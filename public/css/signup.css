@@ -1,0 +1,146 @@
+
+/* Page background and layout */
+.signup-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 5rem 0 1rem 0;
+  background-color: #fdf2f8; /* light pink */
+}
+
+/* Card wrapper */
+.signup-card {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 900px;
+  margin: 0 auto;
+  transform: scale(0.98);
+}
+
+/* Left column */
+.promo-section {
+  position: relative;
+  background: linear-gradient(135deg, #fcedf1 0%, #fff0f7 100%);
+  padding: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 420px; /* helps the image feel substantial on larger screens */
+}
+
+/* make image fill the left area nicely like the reference */
+.illustration-image {
+  width: 100%;
+  height: 100%;
+  max-width: 420px; /* prevents overspill on very wide screens */
+  object-fit: contain; /* keep full artwork visible */
+  border-radius: 12px; /* soft edges like the reference card */
+}
+
+/* Right column (form) */
+.form-section {
+  padding: 2rem;
+}
+
+.form-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.1rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #555;
+  font-weight: 500;
+}
+
+/* Scope to card to avoid overriding global bootstrap elsewhere */
+.signup-card .form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.signup-card .form-control:focus {
+  outline: none;
+  border-color: #e91e63;
+  box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.12);
+}
+
+/* Primary button styled only within signup card */
+.signup-card .cakezz-primary-btn {
+  background: #e91e63;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  width: 100%;
+  margin-bottom: 1rem;
+  transition: background 0.25s ease;
+  color: #fff;
+}
+
+.signup-card .cakezz-primary-btn:hover {
+  background: #c2185b;
+}
+
+/* Google button */
+.btn-google {
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  color: #333;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: border-color 0.25s ease;
+}
+
+.btn-google:hover {
+  border-color: #e91e63;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 1.2rem;
+  color: #666;
+}
+
+.link-pink {
+  color: #e91e63;
+  text-decoration: none;
+  font-weight: 500;
+}
+.link-pink:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .signup-card {
+    margin: 1rem;
+  }
+  .promo-section,
+  .form-section {
+    padding: 1.5rem;
+  }
+  .promo-section {
+    min-height: 320px;
+  }
+}

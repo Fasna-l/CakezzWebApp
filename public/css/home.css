@@ -1,0 +1,548 @@
+/* ==================== COMMON/SHARED CSS ==================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Arial", sans-serif;
+  background-color: #fff;
+}
+
+.btn-pink {
+  background-color: #e91e63;
+  border-color: #e91e63;
+  color: #fff;
+  border-radius: 25px;
+  padding: 8px 20px;
+  font-weight: 500;
+}
+.btn-pink:hover {
+  background-color: #c2185b;
+  border-color: #c2185b;
+  color: #fff;
+}
+
+.text-pink {
+  color: #e91e63;
+}
+
+/* ==================== HEADER CSS ==================== */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 10px 0;
+}
+.navbar-brand {
+  font-weight: bold;
+  font-size: 24px;
+  color: #e91e63 !important;
+}
+.navbar-nav .nav-link {
+  color: #333 !important;
+  font-weight: 500;
+  margin: 0 15px;
+}
+.navbar-nav .nav-link:hover {
+  color: #e91e63 !important;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.header-icons i {
+  font-size: 18px;
+  color: #333;
+  cursor: pointer;
+}
+.header-icons i:hover {
+  color: #e91e63;
+}
+
+/* ==================== HERO SECTION CSS ==================== */
+.hero-section {
+  background: linear-gradient(135deg, #ffebd1, #f8debc);
+  background-size: cover;
+  padding: 0;
+  padding-top: 10px;
+  min-height: 235px;
+  position: relative;
+}
+.hero-banner-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+.hero-banner-container img {
+  padding-top: 50px;
+  width: 100%;
+  height: 300px;
+  display: block;
+}
+
+.hero-shop-now-btn {
+  position: absolute;
+  top: 78%;
+  right: 16%;
+  transform: translateY(-50%);
+  background-color: #8b4513;
+  color: #fff;
+  border: none;
+  padding: 12px 50px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease;
+}
+.hero-shop-now-btn:hover {
+  background-color: #654321;
+}
+@media (max-width: 768px) {
+  .hero-shop-now-btn {
+    right: 10%;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+/* ==================== CAKES SECTION CSS ==================== */
+.cakes-section {
+  padding: 60px 0;
+  background-color: #fff;
+}
+.cakes-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+.cakes-section-header .section-info {
+  text-align: left;
+}
+.section-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+.section-subtitle {
+  color: #666;
+  margin-bottom: 40px;
+}
+.cake-card {
+  background: #fff;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  margin-bottom: 30px;
+  position: relative;
+}
+.cake-card:hover {
+  transform: translateY(-5px);
+}
+.cake-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+.cake-card-body {
+  padding: 20px;
+  text-align: center;
+}
+.cake-card-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+.cake-card-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 15px;
+}
+.cake-add-to-cart-btn {
+  background-color: #c2185b;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.cake-add-to-cart-btn:hover {
+  background-color: #ad1457;
+}
+.view-all-btn {
+  background-color: #e91e63;
+  color: #fff;
+  border: none;
+  padding: 8px 25px;
+  border-radius: 20px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 0.9rem;
+}
+.view-all-btn:hover {
+  background-color: #c2185b;
+  color: #fff;
+  text-decoration: none;
+}
+
+/* ==================== BESTSELLERS SECTION CSS ==================== */
+.bestsellers-section {
+  padding: 60px 0;
+  background-color: #f8f9fa;
+}
+.product-card {
+  background: #fff;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  margin-bottom: 30px;
+  position: relative;
+}
+.product-card:hover {
+  transform: translateY(-5px);
+}
+.product-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+.product-card-body {
+  padding: 20px;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.product-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.product-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #e91e63;
+  margin-bottom: 15px;
+}
+.add-to-cart-btn {
+  background-color: #c2185b;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.add-to-cart-btn:hover {
+  background-color: #ad1457;
+}
+
+/* Rating and discount badges */
+.rating {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.rating i {
+  color: #ffc107;
+  font-size: 14px;
+  margin-right: 2px;
+}
+
+.price-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: -57px;
+  position: absolute;
+  bottom: 60px;
+  left: 10px;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.original-price {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 1rem;
+}
+.sale-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #e91e63;
+}
+
+.wishlist-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #fff;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  z-index: 2;
+}
+.wishlist-icon i {
+  color: #666;
+  font-size: 16px;
+}
+.wishlist-icon:hover i {
+  color: #e91e63;
+}
+
+.view-all-grey {
+  background-color: #6c757d;
+  color: #fff;
+  border: none;
+  padding: 8px 25px;
+  border-radius: 20px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 0.9rem;
+}
+.view-all-grey:hover {
+  background-color: #5a6268;
+  color: #fff;
+  text-decoration: none;
+}
+
+.rating-badge {
+  background-color: #28a745;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 2;
+}
+.rating-badge i {
+  color: #fff;
+  font-size: 12px;
+}
+
+.discount-badge {
+  background-color: #90ee90;
+  color: #006400;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  bottom: 10px;
+  right: 80px;
+  z-index: 2;
+}
+
+/* ==================== CTA SECTION CSS ==================== */
+.cta-section {
+  background: linear-gradient(135deg, #add8e6 0%, #ffb6c1 100%);
+  padding: 80px 0;
+  text-align: center;
+  color: #fff;
+}
+.cta-section h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.cta-section p {
+  font-size: 1.2rem;
+  margin-bottom: 0;
+}
+.cta-pink-text {
+  color: #e91e63;
+}
+.cta-black-text {
+  color: #000;
+}
+
+/* ==================== FOOTER CSS ==================== */
+.footer {
+  background-color: #f8f9fa;
+  padding: 50px 0 30px 0;
+  border-top: 1px solid #e9ecef;
+}
+.footer-brand {
+  font-size: 24px;
+  font-weight: bold;
+  color: #e91e63;
+  margin-bottom: 20px;
+}
+.footer h5 {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+}
+.footer ul {
+  list-style: none;
+  padding: 0;
+}
+.footer ul li {
+  margin-bottom: 10px;
+}
+.footer ul li a {
+  color: #666;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.footer ul li a:hover {
+  color: #e91e63;
+}
+.footer-bottom {
+  border-top: 1px solid #e9ecef;
+  padding-top: 20px;
+  margin-top: 30px;
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+  .section-title {
+    font-size: 1.5rem;
+  }
+  .cta-section h2 {
+    font-size: 2rem;
+  }
+}
+
+/* ==================== USER DROPDOWN ==================== */
+.user-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.user-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-width: 280px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  margin-top: 10px;
+}
+.user-dropdown:hover .user-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.dropdown-header {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.dropdown-header h4 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 5px;
+}
+.dropdown-header p {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0 0 15px;
+}
+.dropdown-login-btn {
+  background-color: #e91e63;
+  color: #fff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+}
+.dropdown-login-btn:hover {
+  background-color: #c2185b;
+  color: #fff;
+  text-decoration: none;
+}
+.dropdown-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dropdown-menu-items {
+  padding: 10px 0;
+}
+.dropdown-menu-item {
+  display: block;
+  padding: 12px 20px;
+  color: #333;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+.dropdown-menu-item:hover {
+  background-color: #f8f9fa;
+  color: #e91e63;
+  text-decoration: none;
+}
+.user-dropdown-menu::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  right: 20px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #fff;
+}

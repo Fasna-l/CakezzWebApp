@@ -1,0 +1,66 @@
+<%- include('../partials/user/header') %>
+<!--=======================SIGNUP PAGE====================================-->
+<main class="signup-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <div class="signup-card">
+          <div class="row g-0">
+            <!--Left: Illustration -->  
+            <div class="col-md-6">
+              <section class="promo-section" aria-label="Signup illustration">
+                <img
+                  src="/images/login-side-image.png"
+                  alt="Delivery person giving a gift to a customer"
+                  class="illustration-image"
+                />
+              </section>
+            </div>
+
+            <!--Right: Form --> 
+            <div class="col-md-6">
+              <section class="form-section" aria-labelledby="signup-title">
+                <h2 id="signup-title" class="form-title">Create an Account</h2>
+
+                <form id="signupForm" action="/signup" method="POST" novalidate>
+                  <div class="form-group">
+                    <label class="form-label" for="name">Full Name</label>
+                    <input type="text" class="form-control" id="name" name="fullName" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required />
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="confirmPassword">Confirm Password</label>
+                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required />
+                  </div>
+
+                  <button type="submit" class="btn btn-primary cakezz-primary-btn">CREATE ACCOUNT</button>
+                </form>
+
+                <button type="button" class="btn btn-google">
+                  <i class="fab fa-google"></i>
+                  Sign up with Google
+                </button>
+
+                <p class="login-link">
+                  Already have account?
+                  <a href="/login" class="link-pink">Login</a>
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<%- include('../partials/user/footer') %>
