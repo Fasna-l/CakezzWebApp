@@ -5,10 +5,12 @@
   box-sizing: border-box;
 }
 
+
 body {
   font-family: "Arial", sans-serif;
   background-color: #fff;
 }
+
 
 .btn-pink {
   background-color: #e91e63;
@@ -24,9 +26,11 @@ body {
   color: #fff;
 }
 
+
 .text-pink {
   color: #e91e63;
 }
+
 
 /* ==================== HEADER CSS ==================== */
 .navbar {
@@ -53,6 +57,7 @@ body {
   color: #e91e63 !important;
 }
 
+
 .header-icons {
   display: flex;
   align-items: center;
@@ -66,6 +71,7 @@ body {
 .header-icons i:hover {
   color: #e91e63;
 }
+
 
 /* ==================== HERO SECTION CSS ==================== */
 .hero-section {
@@ -81,12 +87,15 @@ body {
   display: inline-block;
   width: 100%;
 }
+
+
 .hero-banner-container img {
   padding-top: 50px;
   width: 100%;
   height: 300px;
   display: block;
 }
+
 
 .hero-shop-now-btn {
   position: absolute;
@@ -114,6 +123,9 @@ body {
     font-size: 0.9rem;
   }
 }
+
+
+
 
 /* ==================== CAKES SECTION CSS ==================== */
 .cakes-section {
@@ -205,6 +217,7 @@ body {
   text-decoration: none;
 }
 
+
 /* ==================== BESTSELLERS SECTION CSS ==================== */
 .bestsellers-section {
   padding: 60px 0;
@@ -265,6 +278,7 @@ body {
   background-color: #ad1457;
 }
 
+
 /* Rating and discount badges */
 .rating {
   display: flex;
@@ -277,6 +291,7 @@ body {
   font-size: 14px;
   margin-right: 2px;
 }
+
 
 .price-container {
   display: flex;
@@ -302,6 +317,7 @@ body {
   color: #e91e63;
 }
 
+
 .wishlist-icon {
   position: absolute;
   top: 10px;
@@ -325,6 +341,7 @@ body {
   color: #e91e63;
 }
 
+
 .view-all-grey {
   background-color: #6c757d;
   color: #fff;
@@ -341,6 +358,7 @@ body {
   color: #fff;
   text-decoration: none;
 }
+
 
 .rating-badge {
   background-color: #28a745;
@@ -362,6 +380,7 @@ body {
   font-size: 12px;
 }
 
+
 .discount-badge {
   background-color: #90ee90;
   color: #006400;
@@ -377,6 +396,7 @@ body {
   right: 80px;
   z-index: 2;
 }
+
 
 /* ==================== CTA SECTION CSS ==================== */
 .cta-section {
@@ -400,6 +420,7 @@ body {
 .cta-black-text {
   color: #000;
 }
+
 
 /* ==================== FOOTER CSS ==================== */
 .footer {
@@ -443,6 +464,7 @@ body {
   font-size: 0.9rem;
 }
 
+
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
   .hero-content h1 {
@@ -455,6 +477,7 @@ body {
     font-size: 2rem;
   }
 }
+
 
 /* ==================== USER DROPDOWN ==================== */
 .user-dropdown {
