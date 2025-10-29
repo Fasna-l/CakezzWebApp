@@ -1,0 +1,170 @@
+<%- include('../partials/admin/header') %>
+<link rel="stylesheet" href="/css/admin-style/dashboard.css">
+
+<div class="dashboard-container">
+    <div class="dashboard-wrapper">
+        <%- include('../partials/admin/sidebar') %>
+        
+        <!-- Main Content -->
+        <main class="dashboard-main">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Dashboard</h1>
+            </div>
+            
+            <!-- Stats Cards -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3 class="stat-label">Total User</h3>
+                        <span class="stat-icon user-icon">👤</span>
+                    </div>
+                    <div class="stat-value">40,689</div>
+                    <div class="stat-trend trend-up">
+                        <span class="trend-icon">↑</span>
+                        <span class="trend-text">8% Up from last month</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3 class="stat-label">Total Order</h3>
+                        <span class="stat-icon order-icon">📦</span>
+                    </div>
+                    <div class="stat-value">10293</div>
+                    <div class="stat-trend trend-up">
+                        <span class="trend-icon">↑</span>
+                        <span class="trend-text">1.3% Up from last month</span>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3 class="stat-label">Total</h3>
+                        <span class="stat-icon revenue-icon">💰</span>
+                    </div>
+                    <div class="stat-value">$89,000</div>
+                    <div class="stat-trend trend-down">
+                        <span class="trend-icon">↓</span>
+                        <span class="trend-text">4.3% Down from last month</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sales Details Chart -->
+            <div class="sales-section">
+                <div class="sales-header">
+                    <h2 class="sales-title">Sales Details</h2>
+                    <div class="sales-controls">
+                        <button class="sales-btn">This Month</button>
+                        <button class="sales-btn">Last Month</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Orders Table -->
+            <div class="orders-section">
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>NAME</th>
+                            <th>ADDRESS</th>
+                            <th>DATE</th>
+                            <th>TYPE</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>OOD1</td>
+                            <td>Rakesh</td>
+                            <td>089 South Green Ave, 440</td>
+                            <td>04 Sep 2019</td>
+                            <td>Vanilla cake</td>
+                            <td><span class="status-badge status-completed">Completed</span></td>
+                        </tr>
+                        <tr>
+                            <td>OOD2</td>
+                            <td>Thakuran</td>
+                            <td>879 Immanuel Ferry Suite 526</td>
+                            <td>28 May 2019</td>
+                            <td>Vanilla cake</td>
+                            <td><span class="status-badge status-processing">Processing</span></td>
+                        </tr>
+                        <tr>
+                            <td>OOD3</td>
+                            <td>Fesita</td>
+                            <td>8507 Frida Pines</td>
+                            <td>27 Nov 2019</td>
+                            <td>Vanilla cake</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<%- include('../partials/admin/footer') %>
+<script>
+    // Sales Chart
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    const salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Sales',
+                data: [30, 45, 35, 50, 40, 60, 55, 70, 65, 75, 80, 85],
+                borderColor: '#4a90e2',
+                backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#4a90e2',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        },
+                        color: '#999'
+                    },
+                    grid: {
+                        color: '#444'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#999'
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+</script>

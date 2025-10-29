@@ -11,7 +11,28 @@ const pageNotFound = async (req,res)=>{
     }
 }
 
+const googleAuth = async (req, res) => {
+  try {
+    const user = req.user;
 
+    if (!user) {
+      throw new Error("User not found in req.user");
+    }
+
+    if (user.isBlocked) {
+      return res.render("login", {
+        message: "User is blocked by the admin",
+        icon: "warning",
+      });
+    }
+
+    req.session.user = user._id;
+    res.redirect("/?message=Logged in with Google successfully&icon=success");
+  } catch (error) {
+    console.error("Google Authentication Error:", error);
+    res.redirect("/login?message=Google login failed&icon=warning");
+  }
+};
 
 //Load Home Page
 
@@ -269,6 +290,7 @@ const loadShoppage = async (req,res)=>{
 module.exports = {
     loadHomepage,
     pageNotFound,
+    googleAuth,
     loadSignup,
     signup,
     verifyOtp,

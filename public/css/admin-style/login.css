@@ -22,6 +22,7 @@ body {
 
 /* Admin Header */
 .admin-header {
+  z-index: 1000;
   background-color: #1a1a1a;
   padding: 20px 40px;
   border-bottom: 1px solid #333;
