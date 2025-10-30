@@ -17,17 +17,19 @@ const loadLogin = (req,res)=>{
 const login = async (req,res)=>{
     try {
         const {email,password} = req.body;
-        const admin = await User.findOne({email,isAdmin:true});
+        const admin = await User.findOne({email: email,isAdmin:true});
         if(admin){
-            const passwordMatch = bcrypt.compare(password,admin.password);
+            const passwordMatch = await bcrypt.compare(password,admin.password);
             if(passwordMatch){
                 req.session.admin = true;
                 return res.redirect("/admin")
             }else{
-                return res.redirect("/login")
+                // return res.redirect("/login")
+                res.render("admin-login", { message: "Invalid email or password" });
             }
         }else{
-            return res.redirect("/login")
+            // return res.redirect("/login")
+            res.render("admin-login", { message: "Invalid email or password" });
         }
     } catch (error) {
         console.log("login error",error);
@@ -45,9 +47,29 @@ const loadDashboard = async (req,res)=>{
     }
 }
 
+const logout = async (req,res)=>{
+    try {
+        
+        req.session.destroy((err)=>{
+            if(err){
+                console.log("Session destruction error",err.message);
+                return res.redirect("/pageerror");
+            }
+            return res.redirect("/admin/login")
+        })
+
+    } catch (error) {
+        
+        console.log("Logout error",error);
+        res.redirect("/pageerror")
+
+    }
+}
+
 module.exports = {
     loadLogin,
     login,
     loadDashboard,
-    pageerror
+    pageerror,
+    logout
 }

@@ -2,7 +2,6 @@
 
 
 <div class="admin-login-container">
-    <!-- <div class="login-page-title">Login</div> -->
     
     <div class="admin-login-card">
         <h2 class="admin-login-title">Admin login</h2>
@@ -13,7 +12,7 @@
             </div>
         <%}%>
         
-        <form class="admin-login-form" method="POST" action="/admin/login">
+        <form id="adminLoginForm" class="admin-login-form" method="POST" action="/admin/login" novalidate>
             <div class="form-group">
                 <label for="email" class="form-label">Email</label>
                 <input 
@@ -24,6 +23,7 @@
                     placeholder="Email" 
                     required
                 >
+                <div id="error1" class="error-message"></div>
             </div>
             
             <div class="form-group">
@@ -36,11 +36,77 @@
                     placeholder="Password" 
                     required
                 >
+                <div id="error2" class="error-message"></div>
             </div>
             
             <button type="submit" class="admin-login-btn">Login</button>
         </form>
     </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const adminLoginForm = document.getElementById("adminLoginForm");
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const error1 = document.getElementById("error1");
+  const error2 = document.getElementById("error2");
 
+  function validateEmail() {
+    const emailVal = email.value.trim();
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (emailVal === "") {
+      error1.style.display = "block";
+      error1.textContent = "Email is required";
+    } else if (!emailPattern.test(emailVal)) {
+      error1.style.display = "block";
+      error1.textContent = "Invalid email format";
+    } else {
+      error1.style.display = "none";
+      error1.textContent = "";
+    }
+  }
+
+  function validatePassword() {
+    const passVal = password.value.trim();
+    const passwordPattern =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (passVal === "") {
+      error2.style.display = "block";
+      error2.textContent = "Password is required";
+    } else if (!passwordPattern.test(passVal)) {
+      error2.style.display = "block";
+      error2.textContent = "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters";
+    } else {
+      error2.style.display = "none";
+      error2.textContent = "";
+    }
+  }
+
+//   email.addEventListener("input", validateEmail);
+//   password.addEventListener("input", validatePassword);
+
+//Real - time input validation
+   email.addEventListener("input", function () {
+          if (emailPattern.test(email.value.trim())) {
+            error1.textContent = "";
+          }
+        });
+
+   password.addEventListener("input", function () {
+          if (passwordPattern.test(password.value.trim())) {
+            error2.textContent = "";
+          }
+        });     
+
+  adminLoginForm.addEventListener("submit", function(e) {
+    validateEmail();
+    validatePassword();
+
+    if (error1.textContent || error2.textContent) {
+      e.preventDefault();
+    }
+  });
+});
+</script>
 <%- include('../partials/admin/footer') %>

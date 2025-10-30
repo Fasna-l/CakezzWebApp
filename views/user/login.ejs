@@ -28,24 +28,26 @@
                   <div class="form-group">
                     <label class="form-label" for="email">Email Address</label>
                     <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email Address" required />
-                    <!-- <div id="error2" class="error-message"></div> -->
+                    <div class="error-message" id="error1"></div>
                   </div>
 
                   <div class="form-group">
                     <label class="form-label" for="password">Password</label>
                     <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required />
-                    <!-- <div id="error3" class="error-message"></div> -->
+                    <div class="error-message" id="error2"></div>
                   </div>
+
+                  <!--Forgot Password--> 
+                   <div class="login-options">
+                        <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
+                  </div>
+                  
                   <%if(locals.message && message.length>0){%>
                     <div class="alert alert-danger text-center">
                   <%=message%>
                   </div>
                   <%}%>
                   
-                  <!--Forgot Password--> 
-                   <div class="login-options">
-                        <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
-                  </div>
 
                   <button type="submit" class="btn btn-primary cakezz-primary-btn">LOGIN ACCOUNT</button>
                 </form>
@@ -70,5 +72,62 @@
     </div>
   </div>
 </main>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Select elements
+  const loginForm = document.getElementById("loginForm");
+  const emailid = document.getElementById("email");
+  const passwordid = document.getElementById("password");
+  const error1 = document.getElementById("error1");
+  const error2 = document.getElementById("error2");
+
+  // Email validation
+  function emailValidateChecking() {
+    const emailval = emailid.value.trim();
+    const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (emailval === "") {
+      error1.style.display = "block";
+      error1.innerHTML = "Email is required";
+    } else if (!emailpattern.test(emailval)) {
+      error1.style.display = "block";
+      error1.innerHTML = "Invalid email format";
+    } else {
+      error1.style.display = "none";
+      error1.innerHTML = "";
+    }
+  }
+
+  // Password validation
+  function passValidateChecking() {
+    const passval = passwordid.value.trim();
+    const passpattern =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (passval === "") {
+      error2.style.display = "block";
+      error2.innerHTML = "Password is required";
+    } else if (!passpattern.test(passval)) {
+      error2.style.display = "block";
+      error2.innerHTML =
+        "Password must contain numbers, uppercase, lowercase, and special characters";
+    } else {
+      error2.style.display = "none";
+      error2.innerHTML = "";
+    }
+  }
+
+  // Submit validation
+  loginForm.addEventListener("submit", function(e) {
+    emailValidateChecking();
+    passValidateChecking();
+
+    // Prevent submit if errors exist
+    if (error1.innerHTML || error2.innerHTML) {
+      e.preventDefault();
+    }
+  });
+});
+</script>
 
 <%- include('../partials/user/footer') %>
