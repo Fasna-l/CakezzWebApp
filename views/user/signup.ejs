@@ -95,14 +95,23 @@
 
   function nameValidateChecking (){
     const nameval = nameid.value.trim();
-    const namepattern = /^[A-Za-z\s'-]{1,50}$/;
+    const namepattern = /^[A-Za-z\s'-]{1,50}$/;  //Allows letters, spaces, apostrophes, hyphens, 1-50 characters
+    const sameCharPattern = /^([A-Za-z'-])\1{2,}$/; //Blocks names made of same character only (aaa, ----, '''', zzzzz)
+    const noLetterPattern = !/[A-Za-z]/.test(nameval); //Blocks names with no alphabet letters (example: ----, '''', spaces)
+
     if  (nameval === ""){
       error1.style.display = "block";
       error1.innerHTML = "Please enter a valid name";
     } else if (!namepattern.test(nameval)){
       error1.style.display = "block";
-      error1.innerHTML = "Name can only contain alphabets and spaces"
-    } else{
+      error1.innerHTML = "Name can only contain letters, spaces, hyphen (-), or apostrophe (')"
+    } else if (sameCharPattern.test(nameval)){
+      error1.style.display = "block";
+      error1.innerHTML = "Name cannot contain the same character repeatedly";
+    } else if (noLetterPattern){
+      error1.style.display = "block";
+      error1.innerHTML = "Name must contain alphabet letters";
+    }else{
       error1.style.display = "none";
       error1.innerHTML = ""
     }

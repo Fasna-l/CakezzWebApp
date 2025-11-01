@@ -1,7 +1,10 @@
 const User = require("../../models/userSchema");
+const Otp = require("../../models/otpSchema");  // import OTP Model
 const env = require("dotenv").config();
-const nodemailer  = require("nodemailer");
 const bcrypt = require("bcrypt");
+const { generateOtp } = require("../../helpers/otpHelper");
+const { sendVerificationEmail } = require("../../helpers/emailHelper");
+const { securePassword } = require("../../helpers/passwordHelper");
 
 const pageNotFound = async (req,res)=>{
     try {
@@ -108,40 +111,6 @@ const loadSignup = async (req,res)=>{
     }
 }
 
-function generateOtp(){
-    return Math.floor(100000 + Math.random()*900000).toString();
-}
-
-async function sendVerificationEmail(email,otp){
-    try {
-        
-        const transporter = nodemailer.createTransport({
-            service:"gmail",
-            port:587,
-            secure:false,
-            requireTLS:true,
-            auth:{
-                user:process.env.NODEMAILER_EMAIL,
-                pass:process.env.NODEMAILER_PASSWORD
-            }
-        })
-
-        const info = await transporter.sendMail({
-            from:process.env.NODEMAILER_EMAIL,
-            to:email,
-            subject:"verify your account",
-            text:`<b><h1>Your OTP is ${otp}</h1><b>`,
-            html:`<b><h3>Your OTP is ${otp}</h3><b>`
-
-        })
-
-        return info.accepted.length >0
-
-    } catch (error) {
-        console.error("Error sending email",error);
-        return false;
-    }
-}
 
 const signup = async (req,res) =>{
     try {
@@ -149,7 +118,7 @@ const signup = async (req,res) =>{
         const {name,email,password,confirmPassword} = req.body;
 
         if(password !== confirmPassword){
-            return res.render("signup",{message:"Passwords does not match"});
+            return res.render("signup",{message:"Passwords do not match"});
         }
 
         const findUser = await User.findOne({email});
@@ -161,7 +130,7 @@ const signup = async (req,res) =>{
         }
 
         const otp = generateOtp();
-        const emailSent = await sendVerificationEmail(email,otp);
+        const emailSent = await sendVerificationEmail(email,otp,"Verify your account");
         if (!emailSent) {
             console.log("Email sending failed");
             return res.render("signup", {
@@ -170,9 +139,15 @@ const signup = async (req,res) =>{
             });
         }
 
-        req.session.userOtp = otp;
-        req.session.userData = { name, email, password };
+        // req.session.userOtp = otp;
+        // req.session.userData = { name, email, password };
 
+        // Store OTP in DB (Replace session-based storage)
+        await Otp.deleteOne({email}); //remove old OTP if exists
+        await Otp.create({email,otp});
+
+        req.session.userData = { name, email, password };
+        
         res.render("verify-otp");
         console.log("OTP Send",otp)
 
@@ -184,52 +159,44 @@ const signup = async (req,res) =>{
     }
 }
 
-const securePassword = async(password)=>{
+const verifyOtp = async (req, res) => {
     try {
-        
-        const passwordHash = await bcrypt.hash(password,10);
-        return passwordHash;
+        const enteredOtp = req.body.otp;
+        const { email, name, password } = req.session.userData || {};
 
-    } catch (error) {
-        console.log("securePassword error", error);
-    }
-}
-
-
-//verifyOtp 
-
-const verifyOtp = async (req,res)=>{
-    try {
-        
-        const {otp} = req.body;
-        console.log(otp);
-
-        if(otp===req.session.userOtp){
-            const user = req.session.userData;
-            const passwordHash = await securePassword(user.password);
-
-
-            const saveUserData = new User({
-                name:user.name,
-                email:user.email,
-                password:passwordHash,
-            })
-            await saveUserData.save();
-            req.session.user = saveUserData._id;
-            console.log("User data saved successfully");
-            res.json({success:true,redirectUrl:"/login"})
-
-        }else {
-             res.status(400).json({success:false,message:"Invalid OTP, Please try again"})
+        if (!email) {
+            return res.status(400).json({ success: false, message: "Session expired. Please signup again." });
         }
+
+        // Fetch OTP from DB
+        const otpRecord = await Otp.findOne({ email });
+
+        if (!otpRecord) {
+            return res.json({ success: false, message: "OTP expired or not found. Please resend." });
+        }
+
+        if (otpRecord.otp !== enteredOtp) {
+            return res.json({ success: false, message: "Invalid OTP" });
+        }
+
+        //  Save user after OTP match
+        //const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await securePassword(password);
+        const newUser = new User({ name, email, password: hashedPassword });
+        await newUser.save();
+        req.session.user = newUser._id;
+        console.log("User data saved successfully");
+
+        // Remove OTP from DB
+        await Otp.deleteOne({ email });
+
+        res.json({ success: true, redirectUrl: "/login" });
+
     } catch (error) {
-        
-        console.error("Error Verifying OTP",error);
-        res.status(500).json({success:false,message:"An error occured"});
-
+        console.error("OTP Verify Error:", error);
+        res.status(500).json({ success: false, message: "Server error" });
     }
-}
-
+};
 
 //resendotp
 const resendOtp = async(req,res)=>{
@@ -241,9 +208,11 @@ const resendOtp = async(req,res)=>{
         }
 
         const otp = generateOtp();
-        req.session.userOtp = otp;
+        // req.session.userOtp = otp;
+        await Otp.deleteOne({email});
+        await Otp.create({email,otp});
 
-        const emailSent = await sendVerificationEmail(email,otp)
+        const emailSent = await sendVerificationEmail(email,otp,"Your OTP for Account Verification")
         if(emailSent){
             console.log("Resend OTP:",otp);
             res.status(200).json({success:true,message:"OTP Resend Successfully"})
@@ -258,7 +227,6 @@ const resendOtp = async(req,res)=>{
 
 const logout = async (req,res)=>{
     try {
-        
         req.session.destroy((err)=>{
             if(err){
                 console.log("Session destruction error",err.message);

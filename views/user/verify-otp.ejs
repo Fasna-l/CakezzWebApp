@@ -90,14 +90,7 @@
   function startTimer(){
     timerInterval = setInterval(()=>{
       timer--;
-      document.getElementById("timerValue").textContent = timer;
-      // if (timer <= 0){
-      //   document.getElementById("timerValue").classList.add("expired");
-      //   document.getElementById("timerValue").textContent = "Expired";
-      // //  document.getElementById("timerValue").innerHTML = '<span class="expired">Expired</span>';
-      //   document.getElementById("resendBtn").disabled = false; // allow resend
-      //   document.getElementById("otp").disabled =true;
-      // }  
+      document.getElementById("timerValue").textContent = timer; 
       if (timer <= 0) {
         clearInterval(timerInterval);
         const timerBox = document.getElementById("timerBox");

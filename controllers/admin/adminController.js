@@ -21,7 +21,8 @@ const login = async (req,res)=>{
         if(admin){
             const passwordMatch = await bcrypt.compare(password,admin.password);
             if(passwordMatch){
-                req.session.admin = true;
+                // req.session.admin = true;
+                req.session.admin = admin._id; //Pending :admin session management
                 return res.redirect("/admin")
             }else{
                 // return res.redirect("/login")
@@ -49,12 +50,13 @@ const loadDashboard = async (req,res)=>{
 
 const logout = async (req,res)=>{
     try {
-        
+        req.session.admin = null;  //Pending :admin session management
         req.session.destroy((err)=>{
             if(err){
                 console.log("Session destruction error",err.message);
                 return res.redirect("/pageerror");
             }
+            res.clearCookie('connect.sid');  //Pending :admin session management
             return res.redirect("/admin/login")
         })
 

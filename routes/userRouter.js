@@ -3,7 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const userController = require("../controllers/user/userController");
 const profileController = require("../controllers/user/profileController");
-
+const {userAuth} = require("../middlewares/auth")
 
 //Error Management
 router.get("/pageNotFound",userController.pageNotFound);
@@ -32,7 +32,7 @@ router.post("/login",userController.login);
 
 router.get("/logout",userController.logout);
 
-router.get("/shop",userController.loadShoppage);
+router.get("/shop",userAuth,userController.loadShoppage);
 
 //Profile Management
 router.get("/forgot-password",profileController.getForgotPassPage);
