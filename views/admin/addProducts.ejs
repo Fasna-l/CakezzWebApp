@@ -1,0 +1,127 @@
+<%- include('partials/admin-header') %>
+<link rel="stylesheet" href="/css/editproduct.css">
+
+<div class="dashboard-container">
+    <div class="dashboard-wrapper">
+        <%- include('partials/sidebar') %>
+        
+        <!-- Main Content -->
+        <div class="edit-product-container">
+            <h1 class="page-title">Add Product</h1>
+            
+            <!-- Edit Product Form Card -->
+            <div class="form-card">
+                <form class="edit-product-form">
+                    <!-- Product Name -->
+                    <div class="form-group">
+                        <label for="product-name">Product Name</label>
+                        <input 
+                            type="text" 
+                            id="product-name" 
+                            placeholder="Heavenly Rose Cake"
+                            required
+                        >
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label for="product-description">Description</label>
+                        <input 
+                            type="text" 
+                            id="product-description" 
+                            placeholder="A beautifully crafted rose-themed cake with delicate floral flavors."
+                            required
+                        >
+                    </div>
+
+                    <!-- Category Dropdown -->
+                    <div class="form-group">
+                        <label for="product-category">Category</label>
+                        <select id="product-category" required>
+                            <option value="">Select from here</option>
+                            <option value="birthday">Birthday</option>
+                            <option value="anniversary">Anniversary</option>
+                            <option value="wedding">Wedding</option>
+                        </select>
+                    </div>
+
+                    <!-- Variants Section -->
+                    <div class="variants-section">
+                        <h3>Variants</h3>
+                        
+                        <!-- Variant 1kg -->
+                        <div class="variant-group">
+                            <div class="size-box">1kg</div>
+                            <div class="variant-inputs">
+                                <div class="input-group">
+                                    <label>Stock</label>
+                                    <input type="number" value="1" min="0">
+                                </div>
+                                <div class="input-group">
+                                    <label>Price</label>
+                                    <input type="number" value="1100" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Variant 2kg -->
+                        <div class="variant-group">
+                            <div class="size-box">2kg</div>
+                            <div class="variant-inputs">
+                                <div class="input-group">
+                                    <label>Stock</label>
+                                    <input type="number" value="1" min="0">
+                                </div>
+                                <div class="input-group">
+                                    <label>Price</label>
+                                    <input type="number" value="2200" min="0">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Variant 3kg -->
+                        <div class="variant-group">
+                            <div class="size-box">3kg</div>
+                            <div class="variant-inputs">
+                                <div class="input-group">
+                                    <label>Stock</label>
+                                    <input type="number" value="1" min="0">
+                                </div>
+                                <div class="input-group">
+                                    <label>Price</label>
+                                    <input type="number" value="3300" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload Section -->
+                    <div class="image-section">
+                        <button type="button" class="btn-choose-file">↓ CHOOSE A FILE</button>
+                        
+                        <!-- Image File Display -->
+                        <div class="image-files-grid">
+                            <div class="image-file-input">Image File .Jpeg</div>
+                            <div class="image-file-input">Image File .Jpeg</div>
+                            <div class="image-file-input">Image File .Jpeg</div>
+                            <div class="image-file-input">Image File .Jpeg</div>
+                        </div>
+
+                        <!-- Product Image Preview -->
+                        <div class="product-image-preview">
+                            <img src="/placeholder.svg?height=250&width=250" alt="Product preview">
+                            <button type="button" class="img-action-btn img-like">♡</button>
+                            <button type="button" class="img-action-btn img-close">✕</button>
+                            <button type="button" class="img-action-btn img-rotate">⊙</button>
+                        </div>
+                    </div>
+
+                    <!-- Update Button -->
+                    <button type="submit" class="btn-update">UPDATE</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/admin-footer') %>

@@ -1,0 +1,147 @@
+<%- include('partials/admin-header') %>
+<link rel="stylesheet" href="/css/products.css">
+
+<div class="dashboard-container">
+    <div class="dashboard-wrapper">
+        <%- include('partials/sidebar') %>
+        
+        <!-- Main Content -->
+        <div class="products-container">
+            <div class="products-header">
+                <h1 class="page-title">Products</h1>
+                <button class="btn-add-product">+ ADD NEW PRODUCT</button>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-group">
+                    <label>Filter By</label>
+                    <select class="filter-select">
+                        <option>14 Feb 2019</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Category</label>
+                    <select class="filter-select">
+                        <option>All Categories</option>
+                        <option>Birthday</option>
+                        <option>Anniversary</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Products Table -->
+            <div class="table-wrapper">
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Product Name</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>stock</th>
+                            <th>Action</th>
+                            <th>offer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="image-cell">
+                                <img src="/placeholder.svg?height=50&width=50" alt="Vanilla Cake">
+                            </td>
+                            <td>Vanilla Cake</td>
+                            <td>Birthday</td>
+                            <td>₹1000.00</td>
+                            <td>12</td>
+                            <td class="action-cell">
+                                <button class="btn-edit">✎</button>
+                                <span class="status-badge unlist">Unlist</span>
+                            </td>
+                            <td>
+                                <button class="btn-offer">Add Offer</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="image-cell">
+                                <img src="/placeholder.svg?height=50&width=50" alt="Vanilla Cake">
+                            </td>
+                            <td>Vanilla Cake</td>
+                            <td>Anniversary</td>
+                            <td>₹1100.00</td>
+                            <td>63</td>
+                            <td class="action-cell">
+                                <button class="btn-edit">✎</button>
+                                <span class="status-badge list">List</span>
+                            </td>
+                            <td>
+                                <button class="btn-offer edit-offer">Edit Offer</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="image-cell">
+                                <img src="/placeholder.svg?height=50&width=50" alt="Photo Cake">
+                            </td>
+                            <td>Photo Cake</td>
+                            <td>Birthday</td>
+                            <td>₹456.00</td>
+                            <td>63</td>
+                            <td class="action-cell">
+                                <button class="btn-edit">✎</button>
+                                <span class="status-badge unlist">Unlist</span>
+                            </td>
+                            <td>
+                                <button class="btn-offer">Add Offer</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="image-cell">
+                                <img src="/placeholder.svg?height=50&width=50" alt="Photo Cake">
+                            </td>
+                            <td>Photo Cake</td>
+                            <td>Anniversary</td>
+                            <td>₹560.00</td>
+                            <td>63</td>
+                            <td class="action-cell">
+                                <button class="btn-edit">✎</button>
+                                <span class="status-badge unlist">Unlist</span>
+                            </td>
+                            <td>
+                                <button class="btn-offer">Add Offer</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="image-cell">
+                                <img src="/placeholder.svg?height=50&width=50" alt="Heavenly Rose Cake">
+                            </td>
+                            <td>Heavenly Rose Cake</td>
+                            <td>Birthday</td>
+                            <td>₹1120.00</td>
+                            <td>63</td>
+                            <td class="action-cell">
+                                <button class="btn-edit">✎</button>
+                                <span class="status-badge unlist">Unlist</span>
+                            </td>
+                            <td>
+                                <button class="btn-offer">Add Offer</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="pagination-btn prev">←</button>
+                <button class="pagination-btn active">01</button>
+                <button class="pagination-btn">02</button>
+                <button class="pagination-btn">03</button>
+                <button class="pagination-btn">04</button>
+                <button class="pagination-btn">05</button>
+                <button class="pagination-btn next">→</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/admin-footer') %>

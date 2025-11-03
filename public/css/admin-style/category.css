@@ -23,7 +23,6 @@ body {
   display: flex;
   height: calc(100vh - 60px);
   background-color: #2a2a2a;
-  margin-top: 60px;
 }
 
 .dashboard-wrapper {
@@ -232,29 +231,26 @@ body {
 }
 
 /* Offer Buttons */
+
 .btn-offer {
-  padding: 6px 16px;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
+  padding: 8px 22px;
+  background-color: #3a3a3a;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 6px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
   transition: all 0.3s ease;
-  background-color: #ffffff;
-  color: #2a2a2a;
 }
 
 .btn-offer:hover {
-  background-color: #e0e0e0;
-}
-
-.btn-offer.edit-offer {
-  background-color: #ffff00;
-  color: #000000;
-}
-
-.btn-offer.edit-offer:hover {
-  background-color: #e6e600;
+  background-color: #4a4a4a;
+  border-color: #777;
+  transform: scale(1.03);
 }
 
 /* Action Group */
@@ -330,46 +326,58 @@ input:checked + .slider:before {
   border-color: #ffffff;
   background-color: #3a3a3a;
 }
+.btn-edit svg {
+  stroke: #ffffff; /* Make icon white */
+}
 
 /*Pagination*/
-.pagination {
+
+/*  Updated Pagination Styles (same as customer.css) */
+.pagination-container {
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   gap: 8px;
+  margin-top: 25px;
+  flex-wrap: wrap;
 }
 
-.pagination-btn {
-  width: 36px;
-  height: 36px;
-  border: 1px solid #444444;
-  background-color: #333333;
-  color: #ffffff;
-  border-radius: 50%;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
+.pagination-link {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background-color: #2f2f2f;
+  color: #fff;
+  border: 1px solid #444;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  cursor: pointer;
 }
 
-.pagination-btn:hover {
-  border-color: #555555;
-  background-color: #3a3a3a;
+.pagination-link:hover {
+  background-color: #4a90e2;
+  border-color: #4a90e2;
+  color: #fff;
+  transform: scale(1.05);
 }
 
-.pagination-btn.active {
-  background-color: #ffffff;
-  color: #2a2a2a;
-  border-color: #ffffff;
+.pagination-link.current {
+  background-color: #4a90e2;
+  color: #fff;
+  border-color: #4a90e2;
+  transform: scale(1.05);
+  pointer-events: none;
 }
 
-.pagination-btn.prev,
-.pagination-btn.next {
-  width: 36px;
-  height: 36px;
+.pagination-link.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: #222;
+  border-color: #333;
 }
 
 /* Scrollbar Styling */
@@ -461,3 +469,144 @@ input:checked + .slider:before {
     font-size: 10px;
   }
 }
+/* ✅ Make heading, add button, and search bar stay in one line */
+.page-title {
+  display: flex;
+  justify-content: space-between; /* Push content left & right */
+  align-items: center;            /* Vertically align center */
+  gap: 15px;
+}
+
+/*  Display Add Category and Search on the same row */
+.page-title h2 {
+  margin: 0;
+}
+
+.page-title .btn-add-category {
+  margin-left: auto; 
+  margin-right: 15px;
+}
+
+/* Keep search box inline, not below */
+.page-title .search-form {
+  display: flex;
+  align-items: center;
+}
+/* Style for Add Category Button */
+.btn-add-category {
+  background:#1a1a1a;       /* Gray background */
+  color: #fff;                  /* White text */
+  padding: 8px 18px;            /* Button size */
+  border-radius: 6px;           /* Smooth rounded corners */
+  text-decoration: none;        /* Remove underline */
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;    /* Smooth hover effect */
+  border: 1px solid #666;
+}
+
+.btn-add-category:hover {
+  background-color: rgba(40, 40, 40, 0.9);       /* Slightly lighter on hover */
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+  transform: scale(1.02);       /* Small hover animation */
+}
+
+/* Status Badges */
+ /*  Status text only — white color, no background, no button look */
+.badge-listed,
+.badge-unlisted {
+  color: #ffffff;    /* White text for both */
+  font-weight: 500;
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+
+/* Action Button */
+.btn-list {
+  padding: 6px 14px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.action-list {
+  background: #28a745;   /* Green */
+  color: white;
+}
+
+.action-unlist {
+  background: #d9534f;   /* Red */
+  color: white;
+}
+
+.btn-list:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+.status-badge {
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-badge.listed {
+  color: #4caf50; /* Green text */
+}
+
+.status-badge.unlisted {
+  color: #ff5252; /* Red text */
+}
+
+/* Button */
+.btn-status-toggle {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #444;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-status-toggle:hover {
+  background-color: #666;
+}
+
+
+/* Default Button Styling */
+.btn-status {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #fff;
+  transition: 0.3s;
+}
+
+/* Green button → List */
+.action-list {
+  background-color: #28a745;  /* Green */
+}
+
+.action-list:hover {
+  background-color: #218838;
+}
+
+/* Red button → Unlist */
+.action-unlist {
+  background-color: #dc3545;  /* Red */
+}
+
+.action-unlist:hover {
+  background-color: #c82333;
+}
+

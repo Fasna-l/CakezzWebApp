@@ -1,5 +1,5 @@
 <%- include('../partials/admin/header') %>
-<link rel="stylesheet" href="/css/admin-style/categorycss">
+<link rel="stylesheet" href="/css/admin-style/category.css">
 
 <div class="dashboard-container">
     <div class="dashboard-wrapper">
@@ -9,121 +9,105 @@
         <div class="categories-container">
             <!-- Page Title -->
             <div class="page-title">
-                <h2>Add Category</h2>
-                
-                <form action="/admin/addCategory" method="get" class="search-form" onsubmit="return handleFormSubmit(event)">
-                    <div class="search-box">
-                        <input type="text" class="search-input" placeholder="Search customers..." name="search">
-                        <button class="search-button-text" type="submit">Search</button>
-                        <% if (search && search.trim() !== '') { %>
-                        <a href="/admin/users" class="search-button-text" style="background:#888;text-decoration: none;">Clear</a>
-                        <% } %>     
-                    </div>
-                </form>
+            <h2>Categories</h2>
+            <a href="/admin/category/add" class="btn-add-category"> Add Category</a>
+
+        <form action="/admin/category" method="get" class="search-form">   <!--onsubmit="return handleFormSubmit(event)"-->
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="Search categories..." name="search" value="<%= search || '' %>">
+                <button class="search-button-text" type="submit">Search</button>
+
+                <% if (search && search.trim() !== '') { %>
+                    <a href="/admin/category" class="search-button-text" style="background:#888;text-decoration: none;">Clear</a>
+                <% } %>
             </div>
+        </form>
+</div>
+
 
             <!-- Categories Table -->
             <div class="table-wrapper">
                 <table class="categories-table">
                     <thead>
                         <tr>
-                            <th>S.No</th>
+                            <th>Sl.No</th>
                             <th>Category Name</th>
                             <th>Description</th>
                             <th>category offer</th>
-                            <th>List / Unlist</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                            <th>Edit</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Birthday</td>
-                            <td>........</td>
-                            <td><button class="btn-offer">Add Offer</button></td>
-                            <td>
-                                <div class="action-group">
-                                    <label class="toggle-switch">
-                                        <input type="checkbox">
-                                        <span class="slider"></span>
-                                    </label>
-                                    <button class="btn-edit">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Anniversary</td>
-                            <td>........</td>
-                            <td><button class="btn-offer edit-offer">Edit Offer</button></td>
-                            <td>
-                                <div class="action-group">
-                                    <label class="toggle-switch">
-                                        <input type="checkbox">
-                                        <span class="slider"></span>
-                                    </label>
-                                    <button class="btn-edit">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>
-                                <div class="action-group">
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" checked>
-                                        <span class="slider"></span>
-                                    </label>
-                                    <button class="btn-edit">
-                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
+                        <% if (cat && cat.length > 0) { %>
+                            <% cat.forEach((category, index) => { %>
+                                <tr>
+                                    <td><%= (currentPage - 1) * 4 + index + 1 %></td>
+                                    <td><%= category.categoryName %></td>
+                                    <td><%= category.description %></td>
+
+                                    <!-- Offer (Display Only) -->
+                                    <td>
+                                        <button class="btn-offer">
+                                         <!-- <%= category.offer ? 'Edit Offer' : 'Add Offer' %> -->   
+                                        <%= category.categoryOffer && category.categoryOffer.name ? 'Edit Offer' : 'Add Offer' %>
+                                        </button>
+                                    </td>
+
+                                    <!-- List / Unlist -->
+                                   
+                                    <td class="status-cell">
+                                        <% if (category.isListed) { %>
+                                            <span class="status-badge listed">Listed</span>
+                                        <% } else { %>
+                                            <span class="status-badge unlisted">Unlisted</span>
+                                        <% } %>
+                                    </td>
+
+                                    <td>
+                                        <% if (category.isListed) { %>
+                                            <!-- If category is listed, show Unlist (Red Button) -->
+                                            <button class="btn-status action-unlist" data-id="<%= category._id %>" data-status="listed">
+                                            Unlist
+                                            </button>
+                                        <% } else { %>
+                                        <!-- If category is unlisted, show List (Green Button) -->
+                                            <button class="btn-status action-list" data-id="<%= category._id %>" data-status="unlisted">
+                                            List
+                                            </button>
+                                    <% } %>
+                                    </td>
+
+
+
+                                    <td>
+                                        <div class="action-group">
+                                            <a href="/admin/editCategory?id=<%= category._id %>" class="btn-edit">
+                                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" style="text-align:center;">No categories found</td>
+                            </tr>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
 
             <!-- Pagination -->
-            <!-- <div class="pagination">
-                <button class="pagination-btn prev">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="15 18 9 12 15 6"></polyline>
-                    </svg>
-                </button>
-                <button class="pagination-btn active">01</button>
-                <button class="pagination-btn">02</button>
-                <button class="pagination-btn">03</button>
-                <button class="pagination-btn">04</button>
-                <button class="pagination-btn">05</button>
-                <button class="pagination-btn next">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polyline points="9 18 15 12 9 6"></polyline>
-                    </svg>
-                </button>
-            </div> -->
-            <!-- Pagination -->
- 
             <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 25px;">
 
             <!-- Previous Button -->
         <% if (currentPage > 1) { %>
-            <a href="/admin/users?page=<%= currentPage - 1 %>" class="pagination-link prev">« Prev</a>
+            <a href="/admin/category?page=<%= currentPage - 1 %>" class="pagination-link prev">« Prev</a>
         <% } else { %>
             <span class="pagination-link disabled">« Prev</span>
         <% } %>
@@ -133,13 +117,13 @@
             <% if (i === currentPage) { %>
                 <span class="pagination-link current"><%= i %></span>
             <% } else { %>
-                <a href="/admin/users?page=<%= i %>" class="pagination-link"><%= i %></a>
+                <a href="/admin/category?page=<%= i %>" class="pagination-link"><%= i %></a>
             <% } %>
         <% } %>
 
   <!-- Next Button -->
         <% if (currentPage < totalPages) { %>
-            <a href="/admin/users?page=<%= currentPage + 1 %>" class="pagination-link next">Next »</a>
+            <a href="/admin/category?page=<%= currentPage + 1 %>" class="pagination-link next">Next »</a>
         <% } else { %>
             <span class="pagination-link disabled">Next »</span>
         <% } %>
@@ -154,21 +138,48 @@
         </div>
     </div>
 </div>
+
 <script>
-    function handleFormSubmit(event){
-        event.preventDefault();
-        if(!validateForm){
-            return 
-        }
-    }
+document.querySelectorAll('.btn-status').forEach(button => {
+  button.addEventListener('click', async function () {
+    const id = this.getAttribute('data-id');              // Get Category ID
+    const currentStatus = this.getAttribute('data-status'); // listed/unlisted
 
-    function validateForm(){
-        clearErrorMessages();
-        const categoryName = document.getElementsByName("categoryName")[0].value().trim();
-        const description = document
-    }
+    // Decide API URL
+    const url = currentStatus === 'listed'
+      ? `/admin/listCategory?id=${id}`      // If listed → unlist
+      : `/admin/unlistCategory?id=${id}`;   // If unlisted → list
 
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.success) {
+        const isListed = data.isListed;
+
+        // ✅ 1. Change Button Text (Unlist/List)
+        this.innerText = isListed ? "Unlist" : "List";
+
+        // ✅ 2. Update data-status attribute
+        this.setAttribute('data-status', isListed ? "listed" : "unlisted");
+
+        // ✅ 3. Update Button Color (Green if listed, Red if unlisted)
+        this.classList.remove('action-list', 'action-unlist');
+        this.classList.add(isListed ? 'action-unlist' : 'action-list');
+
+        // ✅ 4. Update the Status Text in Table
+        const statusBadge = this.closest('tr').querySelector('.status-cell .status-badge');
+        statusBadge.innerText = isListed ? "Listed" : "Unlisted";
+        statusBadge.classList.remove('listed', 'unlisted');
+        statusBadge.classList.add(isListed ? 'listed' : 'unlisted');
+      }
+    } catch (error) {
+      console.error("Error updating category status:", error);
+    }
+  });
+});
 </script>
+
 
 
 <%- include('../partials/admin/footer') %>

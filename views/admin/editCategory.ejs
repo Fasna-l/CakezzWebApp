@@ -1,0 +1,154 @@
+<%- include('../partials/admin/header') %>
+<link rel="stylesheet" href="/css/admin-style/addCategory.css">
+
+<div class="dashboard-container">
+    <div class="dashboard-wrapper">
+        <%- include('../partials/admin/sidebar') %>
+        
+        <!-- Main Content -->
+        <div class="add-category-container">
+            <h1 class="page-title">Edit Category</h1>
+            
+            <!-- Add Category Form Card -->
+            <div class="form-card">
+                <form class="add-category-form" method="post" action="/admin/editCategory/<%=category._id%>" onsubmit="return handleEditFormSubmit(event)" novalidate >
+                    <!-- Name Field -->
+                    <div class="form-group">
+                        <label for="category-name">Name :</label>
+                        <input 
+                            type="text" 
+                            id="categoryName"
+                            name="categoryName" 
+                            value="<%=category.categoryName%>"
+                            placeholder="Enter category name"
+                            required
+                        >
+                        <div id="name-error" class="error-message"></div>
+                    </div>
+
+                    <!-- Description Field -->
+                    <div class="form-group">
+                        <label for="category-description">Description:</label>
+                        <textarea placeholder="Enter category description" name="description" class="form-control" id="description"><%=category.description%></textarea>
+                        
+                        <div id="description-error" class="error-message"></div>
+                    </div>
+
+                    <!-- Add Button -->
+                    <button type="submit" class="btn-add">Edit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  async function handleEditFormSubmit(event) {
+    event.preventDefault();
+
+    if (!validateForm()) return;
+
+    const categoryName = document.getElementById("categoryName").value.trim();
+    const description  = document.getElementById("description").value.trim();
+    const categoryId   = "<%= category._id %>";
+
+    try {
+      const res  = await fetch(`/admin/editCategory/${categoryId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ categoryName, description })
+      });
+
+      // If server didn’t return JSON, this will throw and go to catch
+      const data = await res.json();
+
+      if (!data.success) {
+        // Server-side validation (duplicate name etc.)
+        if (window.Swal) {
+          await Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: data.error || "Error updating category"
+          });
+        } else {
+          alert(data.error || "Error updating category");
+        }
+        return;
+      }
+
+      // Success path
+      if (window.Swal) {
+        await Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          text: "Category updated successfully",
+          timer: 1200,
+          showConfirmButton: false
+        });
+      }
+
+      // Redirect after success
+      window.location.href = "/admin/category";
+
+    } catch (err) {
+      // Network/parse error (e.g., not JSON or blocked)
+      if (window.Swal) {
+        await Swal.fire({
+          icon: "error",
+          title: "Server Error",
+          text: err.message || "Something went wrong"
+        });
+      } else {
+        alert(err.message || "Something went wrong");
+      }
+    }
+  }
+
+  function validateForm() {
+    clearErrorMessages();
+    let isValid = true;
+
+    const categoryName = document.getElementById("categoryName").value.trim();
+    const description  = document.getElementById("description").value.trim();
+
+    if (!categoryName) {
+      displayErrorMessage("name-error", "Please enter category name.");
+      isValid = false;
+    } else if (categoryName.length < 3 || categoryName.length > 30) {
+      displayErrorMessage("name-error", "Name must be 3 to 30 characters.");
+      isValid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(categoryName)) {
+      displayErrorMessage("name-error", "Only letters and spaces allowed.");
+      isValid = false;
+    }
+
+    if (!description) {
+      displayErrorMessage("description-error", "Please enter a description.");
+      isValid = false;
+    } else if (description.length < 10) {
+      displayErrorMessage("description-error", "Description must be at least 10 characters.");
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  function clearErrorMessages() {
+    document.querySelectorAll(".error-message").forEach(el => {
+      el.innerText = "";
+      el.style.display = "none";
+    });
+  }
+
+  function displayErrorMessage(id, message) {
+    const el = document.getElementById(id);
+    el.innerText = message;
+    el.style.display = "block";
+  }
+</script>
+
+
+
+
+<%- include('../partials/admin/footer') %>
