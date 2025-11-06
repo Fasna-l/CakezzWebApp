@@ -19,9 +19,9 @@ const productSchema = new Schema({
         type:[String],
         required:true
      },
-     isListed:{
-        type:Boolean,
-        default:true      //It indicates whether the product is listed or unlisted
+     isBlocked: {
+         type: Boolean,
+         default: false, // Indicates whether the category is active or disabled
      },
      status:{
         type:String,

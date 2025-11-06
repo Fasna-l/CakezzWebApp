@@ -1,147 +1,235 @@
-<%- include('partials/admin-header') %>
-<link rel="stylesheet" href="/css/products.css">
+<%- include('../partials/admin/header') %>
+<link rel="stylesheet" href="/css/admin-style/products.css">
+<link rel="stylesheet" href="/css/admin-style/category.css">
 
 <div class="dashboard-container">
-    <div class="dashboard-wrapper">
-        <%- include('partials/sidebar') %>
-        
-        <!-- Main Content -->
-        <div class="products-container">
-            <div class="products-header">
-                <h1 class="page-title">Products</h1>
-                <button class="btn-add-product">+ ADD NEW PRODUCT</button>
-            </div>
+  <div class="dashboard-wrapper">
+    <%- include('../partials/admin/sidebar') %>
 
-            <!-- Filter Section -->
-            <div class="filter-section">
-                <div class="filter-group">
-                    <label>Filter By</label>
-                    <select class="filter-select">
-                        <option>14 Feb 2019</option>
-                    </select>
+    <!-- ✅ Main Content -->
+    <div class="products-container">
+      <main class="main-content" id="mainContent">
+
+        <div class="page-title">
+            <h2>Products</h2>
+
+            <!-- Add Product Button -->
+            <a href="/admin/products/add" class="btn-add-product">Add Product</a>
+
+            <!-- Search Form -->
+            <form action="/admin/products" method="get" class="search-form">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Search products..." name="search" value="<%= search || '' %>">
+                    <button class="search-button-text" type="submit">Search</button>
+
+                    <% if (search && search.trim() !== '') { %>
+                        <a href="/admin/products" class="search-button-text" style="background:#888;text-decoration:none;">Clear</a>
+                    <% } %>
                 </div>
-
-                <div class="filter-group">
-                    <label>Category</label>
-                    <select class="filter-select">
-                        <option>All Categories</option>
-                        <option>Birthday</option>
-                        <option>Anniversary</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Products Table -->
-            <div class="table-wrapper">
-                <table class="products-table">
-                    <thead>
-                        <tr>
-                            <th>Image</th>
-                            <th>Product Name</th>
-                            <th>Category</th>
-                            <th>Price</th>
-                            <th>stock</th>
-                            <th>Action</th>
-                            <th>offer</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="image-cell">
-                                <img src="/placeholder.svg?height=50&width=50" alt="Vanilla Cake">
-                            </td>
-                            <td>Vanilla Cake</td>
-                            <td>Birthday</td>
-                            <td>₹1000.00</td>
-                            <td>12</td>
-                            <td class="action-cell">
-                                <button class="btn-edit">✎</button>
-                                <span class="status-badge unlist">Unlist</span>
-                            </td>
-                            <td>
-                                <button class="btn-offer">Add Offer</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="image-cell">
-                                <img src="/placeholder.svg?height=50&width=50" alt="Vanilla Cake">
-                            </td>
-                            <td>Vanilla Cake</td>
-                            <td>Anniversary</td>
-                            <td>₹1100.00</td>
-                            <td>63</td>
-                            <td class="action-cell">
-                                <button class="btn-edit">✎</button>
-                                <span class="status-badge list">List</span>
-                            </td>
-                            <td>
-                                <button class="btn-offer edit-offer">Edit Offer</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="image-cell">
-                                <img src="/placeholder.svg?height=50&width=50" alt="Photo Cake">
-                            </td>
-                            <td>Photo Cake</td>
-                            <td>Birthday</td>
-                            <td>₹456.00</td>
-                            <td>63</td>
-                            <td class="action-cell">
-                                <button class="btn-edit">✎</button>
-                                <span class="status-badge unlist">Unlist</span>
-                            </td>
-                            <td>
-                                <button class="btn-offer">Add Offer</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="image-cell">
-                                <img src="/placeholder.svg?height=50&width=50" alt="Photo Cake">
-                            </td>
-                            <td>Photo Cake</td>
-                            <td>Anniversary</td>
-                            <td>₹560.00</td>
-                            <td>63</td>
-                            <td class="action-cell">
-                                <button class="btn-edit">✎</button>
-                                <span class="status-badge unlist">Unlist</span>
-                            </td>
-                            <td>
-                                <button class="btn-offer">Add Offer</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="image-cell">
-                                <img src="/placeholder.svg?height=50&width=50" alt="Heavenly Rose Cake">
-                            </td>
-                            <td>Heavenly Rose Cake</td>
-                            <td>Birthday</td>
-                            <td>₹1120.00</td>
-                            <td>63</td>
-                            <td class="action-cell">
-                                <button class="btn-edit">✎</button>
-                                <span class="status-badge unlist">Unlist</span>
-                            </td>
-                            <td>
-                                <button class="btn-offer">Add Offer</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            <div class="pagination">
-                <button class="pagination-btn prev">←</button>
-                <button class="pagination-btn active">01</button>
-                <button class="pagination-btn">02</button>
-                <button class="pagination-btn">03</button>
-                <button class="pagination-btn">04</button>
-                <button class="pagination-btn">05</button>
-                <button class="pagination-btn next">→</button>
-            </div>
+            </form>
         </div>
+
+        
+
+
+        <!-- ✅ Product Table -->
+        <div class="table-wrapper">
+          <!-- <table class="products-table">
+            <thead>
+              <tr>
+                <th>S.No</th>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <% if (products && products.length > 0) { %>
+                <% products.forEach((product, index) => { %>
+                <tr>
+                  <td><%= (currentPage - 1) * 3 + index + 1 %></td>
+
+                  <td>
+                    <% if (product.productImage && product.productImage.length > 0) { %>
+                      <img src="/uploads/product/<%= product.productImage[0] %>" 
+                           alt="<%= product.productName %>" width="50" height="50">
+                    <% } else { %>
+                      <span>No Image</span>
+                    <% } %>
+                  </td>
+
+                  <td><%= product.productName %></td>
+                  <td><%= product.category?.name || "N/A" %></td>
+                  <td>₹<%= product.variants[0]?.price || "0" %></td>
+                  <td><%= product.variants[0]?.stock || "0" %></td>
+                  <td><%= product.status %></td>
+
+                  <td>
+                    <a href="/admin/products/edit?id=<%= product._id %>">
+                      <button class="btn-edit">Edit</button>
+                    </a>
+                  </td>
+                </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="8" style="text-align:center;">No Products Available</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table> -->
+          <table class="categories-table">
+            <thead>
+                <tr>
+                    <th>Sl.No</th>
+                    <th>Image</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Action</th>
+                    <th>Offer</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <% if (products && products.length > 0) { %>
+                    <% products.forEach((product, index) => { %>
+                        <tr>
+                            <td><%= (currentPage - 1) * 3 + index + 1 %></td>
+
+                            <!-- Product Image -->
+                            <td>
+                                <% if (product.productImage && product.productImage.length > 0) { %>
+                                    <img src="/uploads/product/<%= product.productImage[0] %>" style="width:50px;height:50px;border-radius:5px;">
+                                <% } else { %>
+                                    <span>No Image</span>
+                                <% } %>
+                            </td>
+
+                            <td><%= product.productName %></td>
+                            <td><%= product.category ? product.category.categoryName  : "N/A" %></td>
+
+                            <!-- <td>₹<%= product.variants[0]?.price || 0 %></td>
+                            <td><%= product.variants[0]?.stock || 0 %></td> -->
+                            <td>
+                                1kg: ₹<%= product.variants[0]?.price || '-' %> <br>
+                                2kg: ₹<%= product.variants[1]?.price || '-' %> <br>
+                                3kg: ₹<%= product.variants[2]?.price || '-' %>
+                            </td>
+
+                            <td>
+                                1kg: <%= product.variants[0]?.stock || '-' %> <br>
+                                2kg: <%= product.variants[1]?.stock || '-' %> <br>
+                                3kg: <%= product.variants[2]?.stock || '-' %>
+                            </td>
+
+
+                            <!-- Action Buttons -->
+                            <td>
+                                <div class="action-group">
+                                    <!-- Block/UnBlock Button -->
+                                    <% if (product.isBlocked === false) { %>
+                                        <button class="btn btn-danger" style="width: 80px;" 
+                                          onclick="confirmAction(event, '/admin/blockProduct?id=<%= product._id %>', 'Block this product?')">
+                                            Block
+                                        </button>
+                                    <% } else { %>
+                                        <button class="btn btn-success" style="width: 80px;" 
+                                          onclick="confirmAction(event, '/admin/unblockProduct?id=<%= product._id %>', 'Unblock this product?')">
+                                          Unblock
+                                        </button>
+                                    <% } %>
+                                </div>
+                            </td>
+
+                            <!-- Offer Button (disabled for now) -->
+                            <td>
+                                <button class="btn-offer">Offer</button>
+                            </td>
+                            <td>
+                              <!-- Edit Icon -->
+                                    <a href="/admin/editProduct?id=<%= product._id %>" class="btn-edit">
+                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                    </a>
+                            </td>
+                        </tr>
+                <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="9" style="text-align:center;">No Products Available</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        </div>
+
+        <!-- ✅ Pagination -->
+        <div class="pagination-container">
+          <% if (currentPage > 1) { %>
+            <a href="/admin/products?page=<%= currentPage - 1 %>" class="pagination-link">« Prev</a>
+          <% } else { %>
+            <span class="pagination-link disabled">« Prev</span>
+          <% } %>
+
+          <% for (let i = 1; i <= totalPages; i++) { %>
+            <% if (i === currentPage) { %>
+              <span class="pagination-link current"><%= i %></span>
+            <% } else { %>
+              <a href="/admin/products?page=<%= i %>" class="pagination-link"><%= i %></a>
+            <% } %>
+          <% } %>
+
+          <% if (currentPage < totalPages) { %>
+            <a href="/admin/products?page=<%= currentPage + 1 %>" class="pagination-link">Next »</a>
+          <% } else { %>
+            <span class="pagination-link disabled">Next »</span>
+          <% } %>
+        </div>
+         <!-- Optional: Page indicator -->
+        <p style="text-align: center; color: #aaa; font-size: 13px; margin-top: 8px;">
+            Page <%= currentPage %> of <%= totalPages %>
+        </p>
+
+      </main>
     </div>
+
+  </div>
 </div>
 
-<%- include('partials/admin-footer') %>
+<%- include('../partials/admin/footer') %>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  async function confirmAction(event, url, titleText) {
+    event.preventDefault();
+
+    const result = await Swal.fire({
+      title: titleText,
+      text: "Please Confirm Your Action",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, confirm it!",
+      background: "#2a2a2a",
+      color: "#fff"
+    });
+
+    if (result.isConfirmed) {
+      window.location.href = url;
+    }
+  }
+</script>

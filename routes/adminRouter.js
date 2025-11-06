@@ -3,7 +3,12 @@ const router = express.Router();
 const adminController = require("../controllers/admin/adminController");
 const customerController = require("../controllers/admin/customerController");
 const categoryController = require("../controllers/admin/categoryController");
-const {adminAuth} = require("../middlewares/auth")
+const productController = require("../controllers/admin/productController");
+const {userAuth,adminAuth} = require("../middlewares/auth")
+const multer = require("multer");
+// const { storage } = require("../helpers/multer");
+// const uploads = multer({ storage: storage });
+const { uploads } = require("../helpers/multer");
 
 router.get("/pageerror",adminController.pageerror);
 //Login Management
@@ -25,6 +30,15 @@ router.get("/listCategory",adminAuth,categoryController.getListCategory);
 router.get("/unlistCategory",adminAuth,categoryController.getUnlistCategory);
 router.get("/editCategory",adminAuth,categoryController.getEditCategory);
 router.post("/editCategory/:id",adminAuth,categoryController.editCategory);
+
+//Product Management
+router.get('/products', adminAuth, productController.productinfo);
+router.get('/products/add', adminAuth, productController.getProductAddPage);
+router.post('/products/add',adminAuth,uploads.array('productImage', 6),productController.addProduct);
+router.get("/blockProduct",adminAuth,productController.productBlocked);
+router.get("/unblockProduct",adminAuth,productController.productUnBlocked);
+router.get("/editProduct",adminAuth,productController.getEditProduct);
+router.post("/editProduct/:id",adminAuth, uploads.array("productImage", 4),productController.editProduct);
 
 
 module.exports = router;
