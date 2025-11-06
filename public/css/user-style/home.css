@@ -569,3 +569,60 @@ body {
   border-right: 8px solid transparent;
   border-bottom: 8px solid #fff;
 }
+
+
+/* Remove default background & make arrows clean */
+.swiper-button-prev,
+.swiper-button-next {
+    background: none !important;
+    width: 30px;
+    height: 30px;
+    color: black !important;
+    font-weight: bold;
+}
+
+/* Arrow Icon Styling */
+.swiper-button-prev::after,
+.swiper-button-next::after {
+    font-size: 25px;
+    color: gray !important;
+}
+
+/* Position to middle (slightly upward) */
+.swiper-button-prev,
+.swiper-button-next {
+    top: 35% !important;  /* 50% is exact center, 45% moves slightly upward */
+    transform: translateY(-50%);
+}
+
+/* Push arrows to outside of cards */
+.swiper-button-prev {
+    left: -40px;  /* You can adjust (-50px or -60px) based on your layout */
+}
+
+.swiper-button-next {
+    right: -40px;
+}
+
+/* Optional: Hover effect */
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+    color: #ff0077; /* pink hover (optional) */
+    cursor: pointer;
+}
+
+.out-of-stock {
+  color: red;
+  font-weight: bold;
+  margin-top: 5px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.cake-add-to-cart-btn:disabled,
+.add-to-cart-btn:disabled {
+  background-color: #ccc !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+}

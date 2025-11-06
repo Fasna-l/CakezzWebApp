@@ -9,6 +9,7 @@ const {userAuth,adminAuth} = require("../middlewares/auth")
 router.get("/pageNotFound",userController.pageNotFound);
 
 router.get("/",userController.loadHomepage);
+router.get("/shop",userAuth,userController.loadShoppage);
 
 //Signup management
 router.get("/signup",userController.loadSignup);
@@ -31,8 +32,6 @@ router.get("/login",userController.loadLogin);
 router.post("/login",userController.login);
 
 router.get("/logout",userController.logout);
-
-router.get("/shop",userAuth,userController.loadShoppage);
 
 //Profile Management
 router.get("/forgot-password",profileController.getForgotPassPage);

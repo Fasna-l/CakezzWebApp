@@ -1,5 +1,8 @@
 const User = require("../../models/userSchema");
+const Category = require("../../models/categorySchema");
+const Product = require("../../models/productSchema");
 const Otp = require("../../models/otpSchema");  // import OTP Model
+const mongoose = require("mongoose");
 const env = require("dotenv").config();
 const bcrypt = require("bcrypt");
 const { generateOtp } = require("../../helpers/otpHelper");
@@ -39,23 +42,51 @@ const googleAuth = async (req, res) => {
 
 //Load Home Page
 
-const loadHomepage = async (req,res)=>{
-    try {
-        const user = req.session.user;
-        //console.log("loadhome",user)
-        if(user){
-            const userData = await User.findOne({_id:user});
-            //console.log("userData",userData);
-            res.render("home",{user:userData})
-            
-        }else{
-            return res.render("home");
+const loadHomepage = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const categories = await Category.find({ isListed: true });
+
+    // ✅ Latest Products (with totalStock)
+    let latestProducts = await Product.aggregate([
+      { $match: { isBlocked: false, category: { $in: categories.map(c => c._id) } } },
+      {
+        $addFields: {
+          totalStock: { $sum: "$variants.stock" },
+          minPrice: { $min: "$variants.price" }
         }
-    } catch (error) {
-        console.log("Home page not found");
-        res.status(500).send("server error");
-    }
-}
+      },
+      { $sort: { createdAt: -1 } },
+      { $limit: 4 }
+    ]);
+
+    // ✅ Best Products (Top priced items)
+    let bestProducts = await Product.aggregate([
+      { $match: { isBlocked: false, category: { $in: categories.map(c => c._id) } } },
+      {
+        $addFields: {
+          totalStock: { $sum: "$variants.stock" },
+          maxPrice: { $max: "$variants.price" }
+        }
+      },
+      { $sort: { maxPrice: -1 } },
+      { $limit: 8 }
+    ]);
+
+    // ✅ Get User if logged in
+    const userData = user ? await User.findById(user) : null;
+
+    return res.render("home", {
+      user: userData,
+      latestProducts,
+      bestProducts
+    });
+  } catch (error) {
+    console.log("Home page error:", error);
+    res.status(500).send("Server Error");
+  }
+};
+
 
 //Load Login
 
@@ -243,17 +274,113 @@ const logout = async (req,res)=>{
     }
 }
 
-//Load Shop Page
+// Load Shop Page
+const loadShoppage = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const categories = await Category.find({ isListed: true });
 
-const loadShoppage = async (req,res)=>{
-    try {
-        return res.render("shop")
-    } catch (error) {
-        
-        console.log("Shopping page not loading",error);
-        res.status(500).send("Server Error")
+    // ✅ Pagination
+    let page = parseInt(req.query.page) || 1;
+    let limit = 8;
+    let skip = (page - 1) * limit;
+
+    // ✅ Filters
+    let search = req.query.search || "";
+    let categoryFilter = req.query.category || "";
+    let sort = req.query.sort || "";
+    let priceRange = req.query.priceRange || ""; 
+    // let minPrice = parseInt(req.query.minPrice) || 0;
+    // let maxPrice = parseInt(req.query.maxPrice) || 100000;
+    let minPrice = 0, maxPrice = 100000;
+
+    // ✅ Basic Filter
+    let filter = {
+      isBlocked: false,
+      productName: { $regex: search, $options: "i" },
+    };
+
+    if (categoryFilter) {
+      filter.category = new mongoose.Types.ObjectId(categoryFilter);
     }
-}
+
+    if (priceRange) {
+        const [min, max] = priceRange.split("-").map(Number);
+        minPrice = min;
+        maxPrice = max;
+    }
+
+    // ✅ Total product count BEFORE pagination
+    const totalProducts = await Product.countDocuments(filter);
+
+    // ✅ Aggregation Pipeline
+    const pipeline = [
+      { $match: filter },
+
+      // Add min & max price based on variants
+      {
+        $addFields: {
+          minPrice: { $ifNull: [{ $min: "$variants.price" }, 0] },
+          maxPrice: { $ifNull: [{ $max: "$variants.price" }, 0] },
+          totalStock: { $sum: "$variants.stock" }
+        }
+      },
+
+      // ✅ Filter products by chosen price range
+      { $match: { minPrice: { $gte: minPrice, $lte: maxPrice } } }
+    ];
+
+    // ✅ Sorting Logic
+    if (sort === "priceAsc") pipeline.push({ $sort: { minPrice: 1 } });
+    else if (sort === "priceDesc") pipeline.push({ $sort: { minPrice: -1 } });
+    else if (sort === "az") pipeline.push({ $sort: { productName: 1 } });
+    else if (sort === "za") pipeline.push({ $sort: { productName: -1 } });
+    else pipeline.push({ $sort: { createdAt: -1 } });
+
+    // ✅ Pagination
+    pipeline.push({ $skip: skip }, { $limit: limit });
+
+    // ✅ Lookup Category
+    pipeline.push({
+      $lookup: {
+        from: "categories",
+        localField: "category",
+        foreignField: "_id",
+        as: "category"
+      }
+    });
+
+    pipeline.push({
+      $unwind: { path: "$category", preserveNullAndEmptyArrays: true }
+    });
+
+    const products = await Product.aggregate(pipeline);
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    // ✅ Render
+    return res.render("shop", {
+      user: user ? await User.findById(user) : null,
+      products,
+      categories,
+      currentPage: page,
+      totalPages,
+      totalProducts,
+      search,
+      categoryFilter,
+      sort,
+      priceRange,
+      minPrice,
+      maxPrice
+    });
+
+  } catch (error) {
+    console.log("Shopping page error:", error);
+    res.status(500).send("Server Error");
+  }
+};
+
+
+
 
 module.exports = {
     loadHomepage,

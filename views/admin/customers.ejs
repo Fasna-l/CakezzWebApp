@@ -55,7 +55,7 @@
       <tbody>
         <%for(let i=0;i<data.length;i++){%>
         <tr>
-          <td><%= i + 1 %></td>
+          <td><%= (currentPage - 1) * 4 + i + 1 %></td>              <!--<td><%= i + 1 %></td>-->
           <td><%= data[i].name %></td>
           <td><%= data[i].email %></td>
         
