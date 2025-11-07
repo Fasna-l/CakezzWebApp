@@ -29,6 +29,15 @@ const productSchema = new Schema({
         required:true,
         default:'Available'
      },
+     reviews: [
+    {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        name: { type: String },
+        rating: { type: Number, required: true },
+        review: { type: String, trim: true },
+        date: { type: Date, default: Date.now }
+    }
+    ],
      variants:[
         {
             price:{

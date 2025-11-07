@@ -1,0 +1,278 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/product-details.css">
+
+<div class="product-details-container">
+
+  <!-- ✅ Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; 
+    <a href="/shop">Shop</a> &gt;
+    <% if (product && product.category) { %>
+      <a href="/shop?category=<%= product.category._id %>"><%= product.category.categoryName %></a> &gt;
+    <% } %>
+    <span><%= product.productName %></span>
+  </div>
+
+  <!-- ✅ Main Section -->
+  <div class="product-main">
+
+    <!-- ✅ Left: Image Gallery + Zoom -->
+    <div class="product-gallery">
+      <div class="image-zoom-container">
+        <img id="mainImage" class="zoom-image" 
+             src="/uploads/product/<%= product.productImage[0] %>" 
+             alt="<%= product.productName %>">
+      </div>
+      <div class="thumbnail-gallery">
+        <% product.productImage.forEach((img, i) => { %>
+          <img src="/uploads/product/<%= img %>"
+               class="thumbnail <%= i===0 ? 'active-thumb' : '' %>"
+               onclick="changeImage('/uploads/product/<%= img %>', this)">
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- ✅ Right: Product Details -->
+    <div class="product-info">
+      <h1 class="product-title"><%= product.productName %></h1>
+
+      
+
+      <!-- ✅ Price -->
+      <div class="price-section">
+        <div class="price-wrapper">
+          <span class="current-price" id="pd-price">₹0</span>
+        </div>
+        <span class="inclusive-text">Inclusive of all taxes</span>
+      </div>
+
+<!-- Average Rating -->
+<% 
+  let avgRating = 0;
+  if(product.reviews && product.reviews.length){
+    avgRating = (product.reviews.reduce((sum, r) => sum + r.rating, 0) / product.reviews.length).toFixed(1);
+  }
+%>
+
+<% if(avgRating > 0){ %>
+  <span class="rating-badge">★ <%= avgRating %></span>
+<% } %>
+
+
+      <!-- ✅ Stock -->
+      <div class="stock-section">
+        <label class="stock-label">Stock:</label>
+        <span class="stock-value" id="pd-stock">—</span>
+      </div>
+
+      <!-- ✅ Weight Selection -->
+      <div class="weight-section">
+        <label class="weight-label">
+            Weight:
+            <span class="serving-text" id="servingInfoBtn" onclick="toggleServingInfo()">Serving Info</span>
+        </label>
+        <div id="servingPopup" class="serving-popup"></div>
+
+        <div id="pd-weights" class="weight-options">
+          <% product.variants?.forEach((v, i) => { %>
+            <button class="weight-btn <%= i===0 ? 'active' : '' %>" 
+                    data-size="<%= v.size %>"><%= v.size %></button>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- ✅ Product Description -->
+<div class="description-section">
+  <h2 class="description-title">Product Description</h2>
+  <div class="description-content">
+    <% if (product.description && product.description.trim()) { %>
+      <p><%= product.description %></p>
+    <% } else { %>
+      <p><strong>Product Details:</strong></p>
+      <ul class="product-details-list">
+        <li>Cake Flavour: Fusion</li>
+        <li>Shape: Round</li>
+        <li>Type of Cake: Cream</li>
+        <li>Type of Sponge: Vanilla</li>
+        <li>Type of Cream: Vanilla</li>
+        <li>Filling in Layers: Strawberry</li>
+        <li>Toppings: Three Color Cream Flowers</li>
+        <li>Net Quantity: 1 Cake</li>
+      </ul>
+    <% } %>
+  </div>
+</div>
+
+
+      <!-- ✅ Message on Cake -->
+      <div class="message-section">
+        <input type="text" class="message-input" id="pd-message" placeholder="Message on Cake">
+        <button class="message-btn" id="pd-message-btn">Save</button>
+      </div>
+
+      <!-- ✅ Quantity + Cart -->
+      <div class="action-section">
+        <div class="quantity-section">
+          <button class="qty-btn minus" id="pd-qty-minus">−</button>
+          <input type="number" id="pd-qty" class="qty-input" value="1" min="1">
+          <button class="qty-btn plus" id="pd-qty-plus">+</button>
+        </div>
+        <button id="pd-add-to-cart" class="add-to-cart-btn">ADD TO CART</button>
+      </div>
+
+      <!-- ✅ Sold Out Message -->
+      <p id="pd-soldout" class="soldout-text" style="display:none;">Sold Out</p>
+
+      <!-- ✅ Rating & Reviews (Optional Future Section) -->
+      <div class="rating-review-row">
+        <button class="wishlist-btn" title="Add to Wishlist">♥</button>
+        <button class="review-btn"
+          onclick="window.location.href='/product/<%= product._id %>/review'">
+          WRITE A REVIEW
+        </button>
+
+      </div>
+
+      <!-- ✅ Reviews Section -->
+<div class="reviews-section">
+  <h5>Customer Reviews</h5>
+
+  <% if (product.reviews && product.reviews.length > 0) { %>
+    <% product.reviews.forEach(r => { %>
+      <div class="review-card">
+        <div class="review-header">
+          <strong><%= r.name || 'Anonymous' %></strong>
+          <span class="review-rating">
+            <% for (let i = 1; i <= 5; i++) { %>
+              <span><%= i <= r.rating ? '★' : '☆' %></span>
+            <% } %>
+          </span>
+        </div>
+        <p class="review-text"><%= r.review %></p>
+        <small class="review-date"><%= new Date(r.date).toLocaleDateString() %></small>
+      </div>
+    <% }) %>
+  <% } else { %>
+    <p>No reviews yet. Be the first to write one!</p>
+  <% } %>
+</div>
+
+
+    </div>
+  </div>
+
+  <!-- ✅ Related Products -->
+  <div class="related-products">
+    <h2 class="related-title">Related Products</h2>
+    <div class="related-grid">
+      <% if (relatedProducts && relatedProducts.length) { %>
+        <% relatedProducts.forEach(r => { %>
+          <div class="related-card">
+            <a href="/product/<%= r._id %>">
+              <img src="/uploads/product/<%= r.productImage[0] %>" class="related-img">
+            </a>
+            <p class="related-name"><%= r.productName %></p>
+            <span class="related-price">₹<%= Math.min(...r.variants.map(v => v.price)) %></span>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ JavaScript -->
+<script>
+  const mainImage = document.getElementById("mainImage");
+  const priceEl = document.getElementById("pd-price");
+  const stockEl = document.getElementById("pd-stock");
+  const addBtn = document.getElementById("pd-add-to-cart");
+  const soldOut = document.getElementById("pd-soldout");
+  const qtyInput = document.getElementById("pd-qty");
+  const variants = JSON.parse(`<%- JSON.stringify(product?.variants || []) %>`);
+
+  // ✅ Hover Zoom Effect
+  mainImage.addEventListener("mousemove", (e) => {
+    const rect = mainImage.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width * 100;
+    const y = (e.clientY - rect.top) / rect.height * 100;
+    mainImage.style.transformOrigin = `${x}% ${y}%`;
+    mainImage.style.transform = "scale(1.4)";
+  });
+
+  mainImage.addEventListener("mouseleave", () => {
+    mainImage.style.transform = "scale(1)";
+  });
+
+  // ✅ Change Main Image on Thumbnail Click
+  function changeImage(src, element) {
+    mainImage.src = src;
+    document.querySelectorAll(".thumbnail").forEach(img => img.classList.remove("active-thumb"));
+    element.classList.add("active-thumb");
+  }
+
+  // ✅ Update Price, Stock & Button when selecting weight
+  function renderSize(size) {
+    const v = variants.find(item => item.size === size);
+    priceEl.textContent = '₹' + v.price;
+    stockEl.textContent = v.stock + ' items';
+
+    if (v.stock <= 0) {
+      soldOut.style.display = "block";          // Show sold-out message
+      addBtn.disabled = true;                  // Disable Add to Cart
+      addBtn.textContent = "OUT OF STOCK";     // Change button label
+    } else {
+      soldOut.style.display = "none";
+      addBtn.disabled = false;
+      addBtn.textContent = "ADD TO CART";
+    }
+  }
+
+  // ✅ Default size select
+  renderSize(variants[0].size);
+
+  // ✅ Handle weight change clicks
+  document.getElementById("pd-weights").addEventListener("click", (e) => {
+    if (e.target.classList.contains("weight-btn")) {
+      document.querySelectorAll(".weight-btn").forEach(btn => btn.classList.remove("active"));
+      e.target.classList.add("active");
+      renderSize(e.target.dataset.size);
+    }
+  });
+
+  // ✅ Quantity Controls
+  document.getElementById("pd-qty-plus").addEventListener("click", () => {
+    qtyInput.value = Number(qtyInput.value) + 1;
+  });
+  document.getElementById("pd-qty-minus").addEventListener("click", () => {
+    qtyInput.value = Math.max(1, Number(qtyInput.value) - 1);
+  });
+
+  // ✅ Serving Info
+  const servingMessages = {
+    "1kg": "Serves 6 - 10 people",
+    "2kg": "Serves 10 - 20 people",
+    "3kg": "Serves 20 - 30 people"
+  };
+
+  const popup = document.getElementById('servingPopup');
+  const weights = document.getElementById("pd-weights");
+
+  function toggleServingInfo() {
+    popup.style.display = popup.style.display === "block" ? "none" : "block";
+  }
+
+  function updateServingInfo(size) {
+    popup.textContent = servingMessages[size] || "Serving size info not available";
+  }
+
+  weights.addEventListener('click', (e) => {
+    if (e.target.classList.contains('weight-btn')) {
+      updateServingInfo(e.target.dataset.size);
+    }
+  });
+
+  updateServingInfo(variants[0].size);
+</script>
+
+
+<%- include('../partials/user/footer') %>

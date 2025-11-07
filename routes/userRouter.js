@@ -11,6 +11,14 @@ router.get("/pageNotFound",userController.pageNotFound);
 router.get("/",userController.loadHomepage);
 router.get("/shop",userAuth,userController.loadShoppage);
 
+//Product-Detail Page
+router.get("/product/:id", userAuth, userController.loadProductDetails);
+
+//review Page
+router.get("/product/:id/review", userAuth, userController.loadReviewPage);
+router.post("/product/:id/review", userAuth, userController.submitReview);
+
+
 //Signup management
 router.get("/signup",userController.loadSignup);
 router.post("/signup",userController.signup);

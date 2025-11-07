@@ -379,6 +379,100 @@ const loadShoppage = async (req, res) => {
   }
 };
 
+const loadProductDetails = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const userId = req.session.user;
+
+    const product = await Product.findById(productId)
+      .populate("category")
+      .lean();
+
+    if (!product || product.isBlocked) {
+      return res.redirect("/shop");
+    }
+
+    const relatedProducts = await Product.find({
+      category: product.category._id,
+      _id: { $ne: productId },
+      isBlocked: false
+    }).limit(4).lean();
+
+    const user = userId ? await User.findById(userId).lean() : null; // ✅ added
+
+    res.render("product-details", {
+      product,
+      relatedProducts,
+      user       // ✅ Now available in EJS for header
+    });
+
+  } catch (err) {
+    console.log("Product details error:", err);
+    res.redirect("/shop");
+  }
+};
+
+// Load Review Page
+// const loadReviewPage = async (req, res) => {
+//   try {
+//     const productId = req.params.id;
+//     const product = await Product.findById(productId);
+//     if (!product) return res.status(404).send("Product Not Found");
+
+//     res.render("user/reviewPage", { product });
+//   } catch (error) {
+//     console.log(error);
+//     res.redirect("/pageNotFound");
+//   }
+// };
+// Load Review Page
+const loadReviewPage = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const product = await Product.findById(productId);
+    const user = req.session.user ? await User.findById(req.session.user) : null;
+
+    if (!product) return res.status(404).send("Product Not Found");
+
+    res.render("reviewPage", { product, user }); // ✅ correct folder path
+
+  } catch (error) {
+    console.log(error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+
+
+// Submit Review
+const submitReview = async (req, res) => {
+  try {
+    const { rating, review } = req.body;
+    const productId = req.params.id;
+
+    // ✅ Get logged-in user details
+    const userData = await User.findById(req.session.user);
+
+    await Product.findByIdAndUpdate(productId, {
+      $push: {
+        reviews: {
+          user: userData._id,         // Save user ID
+          name: userData.name,        // ✅ Save user name
+          rating,
+          review,
+          date: new Date()
+        }
+      }
+    });
+
+    res.redirect("/product/" + productId);
+  } catch (err) {
+    console.log(err);
+    res.redirect("/pageNotFound");
+  }
+};
+
+
 
 
 
@@ -393,5 +487,8 @@ module.exports = {
     loadLogin,
     login,
     logout,
-    loadShoppage
+    loadShoppage,
+    loadProductDetails,
+    loadReviewPage,
+    submitReview
 }
