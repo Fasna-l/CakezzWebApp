@@ -409,3 +409,22 @@
   position: relative;
   left: 0px;            /* Move to the left (adjust as needed) */
 }
+
+.readmore-btn {
+  background: none;
+  border: none;
+  color: #ff4f81;      /* Light Pink */
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 8px;
+  text-decoration: underline;
+  transition: 0.3s;
+}
+
+.readmore-btn:hover {
+  color: #d81b60;       /* Dark Pink */
+  text-decoration: none;
+}
+

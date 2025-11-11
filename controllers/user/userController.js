@@ -1,3 +1,6 @@
+const path = require("path");
+const fs = require("fs");
+const sharp = require("sharp");
 const User = require("../../models/userSchema");
 const Category = require("../../models/categorySchema");
 const Product = require("../../models/productSchema");
@@ -93,7 +96,7 @@ const loadHomepage = async (req, res) => {
 const loadLogin = async (req,res)=>{
     try {
         if(!req.session.user){
-            return res.render("login")
+            return res.render("login",{message:req.query.message || ""});
         }else{
             res.redirect("/")
         }
@@ -413,19 +416,6 @@ const loadProductDetails = async (req, res) => {
 };
 
 // Load Review Page
-// const loadReviewPage = async (req, res) => {
-//   try {
-//     const productId = req.params.id;
-//     const product = await Product.findById(productId);
-//     if (!product) return res.status(404).send("Product Not Found");
-
-//     res.render("user/reviewPage", { product });
-//   } catch (error) {
-//     console.log(error);
-//     res.redirect("/pageNotFound");
-//   }
-// };
-// Load Review Page
 const loadReviewPage = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -472,8 +462,107 @@ const submitReview = async (req, res) => {
   }
 };
 
+//Load Account page(Profile Page)
+const loadAccountPage = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    const user = await User.findById(userId).lean();
 
+    // Fetch addresses or orders later
+    res.render("account", {
+      user
+    });
+  } catch (error) {
+    console.error("Account Page Error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
 
+// Load Edit Profile Page
+const loadEditProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user);
+    if (!user) return res.redirect("/login");
+
+    res.render("edit-profile", { user });
+  } catch (error) {
+    console.error("Error loading edit profile page:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+// ✅ Update Profile - POST
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    const { name, email } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.redirect("/login");
+
+    // 🧠 Prepare update data
+    const updateData = { name };
+
+    // 🖼️ Handle new profile image upload
+    if (req.file) {
+      console.log("🧩 File received from Multer:", req.file.originalname);
+
+      // ✅ Ensure the profile folder exists
+      const profileDir = path.join(__dirname, "../../public/uploads/profile");
+      if (!fs.existsSync(profileDir)) {
+        fs.mkdirSync(profileDir, { recursive: true });
+      }
+
+      // ✅ Create a unique filename
+      const filename = `${Date.now()}-${req.file.originalname}`;
+      const uploadPath = path.join(profileDir, filename);
+
+      try {
+        // ✅ Compress & save image using Sharp
+        await sharp(req.file.buffer)
+          .resize(300, 300, { fit: "cover" })
+          .jpeg({ quality: 85 })
+          .toFile(uploadPath);
+
+        // ✅ Delete old profile image if it exists
+        if (user.profileImage) {
+          const oldPath = path.join(profileDir, user.profileImage);
+          if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        }
+
+        // ✅ Save new image filename to DB
+        updateData.profileImage = filename;
+        console.log("✅ Profile image saved successfully:", filename);
+      } catch (err) {
+        console.error("❌ Sharp image processing failed:", err);
+      }
+    } else {
+      console.warn("⚠️ No image file received from frontend.");
+    }
+
+    // ✉️ Handle email change (OTP later)
+    if (email !== user.email) {
+      req.session.tempProfileData = {
+        userId,
+        name,
+        email,
+        profileImage: updateData.profileImage || user.profileImage,
+      };
+      console.log("Email changed — OTP verification to be added soon.");
+    } else {
+      updateData.email = email;
+    }
+
+    // 🧾 Save to database
+    await User.findByIdAndUpdate(userId, updateData);
+
+    console.log("Profile updated successfully!");
+    res.redirect("/account");
+  } catch (error) {
+    console.error("Profile update error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
 
 
 module.exports = {
@@ -490,5 +579,8 @@ module.exports = {
     loadShoppage,
     loadProductDetails,
     loadReviewPage,
-    submitReview
+    submitReview,
+    loadAccountPage,
+    loadEditProfile,
+    updateProfile
 }

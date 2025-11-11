@@ -45,7 +45,17 @@
                                 <tr>
                                     <td><%= (currentPage - 1) * 3 + index + 1 %></td>
                                     <td><%= category.categoryName %></td>
-                                    <td><%= category.description %></td>
+                                    <!-- <td><%= category.description %></td>  -->
+                                     <td>
+                                        <% if (category.description && category.description.length > 120) { %>
+                                            <span class="desc-short"><%= category.description.substring(0, 120) %>...</span>
+                                            <span class="desc-full" style="display:none;"><%= category.description %></span>
+                                            <button class="toggle-desc-btn">Read More</button>
+                                        <% } else { %>
+                                            <span><%= category.description %></span>
+                                        <% } %>
+                                    </td>
+ 
 
                                     <!-- Offer (Display Only) -->
                                     <td>
@@ -178,6 +188,28 @@ document.querySelectorAll('.btn-status').forEach(button => {
     }
   });
 });
+
+
+// read more/read less function:
+
+document.querySelectorAll('.toggle-desc-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const shortText = this.parentElement.querySelector('.desc-short');
+      const fullText = this.parentElement.querySelector('.desc-full');
+
+      if (fullText.style.display === "none") {
+        shortText.style.display = "none";
+        fullText.style.display = "inline";
+        this.innerText = "Read Less";
+      } else {
+        shortText.style.display = "inline";
+        fullText.style.display = "none";
+        this.innerText = "Read More";
+      }
+    });
+  });
+
+
 </script>
 
 

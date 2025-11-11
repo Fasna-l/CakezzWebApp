@@ -1,0 +1,61 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/account.css">
+
+<div class="account-container">
+  <!-- Sidebar Navigation -->
+  <div class="account-sidebar">
+    <h3 class="sidebar-title">My Account</h3>
+    <ul class="sidebar-menu">
+      <li><a href="/order" class="sidebar-link"><i class="fas fa-shopping-bag"></i> Order</a></li>
+      <li><a href="/wishlist" class="sidebar-link"><i class="fas fa-heart"></i> Wishlist</a></li>
+      <li><a href="/address" class="sidebar-link"><i class="fas fa-map-marker-alt"></i> Address</a></li>
+      <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li>
+      <li><a href="/account" class="sidebar-link active"><i class="fas fa-user"></i> Account Detail</a></li>
+      <li><a href="/wallet" class="sidebar-link"><i class="fas fa-wallet"></i> Wallet</a></li>
+      <li><a href="/referral" class="sidebar-link"><i class="fas fa-share-alt"></i> Referral</a></li>
+      <li><a href="/logout" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="account-content">
+    <div class="account-header">
+      <h2>Account Details</h2>
+    </div>
+
+<!-- Profile Picture (View Only) -->
+<div class="profile-picture-section">
+  <div class="profile-image-wrapper">
+    <img 
+      id="profileImagePreview" 
+      src="<%= user.profileImage ? '/uploads/profile/' + user.profileImage : '/images/default-avatar.png' %>" 
+      alt="Profile Picture"
+    />
+  </div>
+
+  <p class="upload-text">
+    <a href="/edit-profile" class="edit-profile-link">Change Profile Picture</a>
+  </p>
+</div>
+
+
+    <!-- Form Section -->
+    <form class="account-form" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" value="<%= user.name %>" readonly>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" value="<%= user.email %>" readonly>
+      </div>
+
+      <!-- <button type="submit" class="save-btn">Save Changes</button>  -->    
+       <a href="/edit-profile" class="edit-btn">Edit Profile</a>
+
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/user/footer') %>

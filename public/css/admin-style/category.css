@@ -610,3 +610,21 @@ input:checked + .slider:before {
   background-color: #c82333;
 }
 
+/* Read More / Read Less button style */
+.toggle-desc-btn {
+    background: none;
+    border: none;
+    color: #3498db; /* Blue link color */
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 0;
+    margin-left: 5px;
+    text-decoration: underline;
+    transition: 0.2s ease;
+}
+
+.toggle-desc-btn:hover {
+    color: #1abc9c;  /* Teal hover color */
+    text-decoration: none;
+}

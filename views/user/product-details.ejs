@@ -82,26 +82,39 @@
       </div>
 
       <!-- ✅ Product Description -->
-<div class="description-section">
-  <h2 class="description-title">Product Description</h2>
-  <div class="description-content">
-    <% if (product.description && product.description.trim()) { %>
-      <p><%= product.description %></p>
-    <% } else { %>
-      <p><strong>Product Details:</strong></p>
-      <ul class="product-details-list">
-        <li>Cake Flavour: Fusion</li>
-        <li>Shape: Round</li>
-        <li>Type of Cake: Cream</li>
-        <li>Type of Sponge: Vanilla</li>
-        <li>Type of Cream: Vanilla</li>
-        <li>Filling in Layers: Strawberry</li>
-        <li>Toppings: Three Color Cream Flowers</li>
-        <li>Net Quantity: 1 Cake</li>
-      </ul>
-    <% } %>
-  </div>
-</div>
+      <div class="description-section">
+        <h2 class="description-title">Product Description</h2>
+        <div class="description-content">
+
+          <% if (product.description && product.description.trim()) { %>
+
+            <% if (product.description.length > 200) { %>
+              <p>
+                <span id="short-desc"><%= product.description.substring(0, 200) %>...</span>
+                <span id="full-desc" style="display:none;"><%= product.description %></span>
+                <button id="toggle-desc-btn" class="readmore-btn">Read More</button>
+              </p>
+            <% } else { %>
+              <p><%= product.description %></p>
+            <% } %>
+
+          <% } else { %>
+            <p><strong>Product Details:</strong></p>
+            <ul class="product-details-list">
+              <li>Cake Flavour: Fusion</li>
+              <li>Shape: Round</li>
+              <li>Type of Cake: Cream</li>
+              <li>Type of Sponge: Vanilla</li>
+              <li>Type of Cream: Vanilla</li>
+              <li>Filling in Layers: Strawberry</li>
+              <li>Toppings: Three Color Cream Flowers</li>
+              <li>Net Quantity: 1 Cake</li>
+            </ul>
+          <% } %>
+
+        </div>
+      </div>
+
 
 
       <!-- ✅ Message on Cake -->
@@ -272,6 +285,29 @@
   });
 
   updateServingInfo(variants[0].size);
+
+
+// ✅ Read More / Read Less functionality
+
+const toggleBtn = document.getElementById("toggle-desc-btn");
+if (toggleBtn) {
+  toggleBtn.addEventListener("click", function () {
+    const shortDesc = document.getElementById("short-desc");
+    const fullDesc = document.getElementById("full-desc");
+
+    if (fullDesc.style.display === "none") {
+      shortDesc.style.display = "none";
+      fullDesc.style.display = "inline";
+      this.innerText = "Read Less";
+    } else {
+      shortDesc.style.display = "inline";
+      fullDesc.style.display = "none";
+      this.innerText = "Read More";
+    }
+  });
+}
+
+
 </script>
 
 

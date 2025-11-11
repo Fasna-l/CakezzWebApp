@@ -14,7 +14,7 @@
 
       <!--  Only ONE onsubmit event -->
       <form action="/admin/editProduct/<%=product._id%>" method="POST" enctype="multipart/form-data" class="edit-product-form" onsubmit="submitProductForm(event)" novalidate>
-
+        <input type="hidden" name="page" value="<%= page %>">
         <!-- Product Name -->
         <div class="form-group">
           <label>Product Name</label>
@@ -319,6 +319,7 @@ async function submitProductForm(event) {
   formData.append("description", document.querySelector("textarea[name='description']").value);
   formData.append("category", document.querySelector("select[name='category']").value);
   formData.append("removedImages", JSON.stringify(removedImages));
+  formData.append("page", document.querySelector("input[name='page']").value);
 
 
   // ✅ Add variant data
@@ -352,7 +353,8 @@ async function submitProductForm(event) {
         timer: 1500,
         showConfirmButton: false
       }).then(() => {
-        window.location.href = "/admin/products";
+        window.location.href = result.redirectUrl;
+        //window.location.href = "/admin/products";
       });
     } else {
       Swal.fire({

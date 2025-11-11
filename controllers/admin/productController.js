@@ -159,11 +159,13 @@ const productUnBlocked = async (req,res)=>{
 const getEditProduct = async (req,res)=>{
     try {
         const id = req.query.id;
+        const page = req.query.page || 1;
         const product = await Product.findOne({_id:id});
         const category = await Category.find({});
         res.render("editProduct",{
             product:product,
-            cat:category
+            cat:category,
+            page
         })
     } catch (error) {
         res.redirect("/pageerror")
@@ -173,6 +175,7 @@ const getEditProduct = async (req,res)=>{
 const editProduct = async (req, res) => {
   try {
     const productId = req.params.id;
+    const page = req.body.page || 1;
     const { productName, description, category, variants, removedImages } = req.body;
     
     const product = await Product.findById(productId);
@@ -226,7 +229,7 @@ const editProduct = async (req, res) => {
     product.status = updatedStock > 0 ? "Available" : "Out_of_stock";
 
     await product.save();
-    res.json({ success: true, message: "Product updated successfully!" });
+    res.json({ success: true, message: "Product updated successfully!" ,redirectUrl: `/admin/products?page=${page}` });
 
   } catch (error) {
     console.error(" Error in editProduct:", error);
