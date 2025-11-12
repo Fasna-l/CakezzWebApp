@@ -45,7 +45,7 @@
 
       <!-- Full Name -->
       <div class="form-group">
-        <label for="name">Full Name</label>
+        <label for="name">Name</label>
         <input 
           type="text" 
           class="form-control"
@@ -70,6 +70,11 @@
           value="<%= user.email %>" 
           required
         />
+        <small>
+          Want to change your email? 
+          <a href="/change-email" class="link-pink">Click here to verify a new email address.</a>
+        </small>
+
         <div id="error2" class="error-message"></div>
       </div>
 

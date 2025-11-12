@@ -122,6 +122,11 @@
 .otp-card .cakezz-primary-btn:hover {
   background: #c2185b;
 }
+.error-message{
+  color: #ff4d4d;
+  font-size: 0.75rem;
+  display: none;
+}
 
 /* .timer-box {
   background-color: #f8f9fa;   

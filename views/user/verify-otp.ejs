@@ -25,7 +25,7 @@
                 <h1 id="otp-title" class="form-title">Verify OTP</h1>
                 <p>Enter the 6‑digit code that we sent to your registered email.</p>
 
-                <form id="otpForm" action="/verify-otp" method="post" class="otp-form" onsubmit="return validateOTPForm()">
+                <form id="otpForm" action="/verify-otp" method="post" class="otp-form" onsubmit="return validateOTPForm()" novalidate>
                 <div class="mb-3">
                   <input
                     type="text"
@@ -39,6 +39,7 @@
                     required
                     aria-label="One-time password"
                   />
+                  <div id="errorOtp" class="error-message"></div>
                 </div>
 
                 <button type="submit" class="btn btn-pink w-100 mb-3">
@@ -106,42 +107,55 @@
   }
   startTimer();
 
-  function validateOTPForm(){
-    const otpInput = document.getElementById("otp").value; 
+  function validateOTPForm() {
+  const otpInput = document.getElementById("otp").value.trim();
+  const errorOtp = document.getElementById("errorOtp");
 
-     $.ajax({
-      type:"POST",
-      url:"verify-otp",
-      data:{otp:otpInput},
-      success: function(response){
-        if(response.success){
-          Swal.fire({
-            icon:"success",
-            title:"OTP Verified Successfully",
-            showConfirmButton:false,
-            timer:500,
-          }).then(()=>{
-            window.location.href = response.redirectUrl;
-          })
-        }else {
-          Swal.fire({
-            icon:"error",
-            title:"error",
-            text:response.message,
-          })
-        }
-      },
-      //Invalid OTP
-      error:function (){
-        Swal.fire({
-          icon:"error",
-          title:"Invalid OTP",
-          text:"Please try again"
-        })
-      }
-     })
-     return false
+  // Clear any previous error message
+  errorOtp.textContent = "";
+  errorOtp.style.display = "none"; // hide previous message
+
+
+  // Frontend Validation
+  if (otpInput === "") {
+    errorOtp.textContent = "Please enter the OTP.";
+    errorOtp.style.display = "block";
+    return false;
+  } else if (!/^\d{6}$/.test(otpInput)) {
+    errorOtp.textContent = "OTP must be a 6-digit number.";
+    errorOtp.style.display = "block";
+    return false;
   }
+
+  // If validation passes, proceed with AJAX call
+  $.ajax({
+    type: "POST",
+    url: "verify-otp",
+    data: { otp: otpInput },
+    success: function (response) {
+      if (response.success) {
+        Swal.fire({
+          icon: "success",
+          title: "OTP Verified Successfully",
+          showConfirmButton: false,
+          timer: 500,
+        }).then(() => {
+          window.location.href = response.redirectUrl;
+        });
+      } else {
+        errorOtp.textContent = response.message || "Invalid OTP. Please try again.";
+        errorOtp.style.display = "block";
+      }
+    },
+    error: function () {
+      errorOtp.textContent = "Server error. Please try again later.";
+      errorOtp.style.display = "block";
+    },
+  });
+
+  return false;
+}
+
 
   function resendOTP(){
     clearInterval(timerInterval);
@@ -178,6 +192,11 @@
     return false;
   }
 
+  
+document.getElementById("otp").addEventListener("input", function () {
+  const errorOtp = document.getElementById("errorOtp");
+  errorOtp.style.display = "none";
+});
 </script>
 
 <%- include('../partials/user/footer') %>

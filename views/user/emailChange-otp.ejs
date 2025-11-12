@@ -1,0 +1,184 @@
+<%- include('../partials/user/header') %>
+<link href="/css/user-style/forgotPass-otp.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<main class="otp-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <div class="otp-card">
+          <div class="row g-0">
+
+            <div class="col-md-6">
+              <section class="promo-section">
+                <img src="/images/login-side-image.png" alt="Illustration" class="illustration-image" />
+              </section>
+            </div>
+
+            <div class="col-md-6">
+              <section class="form-section">
+                <h3 class="form-title">Verify Email Change</h3>
+                <p>Enter the 6-digit OTP sent to your new email address.</p>
+
+                <form id="otpForm" onsubmit="return verifyOtp()" novalidate>
+                  <div class="mb-3">
+                    <input type="text" id="otp" maxlength="6" class="form-control otp-input" placeholder="Enter your OTP"  />
+                    <div id="errorOtp" class="error-message"></div>
+                  </div>
+
+                  <button type="submit" class="btn btn-pink w-100 mb-3">CONFIRM</button>
+
+                  <div class="d-flex flex-column flex-sm-row gap-2">
+                    <div class="timer-box flex-fill" id="timerBox">Expires in: <span id="timerValue">60</span>s</div>
+                    <button type="button" id="resendBtn" class="btn btn-outline-secondary flex-fill" onclick="resendOTP()" disabled>Resend OTP</button>
+                  </div>
+                </form>
+
+                <div class="text-muted mt-2">
+                  <a href="/account">Back to Account</a>
+                </div>
+              </section>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+let timer = 60;
+let timerInterval;
+
+// ✅ Start the countdown timer
+function startTimer() {
+  clearInterval(timerInterval);
+  timer = 60;
+  document.getElementById("timerBox").innerHTML = `Expires in: <span id="timerValue">${timer}</span>s`;
+  document.getElementById("resendBtn").disabled = true;
+
+  timerInterval = setInterval(() => {
+    timer--;
+    document.getElementById("timerValue").textContent = timer;
+
+    if (timer <= 0) {
+      clearInterval(timerInterval);
+      document.getElementById("timerBox").innerHTML = "OTP expired";
+      document.getElementById("otp").disabled = false;
+      document.getElementById("resendBtn").disabled = false;
+    }
+  }, 1000);
+}
+
+// ✅ Start timer on page load
+startTimer();
+
+// ✅ Verify OTP function
+// function verifyOtp() {
+//   const otp = document.getElementById("otp").value.trim();
+
+//   if (otp.length !== 6) {
+//     Swal.fire("Invalid OTP", "Please enter a valid 6-digit OTP", "error");
+//     return false;
+//   }
+
+//   $.ajax({
+//     type: "POST",
+//     url: "/verify-email-change-otp",
+//     data: { otp },
+//     success: function (response) {
+//       if (response.success) {
+//         Swal.fire("Success", response.message, "success").then(() => {
+//           window.location.href = "/account";
+//         });
+//       } else {
+//         Swal.fire("Error", response.message, "error");
+//       }
+//     },
+//     error: function () {
+//       Swal.fire("Error", "Something went wrong. Try again.", "error");
+//     },
+//   });
+
+//   return false;
+// }
+
+function verifyOtp() {
+  const otp = document.getElementById("otp").value.trim();
+  const errorOtp = document.getElementById("errorOtp");
+
+  // Clear any previous error
+  errorOtp.textContent = "";
+  errorOtp.style.display = "none";
+
+  // Frontend validation
+  if (otp === "") {
+    errorOtp.textContent = "Please enter the OTP.";
+    errorOtp.style.display = "block";
+    return false;
+  } else if (!/^\d{6}$/.test(otp)) {
+    errorOtp.textContent = "OTP must be a 6-digit number.";
+    errorOtp.style.display = "block";
+    return false;
+  }
+
+  // If validation passes — continue to AJAX
+  $.ajax({
+    type: "POST",
+    url: "/verify-email-change-otp",
+    data: { otp },
+    success: function (response) {
+      if (response.success) {
+        Swal.fire("Success", response.message, "success").then(() => {
+          window.location.href = "/account";
+        });
+      } else {
+        errorOtp.textContent = response.message || "Invalid OTP. Please try again.";
+        errorOtp.style.display = "block";
+      }
+    },
+    error: function () {
+      errorOtp.textContent = "Server error. Please try again later.";
+      errorOtp.style.display = "block";
+    },
+  });
+
+  return false;
+}
+
+
+// ✅ Resend OTP logic with working timer reset
+function resendOTP() {
+  $.ajax({
+    type: "POST",
+    url: "/resend-email-change-otp",
+    success: function (response) {
+      if (response.success) {
+        Swal.fire("OTP Resent", response.message, "success");
+        document.getElementById("otp").disabled = false;
+        startTimer(); // ✅ Restart the countdown after resend
+      } else {
+        Swal.fire("Error", response.message, "error");
+      }
+    },
+    error: function () {
+      Swal.fire("Error", "Failed to resend OTP. Please try again.", "error");
+    },
+  });
+}
+
+
+
+document.getElementById("otp").addEventListener("input", function () {
+  const errorOtp = document.getElementById("errorOtp");
+  errorOtp.style.display = "none";
+});
+
+</script>
+
+
+<%- include('../partials/user/footer') %>

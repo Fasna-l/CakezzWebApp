@@ -1,0 +1,131 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/forgot-password.css">
+
+<main class="forgotpassword-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <div class="forgotpassword-card">
+          <div class="row g-0">
+
+            <div class="col-md-6">
+              <section class="promo-section" aria-label="email change illustration">
+                <img src="/images/login-side-image.png" alt="Illustration" class="illustration-image" />
+              </section>
+            </div>
+
+            <div class="col-md-6">
+              <section class="form-section" aria-labelledby="changeemail-title">
+                <h2 id="changeemail-title" class="form-title">Change Email</h2>
+
+                <form id="emailChangeForm" action="/verify-email-change" method="POST" novalidate>
+
+                  <div class="form-group">
+                    <label class="form-label" for="oldEmail">Current Email</label>
+                    <input type="email" class="form-control" id="oldEmail" name="oldEmail" placeholder="Enter your current email" required />
+                    <div id="errorOld" class="error-message"></div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="newEmail">New Email</label>
+                    <input type="email" class="form-control" id="newEmail" name="newEmail" placeholder="Enter new email" required />
+                    <div id="errorNew" class="error-message"></div>
+                  </div>
+
+                  <% if (locals.message && message.length > 0) { %>
+                    <div class="alert alert-danger text-center"><%= message %></div>
+                  <% } %>
+
+                  <button type="submit" class="btn btn-primary cakezz-primary-btn">Send OTP</button>
+                </form>
+
+                <p class="login-link">
+                  Back To 
+                  <a href="/account" class="link-pink">Profile</a>
+                </p>
+              </section>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+// document.addEventListener("DOMContentLoaded", function() {
+//   const form = document.getElementById("emailChangeForm");
+//   const oldEmail = document.getElementById("oldEmail");
+//   const newEmail = document.getElementById("newEmail");
+//   const errorOld = document.getElementById("errorOld");
+//   const errorNew = document.getElementById("errorNew");
+
+//   function validateEmail(emailInput, errorDiv) {
+//     const val = emailInput.value.trim();
+//     const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+//     if (val === "") {
+//       errorDiv.textContent = "Email is required";
+//     } else if (!pattern.test(val)) {
+//       errorDiv.textContent = "Invalid email format";
+//     } else {
+//       errorDiv.textContent = "";
+//     }
+//   }
+
+//   oldEmail.addEventListener("input", () => validateEmail(oldEmail, errorOld));
+//   newEmail.addEventListener("input", () => validateEmail(newEmail, errorNew));
+
+//   form.addEventListener("submit", (e) => {
+//     validateEmail(oldEmail, errorOld);
+//     validateEmail(newEmail, errorNew);
+
+//     if (errorOld.textContent || errorNew.textContent) {
+//       e.preventDefault();
+//     }
+//   });
+// });
+document.addEventListener("DOMContentLoaded", function() {
+  const form = document.getElementById("emailChangeForm");
+  const oldEmail = document.getElementById("oldEmail");
+  const newEmail = document.getElementById("newEmail");
+  const errorOld = document.getElementById("errorOld");
+  const errorNew = document.getElementById("errorNew");
+
+  // ✅ Function to validate email and display message
+  function validateEmail(emailInput, errorDiv) {
+    const val = emailInput.value.trim();
+    const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    errorDiv.style.display = "none"; // clear previous visibility
+
+    if (val === "") {
+      errorDiv.textContent = "Email is required";
+      errorDiv.style.display = "block";
+    } else if (!pattern.test(val)) {
+      errorDiv.textContent = "Invalid email format";
+      errorDiv.style.display = "block";
+    } else {
+      errorDiv.textContent = "";
+      errorDiv.style.display = "none";
+    }
+  }
+
+  // ✅ Live validation while typing
+  oldEmail.addEventListener("input", () => validateEmail(oldEmail, errorOld));
+  newEmail.addEventListener("input", () => validateEmail(newEmail, errorNew));
+
+  // ✅ Final validation before submission
+  form.addEventListener("submit", (e) => {
+    validateEmail(oldEmail, errorOld);
+    validateEmail(newEmail, errorNew);
+
+    if (errorOld.textContent || errorNew.textContent) {
+      e.preventDefault(); // stop form submission
+    }
+  });
+});
+</script>
+
+<%- include('../partials/user/footer') %>

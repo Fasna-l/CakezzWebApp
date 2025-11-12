@@ -19,6 +19,14 @@ router.get('/account', userAuth, userController.loadAccountPage);
 // Edit Profile
 router.get("/edit-profile", userAuth, userController.loadEditProfile);
 router.post("/edit-profile", userAuth, uploads.single("profileImage"), userController.updateProfile);
+// Email change verification routes
+// Email Change Flow
+router.get("/change-email", userAuth, userController.loadEmailChangePage);
+router.post("/verify-email-change", userAuth, userController.sendEmailChangeOtp);
+router.post("/verify-email-change-otp", userAuth, userController.verifyEmailChangeOtp);
+router.post("/resend-email-change-otp", userAuth, userController.resendEmailChangeOtp);
+
+
 
 //review Page
 router.get("/product/:id/review", userAuth, userController.loadReviewPage);

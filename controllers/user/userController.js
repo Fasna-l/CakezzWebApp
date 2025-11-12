@@ -563,6 +563,102 @@ const updateProfile = async (req, res) => {
     res.redirect("/pageNotFound");
   }
 };
+  
+// ================= EMAIL CHANGE FLOW =================
+
+// Load Email Change Page
+const loadEmailChangePage = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user).lean();
+    res.render("email-change", {user, message: "" });
+  } catch (error) {
+    console.error("Load Email Change Error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+// Step 1: Validate and send OTP
+const sendEmailChangeOtp = async (req, res) => {
+  try {
+    const { oldEmail, newEmail } = req.body;
+    const userId = req.session.user;
+
+    const user = await User.findById(userId);
+    if (!user) return res.render("email-change", { user:null, message: "User not found" });
+
+    if (user.email !== oldEmail) {
+      return res.render("email-change", { user, message: "Old email does not match your current email" });
+    }
+
+    const existingUser = await User.findOne({ email: newEmail });
+    if (existingUser) {
+      return res.render("email-change", { user, message: "This new email is already registered" });
+    }
+
+    const otp = generateOtp();
+    await Otp.deleteOne({ email: newEmail });
+    await Otp.create({ email: newEmail, otp });
+
+    const emailSent = await sendVerificationEmail(newEmail, otp, "OTP to verify your new email address");
+    if (!emailSent) {
+      return res.render("email-change", { user, message: "Failed to send OTP. Please try again." });
+    }
+
+    req.session.newEmail = newEmail;
+    console.log("Email Change OTP:", otp);
+
+    res.render("emailChange-otp",{user});
+  } catch (error) {
+    console.error("Send Email Change OTP Error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+// Step 2: Verify OTP and update email
+const verifyEmailChangeOtp = async (req, res) => {
+  try {
+    const { otp } = req.body;
+    const userId = req.session.user;
+    const newEmail = req.session.newEmail;
+
+    if (!userId) return res.json({ success: false, message: "User not logged in" });
+    if (!newEmail) return res.json({ success: false, message: "Session expired. Please resend OTP." });
+
+    const otpRecord = await Otp.findOne({ email: newEmail });
+    if (!otpRecord) return res.json({ success: false, message: "OTP expired or not found" });
+    if (otpRecord.otp !== otp) return res.json({ success: false, message: "Invalid OTP" });
+
+    await User.findByIdAndUpdate(userId, { email: newEmail });
+    await Otp.deleteOne({ email: newEmail });
+    delete req.session.newEmail;
+
+    return res.json({ success: true, message: "Email updated successfully!" });
+  } catch (error) {
+    console.error("Verify Email Change OTP Error:", error);
+    res.json({ success: false, message: "Server error" });
+  }
+};
+
+// Step 3: Resend OTP
+const resendEmailChangeOtp = async (req, res) => {
+  try {
+    const newEmail = req.session.newEmail;
+    if (!newEmail) {
+      return res.json({ success: false, message: "Session expired. Please restart email change process." });
+    }
+
+    const otp = generateOtp();
+    await Otp.deleteOne({ email: newEmail });
+    await Otp.create({ email: newEmail, otp });
+    await sendVerificationEmail(newEmail, otp, "Resent OTP for Email Change Verification");
+
+    console.log("Resent OTP:", otp);
+    res.json({ success: true, message: "OTP resent successfully" });
+  } catch (error) {
+    console.error("Resend Email Change OTP Error:", error);
+    res.json({ success: false, message: "Internal server error" });
+  }
+};
 
 
 module.exports = {
@@ -582,5 +678,9 @@ module.exports = {
     submitReview,
     loadAccountPage,
     loadEditProfile,
-    updateProfile
+    updateProfile,
+    loadEmailChangePage,
+    sendEmailChangeOtp,
+    verifyEmailChangeOtp,
+    resendEmailChangeOtp
 }

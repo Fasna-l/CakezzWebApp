@@ -236,6 +236,12 @@
   text-decoration: underline;
 }
 
+.error-message{
+  color: #ff4d4d;
+  font-size: 0.75rem;
+  display: none;
+}
+
 
 /* Responsive */
 @media (max-width: 768px) {
