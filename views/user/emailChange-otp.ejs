@@ -77,36 +77,6 @@ function startTimer() {
 // ✅ Start timer on page load
 startTimer();
 
-// ✅ Verify OTP function
-// function verifyOtp() {
-//   const otp = document.getElementById("otp").value.trim();
-
-//   if (otp.length !== 6) {
-//     Swal.fire("Invalid OTP", "Please enter a valid 6-digit OTP", "error");
-//     return false;
-//   }
-
-//   $.ajax({
-//     type: "POST",
-//     url: "/verify-email-change-otp",
-//     data: { otp },
-//     success: function (response) {
-//       if (response.success) {
-//         Swal.fire("Success", response.message, "success").then(() => {
-//           window.location.href = "/account";
-//         });
-//       } else {
-//         Swal.fire("Error", response.message, "error");
-//       }
-//     },
-//     error: function () {
-//       Swal.fire("Error", "Something went wrong. Try again.", "error");
-//     },
-//   });
-
-//   return false;
-// }
-
 function verifyOtp() {
   const otp = document.getElementById("otp").value.trim();
   const errorOtp = document.getElementById("errorOtp");

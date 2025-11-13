@@ -135,11 +135,71 @@ const postNewPassword = async (req,res)=>{
     }
 }
 
+
+
+//change Password
+// GET change password page
+const getChangePasswordPage = async (req, res) => {
+  try {
+    const userId = req.session.user; // currently an ID
+    const user = await User.findById(userId);
+    res.render("password",{user});
+  } catch (error) {
+    console.error("Change Password Page Error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+// POST change password logic
+const postChangePassword = async (req, res) => {
+  try {
+    console.log("🟡 Change Password Route Hit"); 
+    const { oldpassword, newpassword, Confirmpassword } = req.body;
+    const userId = req.session.user;
+
+    if (!userId) {
+      return res.redirect("/login");
+    }
+
+    const user = await User.findById(userId);
+    const isMatch = await bcrypt.compare(oldpassword, user.password);
+
+    if (!isMatch) {
+      return res.render("password", {
+        user,
+        message: "Old password is incorrect",
+      });
+    }
+
+    if (newpassword !== Confirmpassword) {
+      return res.render("password", {
+        user,
+        message: "New passwords do not match",
+      });
+    }
+
+    const passwordHash = await securePassword(newpassword);
+    await User.updateOne({ _id: userId }, { $set: { password: passwordHash } });
+
+    // Redirect back to password page with success flash message
+    res.render("password", {
+      user,
+      successMessage: "Password changed successfully!",
+    });
+  } catch (error) {
+    console.error("Change Password Error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+
 module.exports ={
     getForgotPassPage,
     forgotEmailValid,
     verifyForgotPassOtp,
     getResetPassPage,
     resendOtp,
-    postNewPassword
+    postNewPassword,
+    getChangePasswordPage,
+    postChangePassword,
 }

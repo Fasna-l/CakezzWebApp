@@ -123,17 +123,6 @@
   background: #c2185b;
 }
 
-/* .timer-box {
-  background-color: #f8f9fa;   
-  border: 1px solid #dee2e6;
-  border-radius: 10px;
-  padding: 10px;
-  text-align: center;
-  font-weight: 500;
-  color: #333;
-  cursor: default;             
-} */
-
 /* Timer box styling */
 .timer-box {
   background-color: #fff4f8;         /* soft pink background */
@@ -167,12 +156,6 @@
 
 
 /* Timer Expires colour change to red */
-
-/* #timerValue.expired {
-  color: red;
-  font-weight: bold;
-  
-} */
 #timerValue.expired {
   display: inline-block;
   background-color: #ffe5eb;        /* soft pink background */

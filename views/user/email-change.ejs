@@ -54,38 +54,6 @@
 </main>
 
 <script>
-// document.addEventListener("DOMContentLoaded", function() {
-//   const form = document.getElementById("emailChangeForm");
-//   const oldEmail = document.getElementById("oldEmail");
-//   const newEmail = document.getElementById("newEmail");
-//   const errorOld = document.getElementById("errorOld");
-//   const errorNew = document.getElementById("errorNew");
-
-//   function validateEmail(emailInput, errorDiv) {
-//     const val = emailInput.value.trim();
-//     const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-//     if (val === "") {
-//       errorDiv.textContent = "Email is required";
-//     } else if (!pattern.test(val)) {
-//       errorDiv.textContent = "Invalid email format";
-//     } else {
-//       errorDiv.textContent = "";
-//     }
-//   }
-
-//   oldEmail.addEventListener("input", () => validateEmail(oldEmail, errorOld));
-//   newEmail.addEventListener("input", () => validateEmail(newEmail, errorNew));
-
-//   form.addEventListener("submit", (e) => {
-//     validateEmail(oldEmail, errorOld);
-//     validateEmail(newEmail, errorNew);
-
-//     if (errorOld.textContent || errorNew.textContent) {
-//       e.preventDefault();
-//     }
-//   });
-// });
 document.addEventListener("DOMContentLoaded", function() {
   const form = document.getElementById("emailChangeForm");
   const oldEmail = document.getElementById("oldEmail");
