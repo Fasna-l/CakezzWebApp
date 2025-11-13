@@ -4,6 +4,7 @@ const sharp = require("sharp");
 const User = require("../../models/userSchema");
 const Category = require("../../models/categorySchema");
 const Product = require("../../models/productSchema");
+const Cart = require("../../models/cartSchema");
 const Otp = require("../../models/otpSchema");  // import OTP Model
 const mongoose = require("mongoose");
 const env = require("dotenv").config();
@@ -50,6 +51,10 @@ const loadHomepage = async (req, res) => {
     const user = req.session.user;
     const categories = await Category.find({ isListed: true });
 
+    const cart = user ? await Cart.findOne({ user }).lean() : null;
+    const cartCount = cart ? cart.items.length : 0;
+
+
     // ✅ Latest Products (with totalStock)
     let latestProducts = await Product.aggregate([
       { $match: { isBlocked: false, category: { $in: categories.map(c => c._id) } } },
@@ -82,7 +87,8 @@ const loadHomepage = async (req, res) => {
     return res.render("home", {
       user: userData,
       latestProducts,
-      bestProducts
+      bestProducts,
+      cartCount
     });
   } catch (error) {
     console.log("Home page error:", error);
@@ -283,6 +289,10 @@ const loadShoppage = async (req, res) => {
     const user = req.session.user;
     const categories = await Category.find({ isListed: true });
 
+    const cart = user ? await Cart.findOne({ user }).lean() : null;
+    const cartCount = cart ? cart.items.length : 0;
+
+
     // ✅ Pagination
     let page = parseInt(req.query.page) || 1;
     let limit = 8;
@@ -373,7 +383,8 @@ const loadShoppage = async (req, res) => {
       sort,
       priceRange,
       minPrice,
-      maxPrice
+      maxPrice,
+      cartCount
     });
 
   } catch (error) {
@@ -386,6 +397,9 @@ const loadProductDetails = async (req, res) => {
   try {
     const productId = req.params.id;
     const userId = req.session.user;
+
+    const cart = userId ? await Cart.findOne({ user: userId }).lean() : null;
+    const cartCount = cart ? cart.items.length : 0;
 
     const product = await Product.findById(productId)
       .populate("category")
@@ -406,7 +420,8 @@ const loadProductDetails = async (req, res) => {
     res.render("product-details", {
       product,
       relatedProducts,
-      user       // ✅ Now available in EJS for header
+      user,
+      cartCount       // ✅ Now available in EJS for header
     });
 
   } catch (err) {

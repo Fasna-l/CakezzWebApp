@@ -627,5 +627,22 @@ body {
   cursor: not-allowed !important;
 }
 
+.cart-icon-wrapper {
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+}
+
+#cart-count {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background: #ff3d3d;
+  color: #fff;
+  padding: 2px 6px;
+  font-size: 12px;
+  border-radius: 50%;
+  font-weight: bold;
+}
 
 

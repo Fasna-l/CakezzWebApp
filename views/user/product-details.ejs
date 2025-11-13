@@ -130,7 +130,14 @@
           <input type="number" id="pd-qty" class="qty-input" value="1" min="1">
           <button class="qty-btn plus" id="pd-qty-plus">+</button>
         </div>
-        <button id="pd-add-to-cart" class="add-to-cart-btn">ADD TO CART</button>
+        <button 
+  id="pd-add-to-cart"
+  class="add-to-cart-btn"
+  data-product-id="<%= product._id %>">
+  ADD TO CART
+</button>
+
+
       </div>
 
       <!-- ✅ Sold Out Message -->
@@ -306,7 +313,6 @@ if (toggleBtn) {
     }
   });
 }
-
 
 </script>
 

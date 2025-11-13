@@ -152,8 +152,7 @@ const getChangePasswordPage = async (req, res) => {
 
 // POST change password logic
 const postChangePassword = async (req, res) => {
-  try {
-    console.log("🟡 Change Password Route Hit"); 
+  try { 
     const { oldpassword, newpassword, Confirmpassword } = req.body;
     const userId = req.session.user;
 

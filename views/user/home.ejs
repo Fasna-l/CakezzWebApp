@@ -54,10 +54,15 @@
 
               <button 
                 class="cake-add-to-cart-btn"
+                data-product-id="<%= product._id %>"
+                data-size="1kg"
+                data-qty="1"
                 <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'disabled' : '' %>>
+  
                 <i class="fas fa-shopping-cart"></i>
                 <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
               </button>
+
             </div>
           </div>
         </div>
@@ -100,10 +105,15 @@
               <div class="product-card-body">
                 <button 
                   class="add-to-cart-btn mb-3"
+                  data-product-id="<%= product._id %>"
+                  data-size="3kg"
+                  data-qty="1"
                   <%= (!threeKgVariant || threeKgVariant.stock <= 0) ? 'disabled' : '' %>>
+  
                   <i class="fas fa-shopping-cart"></i>
                   <%= (!threeKgVariant || threeKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
                 </button>
+
                 <h5 class="product-title"><%= product.productName %></h5>
               </div>
             </div>

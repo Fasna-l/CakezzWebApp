@@ -1,0 +1,74 @@
+<%- include('../partials/user/header') %>
+<script src="/js/cartPage.js" defer></script>
+<link rel="stylesheet" href="/css/user-style/cart.css">
+
+<div class="cart-container">
+  <h2 class="cart-title">Shopping Cart</h2>
+
+  <% if(cartItems.length === 0) { %>
+    <div class="empty-cart">
+      <p>Your cart is empty</p>
+      <a href="/shop" class="btn-shop">Continue Shopping</a>
+    </div>
+  <% } else { %>
+
+  <div class="cart-wrapper">
+
+    <div class="cart-items">
+      <% cartItems.forEach(item => { %>
+        <div class="cart-item" data-id="<%= item.productId %>" data-size="<%= item.size %>">
+
+          <div class="item-img">
+            <img src="/uploads/product/<%= item.image %>" />
+          </div>
+
+          <div class="item-info">
+            <h3><%= item.name %> (<%= item.size %>)</h3>
+            <p class="price">₹<%= item.price %></p>
+          </div>
+
+          <div class="item-qty">
+            <button class="qty-btn minus">-</button>
+            <span class="qty-display"><%= item.quantity %></span>
+            <button class="qty-btn plus">+</button>
+          </div>
+
+          <div class="item-subtotal">
+            ₹<%= item.subtotal %>
+          </div>
+
+          <button class="remove-btn">Remove</button>
+
+        </div>
+      <% }) %>
+    </div>
+
+    <div class="cart-summary">
+      <h3>Order Summary</h3>
+
+      <div class="row">
+        <span>Subtotal</span>
+        <span id="subtotal">₹<%= subtotal %></span>
+      </div>
+
+      <div class="row">
+        <span>Shipping</span>
+        <span>FREE</span>
+      </div>
+
+      <div class="total">
+        <span>Total</span>
+        <span id="total">₹<%= subtotal %></span>
+      </div>
+
+      <button class="checkout-btn" onclick="window.location.href='/checkout'">
+        Proceed to Checkout
+      </button>
+    </div>
+
+  </div>
+
+  <% } %>
+</div>
+
+<%- include('../partials/user/footer') %>

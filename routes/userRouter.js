@@ -4,6 +4,7 @@ const passport = require("passport");
 const userController = require("../controllers/user/userController");
 const profileController = require("../controllers/user/profileController");
 const addressController = require("../controllers/user/addressController");
+const cartController = require("../controllers/user/cartController");
 const {userAuth,adminAuth} = require("../middlewares/auth");
 const { uploads } = require("../helpers/multer");
 
@@ -71,5 +72,21 @@ router.get("/edit-address/:id", userAuth, addressController.loadEditAddress);
 router.post("/update-address/:id", userAuth, addressController.updateAddress);
 router.delete("/delete-address/:id", userAuth, addressController.deleteAddress);
 router.post("/set-default-address/:id", userAuth, addressController.setDefaultAddress);
+
+// cart management
+router.post("/add-to-cart", userAuth, cartController.addToCart);
+router.post("/cart/update-qty", userAuth, cartController.updateQuantity);
+router.post("/cart/remove", userAuth, cartController.removeCartItem);
+router.get("/cart", userAuth, cartController.getCartPage);
+
+// cart count
+router.get("/cart-count", userAuth, async (req, res) => {
+  const Cart = require("../models/cartSchema");
+  const count = (await Cart.findOne({ user: req.session.user }))?.items.length || 0;
+  res.json({ count });
+});
+
+
+
 
 module.exports = router;

@@ -70,10 +70,15 @@
         <% } %>
 
         <button class="add-to-cart-btn"
-                <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'disabled' : '' %>>
-          <i class="fas fa-shopping-cart"></i>
-          <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
-        </button>
+  data-product-id="<%= product._id %>"
+  data-size="1kg"
+  data-qty="1"
+  <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'disabled' : '' %>>
+  
+  <i class="fas fa-shopping-cart"></i>
+  <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
+</button>
+
 
         <% 
     let avg = 0;
