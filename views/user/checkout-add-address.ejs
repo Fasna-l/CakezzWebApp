@@ -1,0 +1,136 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/checkout-add-address.css">
+
+<div class="page-wrap">
+  <div class="container checkout-add-page">
+
+    <h1 class="page-title">Checkout</h1>
+
+    <div class="checkout-grid">
+
+      <!-- LEFT: Add Address Form -->
+      <section class="card address-form-card">
+        <h2 class="card-title">Add Address</h2>
+
+        <form id="addAddressForm" method="POST" action="/checkout/add-address" novalidate>
+
+          <!-- Phone -->
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" name="phone" id="phone" placeholder="Enter 10-digit number" required>
+            <span class="error-message" id="phoneError"></span>
+          </div>
+
+          <!-- Street Address -->
+          <div class="form-group">
+            <label>Street Address</label>
+            <input type="text" name="streetAddress" id="streetAddress" placeholder="House No, Street Name" required>
+            <span class="error-message" id="streetAddressError"></span>
+          </div>
+
+          <!-- City & District -->
+          <div class="form-row">
+            <div class="form-group">
+              <label>City</label>
+              <input type="text" name="city" id="city" placeholder="City" required>
+              <span class="error-message" id="cityError"></span>
+            </div>
+
+            <div class="form-group">
+              <label>District</label>
+              <select name="district" id="district" required>
+                <option value="">Select District</option>
+                <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                <option value="Kollam">Kollam</option>
+                <option value="Pathanamthitta">Pathanamthitta</option>
+                <option value="Alappuzha">Alappuzha</option>
+                <option value="Kottayam">Kottayam</option>
+                <option value="Idukki">Idukki</option>
+                <option value="Ernakulam">Ernakulam</option>
+                <option value="Thrissur">Thrissur</option>
+                <option value="Palakkad">Palakkad</option>
+                <option value="Malappuram">Malappuram</option>
+                <option value="Kozhikode">Kozhikode</option>
+                <option value="Wayanad">Wayanad</option>
+                <option value="Kannur">Kannur</option>
+                <option value="Kasaragod">Kasaragod</option>
+              </select>
+              <span class="error-message" id="districtError"></span>
+            </div>
+          </div>
+
+          <!-- Pincode & State -->
+          <div class="form-row">
+            <div class="form-group">
+              <label>Pincode</label>
+              <input type="text" name="pincode" id="pincode" placeholder="6-digit code" required>
+              <span class="error-message" id="pincodeError"></span>
+            </div>
+
+            <div class="form-group">
+              <label>State</label>
+              <input type="text" name="state" id="state" value="Kerala" readonly>
+              <span class="error-message" id="stateError"></span>
+            </div>
+          </div>
+
+          <!-- Landmark -->
+          <div class="form-group">
+            <label>Landmark (Optional)</label>
+            <input type="text" name="landmark" id="landmark" placeholder="Nearby place">
+            <span class="error-message" id="landmarkError"></span>
+          </div>
+
+          <!-- Address Type -->
+          <div class="form-group">
+            <label>Address Type</label>
+            <select name="addressType" id="addressType">
+              <option value="Home">Home</option>
+              <option value="Work">Work</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn save-btn">Save Address</button>
+        </form>
+      </section>
+
+      <!-- RIGHT: Order Summary -->
+      <aside class="card summary-card">
+        <h2 class="card-title">Your Order</h2>
+
+        <div class="cart-item">
+          <% if (checkoutItems && checkoutItems.length) { %>
+            <% checkoutItems.forEach(function(item){ %>
+              <div class="cart-row">
+                <img src="/uploads/product/<%= item.product.image %>" class="cart-thumb">
+                <div class="cart-meta">
+                  <div class="cart-name"><%= item.product.name %></div>
+                  <div class="cart-qty">Qty: <%= item.quantity %></div>
+                </div>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+
+        <div class="price-box">
+          <div class="price-row"><span>Subtotal :</span><span>₹<%= totals.subTotal %></span></div>
+          <div class="price-row"><span>Shipping</span><span><%= totals.shipping === 0 ? 'Free' : '₹' + totals.shipping %></span></div>
+          <div class="price-row"><span>Tax:</span><span>₹<%= totals.tax %></span></div>
+
+          <hr class="price-divider" />
+
+          <div class="price-row total"><span>Total</span><span>₹<%= totals.grandTotal %></span></div>
+        </div>
+
+        <a href="/checkout" class="btn back-btn">Back to Checkout</a>
+      </aside>
+
+    </div>
+  </div>
+</div>
+
+<script src="/js/checkout-address-validation.js"></script>
+
+<%- include('../partials/user/footer') %>

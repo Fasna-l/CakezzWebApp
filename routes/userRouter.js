@@ -5,6 +5,7 @@ const userController = require("../controllers/user/userController");
 const profileController = require("../controllers/user/profileController");
 const addressController = require("../controllers/user/addressController");
 const cartController = require("../controllers/user/cartController");
+const checkOutController = require("../controllers/user/checkOutController");
 const {userAuth,adminAuth} = require("../middlewares/auth");
 const { uploads } = require("../helpers/multer");
 
@@ -78,14 +79,31 @@ router.post("/add-to-cart", userAuth, cartController.addToCart);
 router.post("/cart/update-qty", userAuth, cartController.updateQuantity);
 router.post("/cart/remove", userAuth, cartController.removeCartItem);
 router.get("/cart", userAuth, cartController.getCartPage);
-
 // cart count
 router.get("/cart-count", userAuth, async (req, res) => {
   const Cart = require("../models/cartSchema");
   const count = (await Cart.findOne({ user: req.session.user }))?.items.length || 0;
   res.json({ count });
 });
+router.get("/cart/checkout", userAuth, cartController.proceedToCheckout);
 
+
+//checkout
+router.get("/checkout", checkOutController.getCheckout);
+router.get("/checkout/add-address", (req, res) => {
+  res.render("checkout-add-address", {
+    checkoutItems: req.session.checkoutItems || [],
+    totals: req.session.checkoutTotals || {}
+  });
+});
+router.post("/checkout/add-address", checkOutController.postAddAddress);
+router.get("/checkout/edit-address/:id", checkOutController.getEditAddress);
+router.post("/checkout/update-address/:id", checkOutController.postEditAddress);
+router.post("/checkout/save-delivery", checkOutController.saveDeliveryDate);
+router.get("/checkout/payment", checkOutController.getPaymentPage);
+router.post("/checkout/place-order", checkOutController.placeOrder);
+router.get("/checkout/success/:orderId", checkOutController.getSuccessPage);
+router.get("/personalize", userAuth, checkOutController.getPersonalizePage);
 
 
 

@@ -14,6 +14,13 @@ document.addEventListener("click", async function (e) {
     const btn = e.target.closest(".cake-add-to-cart-btn");
     addItemToCart(btn.dataset.productId, btn.dataset.size, btn.dataset.qty);
   }
+
+  /* SHOP PAGE */
+  if (e.target.closest(".add-to-cart-btn")) {
+    const btn = e.target.closest(".add-to-cart-btn");
+    addItemToCart(btn.dataset.productId, btn.dataset.size, btn.dataset.qty);
+  }
+
 });
 
 

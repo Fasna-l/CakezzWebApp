@@ -1,0 +1,133 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/payment.css">
+
+<div class="page-wrap">
+  <div class="container payment-page">
+
+    <h1 class="page-title">Payment</h1>
+
+    <div class="payment-grid">
+
+      <!-- LEFT SIDE -->
+      <section class="card payment-left">
+
+        <!-- PAYMENT METHOD -->
+        <div class="payment-method-box">
+          <h3 class="section-title">Pay With:</h3>
+
+          <label class="radio-option">
+            <input type="radio" name="paymentMethod" value="COD" checked>
+            <span>COD</span>
+          </label>
+
+          <label class="radio-option">
+            <input type="radio" name="paymentMethod" value="RazorPay">
+            <span>Razer Pay</span>
+          </label>
+
+          <label class="radio-option">
+            <input type="radio" name="paymentMethod" value="Wallet">
+            <span>Wallet</span>
+          </label>
+        </div>
+
+        <!-- COUPONS -->
+        <div class="coupon-box">
+          <h3 class="section-title">Available coupons</h3>
+
+          <% coupons.forEach(c => { %>
+            <div class="coupon-row">
+              <span class="coupon-name"><%= c.name %></span>
+              <button class="btn small copy-btn" data-code="<%= c.code %>">Copy</button>
+            </div>
+          <% }) %>
+        </div>
+
+      </section>
+
+      <!-- RIGHT SIDE -->
+      <aside class="card payment-summary">
+
+        <h3 class="section-title">Order Summary</h3>
+
+        <!-- MULTIPLE ORDER ITEMS -->
+<% checkoutItems.forEach(item => { %>
+  <div class="summary-item">
+    <div>
+      <p class="cake-name"><%= item.product.name %></p>
+      <p class="cake-qty">Qty: <%= item.quantity %></p>
+    </div>
+    <div class="cake-price">
+      ₹<%= item.price * item.quantity %>
+    </div>
+  </div>
+<% }) %>
+
+        <!-- APPLY COUPON -->
+        <form id="applyCouponForm" method="POST" action="/checkout/apply-coupon">
+          <div class="apply-coupon-box">
+            <input type="text" name="couponCode" id="couponCode" placeholder="Gift or discount code">
+            <button class="btn apply-btn">Apply</button>
+          </div>
+        </form>
+
+        <!-- PRICE BOX -->
+        <div class="price-box">
+          <div class="price-row"><span>Subtotal :</span><span>₹<%= totals.subTotal %></span></div>
+          <div class="price-row"><span>Shipping</span><span><%= totals.shipping === 0 ? "Free" : "₹" + totals.shipping %></span></div>
+          <div class="price-row"><span>Tax:</span><span>₹<%= totals.tax %></span></div>
+
+          <% if (totals.discount > 0) { %>
+            <div class="price-row discount">
+              <span>Discount:</span><span>- ₹<%= totals.discount %></span>
+            </div>
+          <% } %>
+
+          <hr class="price-divider">
+
+          <div class="price-row total">
+            <span>Total</span>
+            <span>₹<%= totals.grandTotal %></span>
+          </div>
+        </div>
+
+        <!-- Place Order -->
+        <form id="placeOrderForm" method="POST" action="/checkout/place-order">
+          <input type="hidden" name="selectedPayment" id="selectedPayment">
+
+          <button type="submit" class="btn place-order-btn">
+            Place Order
+          </button>
+        </form>
+
+      </aside>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Copy coupon code
+document.querySelectorAll(".copy-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const code = btn.dataset.code;
+    navigator.clipboard.writeText(code);
+    btn.textContent = "Copied!";
+    setTimeout(() => btn.textContent = "Copy", 1200);
+  });
+});
+
+// Payment method selection
+const radios = document.querySelectorAll("input[name='paymentMethod']");
+const hidden = document.getElementById("selectedPayment");
+
+function updateMethod() {
+  const checked = document.querySelector("input[name='paymentMethod']:checked");
+  hidden.value = checked.value;
+}
+updateMethod();
+
+radios.forEach(r => r.addEventListener("change", updateMethod));
+</script>
+
+<%- include('../partials/user/footer') %>

@@ -8,6 +8,8 @@ const passport = require("./config/passport")
 const nocache = require('nocache');
 const userRouter = require("./routes/userRouter");
 const adminRouter = require("./routes/adminRouter");
+const User = require("./models/userSchema");
+const Cart = require("./models/cartSchema");
 db()
 
 app.use(nocache());
@@ -25,8 +27,28 @@ app.use(session({
     }
 }))
 
-app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
+// app.use((req, res, next) => {
+//   res.locals.user = req.session.user || null;
+//   next();
+// });
+app.use(async (req, res, next) => {
+  if (req.session.user) {
+    res.locals.user = await User.findById(req.session.user).lean();
+  } else {
+    res.locals.user = null;
+  }
+  next();
+});
+
+app.use(async (req, res, next) => {
+  if (!req.session.user) {
+    res.locals.cartCount = 0;
+    return next();
+  }
+
+  const cart = await Cart.findOne({ user: req.session.user });
+  res.locals.cartCount = cart ? cart.items.length : 0;
+
   next();
 });
 

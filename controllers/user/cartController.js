@@ -191,6 +191,63 @@ const removeCartItem = async (req, res) => {
 //     res.redirect("/pageNotFound");
 //   }
 // };
+/* --------------------------------------------------------
+   PROCEED TO CHECKOUT
+-------------------------------------------------------- */
+const proceedToCheckout = async (req, res) => {
+  try {
+    const userId = req.session.user;
+
+    const cart = await Cart.findOne({ user: userId }).populate("items.product");
+
+    if (!cart || cart.items.length === 0) {
+      return res.redirect("/cart");
+    }
+
+    // Build checkout items
+    const checkoutItems = cart.items.map((item) => {
+      const product = item.product;
+      const variant = product.variants.find(v => v.size === item.size);
+
+      return {
+        productId: product._id,
+        product: {
+          name: product.productName,
+          image: product.productImage[0]
+        },
+        size: item.size,
+        quantity: item.quantity,
+        price: variant.price
+      };
+    });
+
+    // Calculate totals
+    let subTotal = 0;
+    checkoutItems.forEach((ci) => {
+      subTotal += ci.price * ci.quantity;
+    });
+
+    const shipping = subTotal > 500 ? 0 : 50;
+    const tax = Math.round(subTotal * 0.05);
+    const grandTotal = subTotal + shipping + tax;
+
+    // SAVE TO SESSION
+    req.session.checkoutItems = checkoutItems;
+    req.session.checkoutTotals = {
+      subTotal,
+      shipping,
+      tax,
+      grandTotal
+    };
+
+    res.redirect("/checkout");
+
+  } catch (error) {
+    console.error("proceedToCheckout error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
 
 const getCartPage = async (req, res) => {
   try {
@@ -239,5 +296,6 @@ module.exports = {
   addToCart,
   updateQuantity,
   removeCartItem,
-  getCartPage,
+  proceedToCheckout,
+  getCartPage
 };

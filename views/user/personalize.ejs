@@ -1,0 +1,148 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/personalize.css">
+
+<div class="page-wrap">
+  <div class="container personalize-page">
+
+    <h1 class="page-title">Checkout</h1>
+
+    <div class="personalize-grid">
+
+      <!-- LEFT: Delivery Date -->
+      <section class="card delivery-card">
+        <h2 class="card-title">Delivery Date and Time</h2>
+
+        <form id="deliveryForm" method="POST" action="/checkout/save-delivery" novalidate>
+
+          <div class="form-group">
+            <label>Date & Time</label>
+            <input 
+              type="datetime-local" 
+              name="deliveryDate" 
+              id="deliveryDate" 
+              required 
+              value=""
+            >
+    <!-- show server-side error if exists -->
+          <% if (typeof deliveryError !== 'undefined' && deliveryError) { %>
+            <span class="error-message" id="deliveryError" style="display:block;"><%= deliveryError %></span>
+          <% } else { %>
+            <span class="error-message" id="deliveryError"></span>
+          <% } %>
+        </div>
+
+
+          <button class="btn save-btn" type="submit">Save</button>
+        </form>
+      </section>
+
+      <!-- RIGHT: Summary -->
+      <aside class="card summary-card">
+        <h2 class="card-title">Your Order</h2>
+
+        <div class="cart-item">
+          <% checkoutItems.forEach(item => { %>
+            <div class="cart-row">
+              <img src="/uploads/product/<%= item.product.image %>" class="cart-thumb">
+              <div class="cart-meta">
+                <div class="cart-name"><%= item.product.name %></div>
+                <div class="cart-qty">Qty: <%= item.quantity %></div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+
+        <div class="price-box">
+          <div class="price-row"><span>Subtotal :</span><span>₹<%= totals.subTotal %></span></div>
+          <div class="price-row"><span>Shipping</span><span><%= totals.shipping === 0 ? 'Free' : '₹' + totals.shipping %></span></div>
+          <div class="price-row"><span>Tax:</span><span>₹<%= totals.tax %></span></div>
+
+          <hr class="price-divider">
+
+          <div class="price-row total"><span>Total</span><span>₹<%= totals.grandTotal %></span></div>
+        </div>
+
+        <form id="goPaymentForm" action="/checkout/payment" method="GET">
+          <button class="btn payment-btn" type="submit">Select Payment</button>
+        </form>
+
+      </aside>
+
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/user/footer') %>
+<script>
+const deliveryInput = document.getElementById("deliveryDate");
+const deliveryError = document.getElementById("deliveryError");
+const deliveryForm = document.getElementById("deliveryForm");
+
+// --- SET MIN DATE = NOW + 1 HOUR ---
+(function () {
+    const now = new Date();
+    const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+
+    const year = oneHourLater.getFullYear();
+    const month = String(oneHourLater.getMonth() + 1).padStart(2, "0");
+    const day = String(oneHourLater.getDate()).padStart(2, "0");
+    const hours = String(oneHourLater.getHours()).padStart(2, "0");
+    const minutes = String(oneHourLater.getMinutes()).padStart(2, "0");
+
+    deliveryInput.min = `${year}-${month}-${day}T${hours}:${minutes}`;
+})();
+
+// --- VALIDATION ---
+deliveryForm.addEventListener("submit", function (e) {
+    const value = deliveryInput.value.trim();
+
+    // If no date/time selected
+    if (!value) {
+        e.preventDefault();
+        deliveryError.textContent = "Please select a delivery date & time.";
+        deliveryError.style.display = "block";
+        return;
+    }
+
+    const selected = new Date(value);
+    const minAllowed = new Date(deliveryInput.min);
+
+    // If selected time < minimum allowed
+    if (selected < minAllowed) {
+        e.preventDefault();
+        deliveryError.textContent =
+            "Delivery must be at least 1 hour from now.";
+        deliveryError.style.display = "block";
+        return;
+    }
+
+    // Hide error if valid
+    deliveryError.style.display = "none";
+});
+
+
+
+// Block going to payment unless a date is selected & valid
+document.getElementById("goPaymentForm").addEventListener("submit", function(e) {
+    const value = deliveryInput.value.trim();
+
+    if (!value) {
+        e.preventDefault();
+        deliveryError.textContent = "Please select a delivery date & time.";
+        deliveryError.style.display = "block";
+        return;
+    }
+
+    const selected = new Date(value);
+    const minAllowed = new Date(deliveryInput.min);
+
+    if (selected < minAllowed) {
+        e.preventDefault();
+        deliveryError.textContent = "Delivery must be at least 1 hour from now.";
+        deliveryError.style.display = "block";
+        return;
+    }
+});
+
+</script>
+
