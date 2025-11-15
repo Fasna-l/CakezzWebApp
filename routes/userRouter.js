@@ -6,6 +6,7 @@ const profileController = require("../controllers/user/profileController");
 const addressController = require("../controllers/user/addressController");
 const cartController = require("../controllers/user/cartController");
 const checkOutController = require("../controllers/user/checkOutController");
+const orderController = require("../controllers/user/orderController");
 const {userAuth,adminAuth} = require("../middlewares/auth");
 const { uploads } = require("../helpers/multer");
 
@@ -105,6 +106,19 @@ router.post("/checkout/place-order", checkOutController.placeOrder);
 router.get("/checkout/success/:orderId", checkOutController.getSuccessPage);
 router.get("/personalize", userAuth, checkOutController.getPersonalizePage);
 
+
+//order management
+router.get("/order", userAuth, orderController.loadOrderList);
+router.get("/order/:id", userAuth, orderController.loadOrderDetails);
+// Cancel order
+router.get("/order/cancel/:id", userAuth, orderController.loadCancelPage);
+router.post("/order/cancel/:id", userAuth, orderController.cancelOrder);
+// Cancel single product
+//router.post("/order/cancel-item/:id", userAuth, orderController.cancelSingleItem);
+// Return order
+router.get("/order/return/:id", userAuth, orderController.loadReturnPage);
+router.post("/order/return/:id", userAuth, orderController.submitReturnRequest);
+router.get("/order/invoice/:id", userAuth, orderController.downloadInvoice);
 
 
 module.exports = router;

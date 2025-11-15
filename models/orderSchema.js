@@ -47,7 +47,6 @@ const orderSchema = new mongoose.Schema({
   ],
 
   shippingAddress: {
-    name: { type: String, required: true },
     addressType: { type: String, required: true },
     streetAddress: { type: String, required: true },
     city: { type: String, required: true },
@@ -56,7 +55,6 @@ const orderSchema = new mongoose.Schema({
     landmark: { type: String },
     pinCode: { type: String, required: true },
     phoneNumber: { type: String, required: true },
-    country: { type: String, default: "India" },
   },
 
   subTotal: { type: Number, required: true },

@@ -1,0 +1,134 @@
+<%- include('../partials/admin/header') %>
+<link rel="stylesheet" href="/css/admin-style/orderlist.css">
+
+<div class="dashboard-container">
+    <div class="dashboard-wrapper">
+        <%- include('../partials/admin/sidebar') %>
+        
+        <!-- Main Content -->
+        <div class="categories-container">
+            <!-- Page Title with Search -->
+            <div class="page-title">
+                <h2>Orders</h2>
+
+                <form action="/admin/orders" method="get" class="search-form">
+                    <div class="search-box">
+                        <input type="text" 
+                        class="search-input" 
+                        placeholder="Search customers..." 
+                        name="search" 
+                        value="<%= search || '' %>">
+
+                        <button class="search-button-text" type="submit">Search</button>    
+
+                        <% if (search && search.trim() !== '') { %>
+                            <a href="/admin/orders" class="clear-btn">Clear</a>
+                        <% } %>
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="filter-section">
+
+    <!-- Date Filter -->
+    <select class="filter-select" name="date" onchange="window.location.href='?date=' + this.value">
+        <option value="">Filter by Date</option>
+        <option value="today">Today</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+    </select>
+
+    <!-- Order Status Filter -->
+    <select class="filter-select" name="status" onchange="window.location.href='?status=' + this.value">
+        <option value="">Order Status</option>
+        <option value="Pending">Pending</option>
+        <option value="Processing">Processing</option>
+        <option value="Shipped">Shipped</option>
+        <option value="Delivered">Delivered</option>
+        <option value="Cancelled">Cancelled</option>
+    </select>
+
+</div>
+
+
+            <!-- Orders Table -->
+            <div class="table-wrapper">
+                <table class="customers-table">
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>NAME</th>
+                            <th>ADDRESS</th>
+                            <th>DATE</th>
+                            <th>TYPE</th>
+                            <th>STATUS</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (orders && orders.length > 0) { %>
+                            <% orders.forEach((order) => { %>
+                                <tr>
+                                    <td><%= order.id %></td>
+                                    <td><%= order.customerName %></td>
+                                    <td><%= order.address %></td>
+                                    <td><%= order.date %></td>
+                                    <td><%= order.type %></td>
+                                    <td>
+                                        <span class="status-badge <%= order.status.toLowerCase() %>">
+                                            <%= order.status %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="/admin/order-details/<%= order._id %>" class="btn-edit">
+                                            <!-- <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                            </svg> -->
+                                            View
+                                        </a>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7" style="text-align:center;">No orders found</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container">
+                <% if (currentPage > 1) { %>
+                    <a href="/admin/orders?page=<%= currentPage - 1 %>" class="pagination-link prev">« Prev</a>
+                <% } else { %>
+                    <span class="pagination-link disabled">« Prev</span>
+                <% } %>
+
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <% if (i === currentPage) { %>
+                        <span class="pagination-link current"><%= i %></span>
+                    <% } else { %>
+                        <a href="/admin/orders?page=<%= i %>" class="pagination-link"><%= i %></a>
+                    <% } %>
+                <% } %>
+
+                <% if (currentPage < totalPages) { %>
+                    <a href="/admin/orders?page=<%= currentPage + 1 %>" class="pagination-link next">Next »</a>
+                <% } else { %>
+                    <span class="pagination-link disabled">Next »</span>
+                <% } %>
+            </div>
+
+            <p style="text-align: center; color: #aaa; font-size: 13px; margin-top: 8px;">
+                Page <%= currentPage %> of <%= totalPages %>
+            </p>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/admin/footer') %>

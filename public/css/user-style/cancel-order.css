@@ -1,0 +1,136 @@
+.account-container {
+  display: flex;
+  width: 90%;
+  max-width: 1200px;
+  margin: 90px auto;
+  gap: 30px;
+}
+
+/* Sidebar – same as your address.css */
+.account-sidebar {
+  width: 25%;
+  background: linear-gradient(135deg, #f16ead 0%, #4e0b2a 100%);
+  padding: 30px 20px;
+  border-radius: 15px;
+  height: fit-content;
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(255, 77, 166, 0.15);
+}
+
+.sidebar-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  transition: 0.3s;
+}
+
+.sidebar-link.active {
+  background: #411128;
+  border: 2px solid #ff4da6;
+}
+
+/* Main Section */
+.orders-main-content {
+  flex: 1;
+}
+
+.cancel-card {
+  background: #fff5f8;
+  padding: 30px;
+  border-radius: 15px;
+  border: 1px solid #ffcedf;
+}
+
+.cancel-card h2 {
+  margin-bottom: 10px;
+  font-size: 24px;
+  color: #333;
+}
+
+.subtitle {
+  margin-bottom: 20px;
+  color: #666;
+}
+
+/* Form */
+.cancel-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.cancel-form textarea {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  resize: none;
+  font-size: 14px;
+}
+
+.cancel-buttons {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Button styles */
+.btn-primary {
+  background: #ff66a3;
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #ff3385;
+}
+
+.btn-secondary {
+  background: #ddd;
+  color: #444;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background: #ccc;
+}
+
+/* Mobile */
+@media(max-width: 900px) {
+  .account-sidebar {
+    display: none;
+  }
+
+  .cancel-card {
+    margin-top: 20px;
+  }
+}

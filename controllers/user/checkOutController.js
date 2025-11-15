@@ -105,19 +105,10 @@ const postEditAddress = async (req, res) => {
 /* ------------------------------------
    SAVE DELIVERY DATE (with validation)
 -------------------------------------- */
-/* ------------------------------------
-   SAVE DELIVERY DATE (with validation + user-friendly redirect)
--------------------------------------- */
+
 const saveDeliveryDate = async (req, res) => {
   try {
-    
-
     const selectedDate = req.body.deliveryDate;
-    console.log("saveDeliveryDate -> req.body.deliveryDate:", selectedDate);
-
-    // debug (temporary) - uncomment while testing
-    // console.log("SAVE DELIVERY: body =", req.body);
-
     // If empty
     if (!selectedDate || selectedDate.trim() === "") {
       // store friendly error in session and redirect back to personalize page
@@ -186,7 +177,7 @@ const placeOrder = async (req, res) => {
 
     const items = [];
 
-    // 🔥 1️⃣ REDUCE STOCK FOR EACH ITEM
+    //  REDUCE STOCK FOR EACH ITEM
     for (let cart of req.session.checkoutItems) {
       const product = await Product.findById(cart.productId);
 
@@ -209,7 +200,7 @@ const placeOrder = async (req, res) => {
       });
     }
 
-    // 🔥 2️⃣ CREATE ORDER
+    //  CREATE ORDER
     const order = new Order({
       orderId: "ORD-" + crypto.randomBytes(3).toString("hex").toUpperCase(),
       userId,
@@ -240,17 +231,17 @@ const placeOrder = async (req, res) => {
 
     await order.save();
 
-    // 🔥 3️⃣ CLEAR USER CART FROM DATABASE
+    //  CLEAR USER CART FROM DATABASE
     await Cart.findOneAndUpdate(
       { user: userId },
       { $set: { items: [] } }
     );
 
-    // 🔥 4️⃣ CLEAR SESSION CART
+    //  CLEAR SESSION CART
     req.session.checkoutItems = [];
     req.session.checkoutTotals = null;
 
-    // 🔥 5️⃣ REDIRECT
+    //  REDIRECT
     return res.redirect(`/checkout/success/${order._id}`);
 
   } catch (err) {
@@ -269,17 +260,27 @@ const getSuccessPage = async (req, res) => {
 
     const order = await Order.findById(req.params.orderId);
 
+    if (!order) {
+      return res.redirect("/order");
+    }
+
+    const deliveryDateFormatted = order.deliveryDate
+      ? new Date(order.deliveryDate).toDateString()
+      : "Not Assigned";
+
     res.render("payment-success", {
       user,
-      orderId: order._id,
-      deliveryDateFormatted: new Date(order.deliveryDate).toDateString()
+      order,                     // IMPORTANT: send full order
+      deliveryDateFormatted      // OK to keep this
     });
 
   } catch (err) {
-    console.log(err);
-    res.redirect("/pageerror");
+    console.log("getSuccessPage error:", err);
+    res.redirect("/pageNotFound");
   }
 };
+
+
 
 const getPersonalizePage = async (req, res) => {
   try {
