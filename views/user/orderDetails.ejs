@@ -21,14 +21,20 @@
   <!-- Main Content -->
   <div class="orders-main-content">
     <div class="order-details-card">
-      <%
-        const isReturnFlow =
-          order.orderStatus === "Return Requested" ||
-          order.orderStatus === "Returned" ||
-          order.orderStatus === "Rejected" ||
-          order.orderStatus === "Return Rejected";
-      %>
+     <%
+  const isCancelledFlow = order.orderStatus === "Cancelled";
+  const isReturnFlow =
+    order.orderStatus === "Return Requested" ||
+    order.orderStatus === "Returned" ||
+    order.orderStatus === "Rejected" ||
+    order.orderStatus === "Return Rejected";
 
+  // Helper: what stages should be active
+  const stage1 = ['Pending','Processing','Packed','Shipped','Out for Delivery','Delivered'].includes(order.orderStatus);
+  const stage2 = ['Packed','Shipped','Out for Delivery','Delivered'].includes(order.orderStatus);
+  const stage3 = ['Shipped','Out for Delivery','Delivered'].includes(order.orderStatus);
+  const stage4 = ['Delivered'].includes(order.orderStatus);
+%>
       <div class="order-header">
         <h2>Order Details</h2>
         <p class="order-id">Order ID: <%= order.orderId %></p>
@@ -36,62 +42,41 @@
 
 
       <!-- Modern Order Tracking -->
+
+
 <div class="winni-tracking-container">
 
-    <!-- STEP 1 -->
-    <div class="winni-step 
-        <%= !isReturnFlow &&
-            (order.orderStatus === 'Pending' || order.orderStatus === 'Packed' ||
-             order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') 
-            ? 'active' : '' %>">
-        <div class="circle">1</div>
-        <p>Placed</p>
-    </div>
+  <!-- STEP 1 -->
+  <div class="winni-step <%= !isCancelledFlow && !isReturnFlow && stage1 ? 'active' : '' %>">
+      <div class="circle">1</div>
+      <p>Placed</p>
+  </div>
 
-    <div class="step-line 
-        <%= !isReturnFlow && order.orderStatus !== 'Pending'
-            ? 'active' : '' %>"></div>
+  <div class="step-line <%= !isCancelledFlow && !isReturnFlow && stage2 ? 'active' : '' %>"></div>
 
-    <!-- STEP 2 -->
-    <div class="winni-step 
-        <%= !isReturnFlow &&
-            (order.orderStatus === 'Packed' || order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') 
-            ? 'active' : '' %>">
-        <div class="circle">2</div>
-        <p>Packed</p>
-    </div>
+  <!-- STEP 2 -->
+  <div class="winni-step <%= !isCancelledFlow && !isReturnFlow && stage2 ? 'active' : '' %>">
+      <div class="circle">2</div>
+      <p>Packed</p>
+  </div>
 
-    <div class="step-line 
-        <%= !isReturnFlow && ['Shipped','Delivered'].includes(order.orderStatus) 
-            ? 'active' : '' %>"></div>
+  <div class="step-line <%= !isCancelledFlow && !isReturnFlow && stage3 ? 'active' : '' %>"></div>
 
-    <!-- STEP 3 -->
-    <div class="winni-step 
-        <%= !isReturnFlow &&
-            (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') 
-            ? 'active' : '' %>">
-        <div class="circle">3</div>
-        <p>Shipped</p>
-    </div>
+  <!-- STEP 3 -->
+  <div class="winni-step <%= !isCancelledFlow && !isReturnFlow && stage3 ? 'active' : '' %>">
+      <div class="circle">3</div>
+      <p>Shipped</p>
+  </div>
 
-    <div class="step-line 
-        <%= !isReturnFlow && order.orderStatus === 'Delivered' 
-            ? 'active' : '' %>"></div>
+  <div class="step-line <%= !isCancelledFlow && !isReturnFlow && stage4 ? 'active' : '' %>"></div>
 
-    <!-- STEP 4 -->
-    <div class="winni-step 
-        <%= !isReturnFlow && order.orderStatus === 'Delivered' 
-            ? 'active' : '' %>">
-        <div class="circle">4</div>
-        <p>Delivered</p>
-    </div>
+  <!-- STEP 4 -->
+  <div class="winni-step <%= !isCancelledFlow && !isReturnFlow && stage4 ? 'active' : '' %>">
+      <div class="circle">4</div>
+      <p>Delivered</p>
+  </div>
 
 </div>
-
-
-
-
-
 
       <!-- TOP SUMMARY BOX -->
       <div class="order-summary-box">

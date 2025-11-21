@@ -191,6 +191,7 @@ const cancelOrder = async (req, res) => {
       });
     }
 
+    recalculateOrderTotals(order);
     await order.save();
     return res.redirect(`/order/${orderId}`);
 
@@ -248,6 +249,7 @@ const submitReturnRequest = async (req, res) => {
     });
 
     order.markModified("items");
+    recalculateOrderTotals(order);
     await order.save();
 
     res.redirect(`/order/${orderId}`);
@@ -479,6 +481,7 @@ const submitSingleReturn = async (req, res) => {
     }
 
     order.markModified("items");
+    recalculateOrderTotals(order);
     await order.save();
 
     res.redirect(`/order/${orderId}`);
@@ -489,6 +492,43 @@ const submitSingleReturn = async (req, res) => {
   }
 };
 
+/* --------------------------------------------------------
+   HELPER: RECALCULATE ORDER TOTALS
+---------------------------------------------------------*/
+function recalculateOrderTotals(order) {
+
+  // Include only ACTIVE items (exclude cancelled/returned)
+  const validItems = order.items.filter(
+    item =>
+      item.status !== "Cancelled" &&
+      item.status !== "Returned"
+  );
+
+  // SUBTOTAL
+  const subTotal = validItems.reduce((sum, item) => {
+    return sum + item.price * item.quantity;
+  }, 0);
+
+  // TAX (5%)
+  const taxAmount = Math.round(subTotal * 0.05);
+
+  // SHIPPING: always 50 if subtotal > 0
+  const shippingCharge = subTotal > 0 ? 50 : 0;
+  // No offers in your system
+  const offerDiscount = 0;
+
+  // FINAL TOTAL
+  const totalAmount = subTotal + taxAmount + shippingCharge;
+
+  // Apply back to order object
+  order.subTotal = subTotal;
+  order.taxAmount = taxAmount;
+  order.shippingCharge = shippingCharge;
+  order.offerDiscount = offerDiscount;
+  order.totalAmount = totalAmount;
+
+  return order;
+}
 
 
 /* --------------------------------------------------------
