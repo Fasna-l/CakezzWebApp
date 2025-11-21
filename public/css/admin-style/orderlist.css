@@ -479,6 +479,23 @@ body {
     font-size: 14px;
 }
 
+/* Add left spacing just like Users page */
+.categories-container {
+    margin-left: 35px;     /* space between sidebar & content */
+    padding-right: 0;      /* no extra right spacing */
+}
+
+/* Add small top gap under title area */
+.page-title {
+    margin-bottom: 15px;
+}
+
+/* Table wrapper spacing */
+.table-wrapper {
+    margin-top: 15px;
+}
+
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .dashboard-wrapper {

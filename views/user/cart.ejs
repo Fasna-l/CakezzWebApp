@@ -16,7 +16,12 @@
 
     <div class="cart-items">
       <% cartItems.forEach(item => { %>
-        <div class="cart-item" data-id="<%= item.productId %>" data-size="<%= item.size %>">
+        <div class="cart-item" 
+             data-id="<%= item.productId %>" 
+             data-size="<%= item.size %>"
+             data-unavailable="<%= item.isUnavailable %>"
+             data-outofstock="<%= item.isOutOfStock %>"
+             >
 
           <div class="item-img">
             <img src="/uploads/product/<%= item.image %>" />
@@ -25,7 +30,14 @@
           <div class="item-info">
             <h3><%= item.name %> (<%= item.size %>)</h3>
             <p class="price">₹<%= item.price %></p>
+
+            <% if(item.isUnavailable){ %>
+              <p class="warning-text">⚠ This product is currently unavailable.</p>
+            <% } else if(item.isOutOfStock){ %>
+              <p class="warning-text">⚠ Out of stock.</p>
+            <% } %>
           </div>
+
 
           <div class="item-qty">
             <button class="qty-btn minus">-</button>
@@ -52,13 +64,18 @@
       </div>
 
       <div class="row">
+        <span>Tax (5%)</span>
+        <span>₹<%= tax %></span>
+      </div>
+
+      <div class="row">
         <span>Shipping</span>
-        <span>FREE</span>
+        <span>₹<%= shipping %></span>
       </div>
 
       <div class="total">
         <span>Total</span>
-        <span id="total">₹<%= subtotal %></span>
+        <span id="total">₹<%= total %></span>
       </div>
 
       <button class="checkout-btn" onclick="window.location.href='/cart/checkout'">
@@ -71,5 +88,6 @@
 
   <% } %>
 </div>
+
 
 <%- include('../partials/user/footer') %>

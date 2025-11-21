@@ -12,6 +12,14 @@ function findVariant(product, size) {
 -------------------------------------------------------- */
 const addToCart = async (req, res) => {
   try {   
+
+    if (!req.session.user) {
+      return res.json({
+        success: false,
+        message: "Please login to continue."
+      });
+    }
+
     const userId = req.session.user;
     const { productId, size, quantity } = req.body;
 
@@ -52,12 +60,32 @@ const addToCart = async (req, res) => {
       (i) => i.product.toString() === productId && i.size === size
     );
 
+    // if (existing) {
+    //   if (existing.quantity + qty > variant.stock) {
+    //     return res.json({ success: false, message: "Not enough stock" });
+    //   }
+    //   existing.quantity += qty;
+    // } 
+
     if (existing) {
-      if (existing.quantity + qty > variant.stock) {
-        return res.json({ success: false, message: "Not enough stock" });
+      // MAX 5 LIMIT
+      if (existing.quantity + qty > 5) {
+        return res.json({
+          success: false,
+          message: "Maximum 5 per item allowed."
+        });
       }
+
+      // STOCK CHECK
+      if (existing.quantity + qty > variant.stock) {
+        return res.json({
+          success: false,
+          message: "Not enough stock"
+        });
+      }
+
       existing.quantity += qty;
-    } else {
+    }else {
       cart.items.push({
         product: productId,
         size,
@@ -167,7 +195,8 @@ const proceedToCheckout = async (req, res) => {
       subTotal += ci.price * ci.quantity;
     });
 
-    const shipping = subTotal > 500 ? 0 : 50;
+    //const shipping = subTotal > 500 ? 0 : 50;
+    const shipping = 50;
     const tax = Math.round(subTotal * 0.05);
     const grandTotal = subTotal + shipping + tax;
 
@@ -207,22 +236,54 @@ const getCartPage = async (req, res) => {
       });
     }
 
-    const cartItems = cart.items.map((item) => ({
-      productId: item.product._id,
-      name: item.product.productName,
-      size: item.size,
-      image: item.product.productImage[0],
-      price: item.priceAtAdd,
-      quantity: item.quantity,
-      subtotal: item.quantity * item.priceAtAdd,
-    }));
+    // const cartItems = cart.items.map((item) => ({
+    //   productId: item.product._id,
+    //   name: item.product.productName,
+    //   size: item.size,
+    //   image: item.product.productImage[0],
+    //   price: item.priceAtAdd,
+    //   quantity: item.quantity,
+    //   subtotal: item.quantity * item.priceAtAdd,
+    // }));
+
+    const cartItems = cart.items.map((item) => {
+
+      const isUnavailable =
+        item.product.isBlocked ||
+        (item.product.category?.isListed === false);
+
+      const variant = item.product.variants.find(v => v.size === item.size);
+      const isOutOfStock = variant?.stock <= 0;
+
+      return {
+        productId: item.product._id,
+        name: item.product.productName,
+        size: item.size,
+        image: item.product.productImage[0],
+        price: item.priceAtAdd,
+        quantity: item.quantity,
+        subtotal: item.quantity * item.priceAtAdd,
+        isUnavailable,
+        isOutOfStock
+      };
+    });
+
 
     const subtotal = cartItems.reduce((a, b) => a + b.subtotal, 0);
+
+    const tax = Math.round(subtotal * 0.05);
+    //Always add ₹50 shipping
+    const shipping = 50;
+    //  Final total for cart page
+    const total = subtotal + shipping + tax;
 
     res.render("cart", {
       user,
       cartItems,
       subtotal,
+      tax,
+      shipping,
+      total,
       cartCount,
     });
   } catch (error) {

@@ -57,11 +57,25 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     const result = await res.json();
-    if (result.success) {
-      window.location.href = "/checkout";
-    } else {
-      alert(result.message || "Failed to add address");
-    }
-  });
 
-});
+    if (result.success) {
+      Swal.fire({
+        title: "Address Added!",
+        text: "Your address has been saved successfully.",
+        icon: "success",
+        confirmButtonText: "Continue"
+      }).then(() => {
+        window.location.href = "/checkout";
+      });
+
+    } else {
+        Swal.fire({
+        icon: "error",
+        title: "Something went wrong",
+        text: result.message || "Failed to add address.",
+      });
+    }
+
+    });
+
+  });

@@ -534,6 +534,34 @@ body {
     margin: 0 !important;
 }
 
+.admin-return-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+}
+
+.admin-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none !important;
+  color: white;
+  display: inline-block;
+}
+
+.approve-btn {
+  background: #28a745;  /* green */
+}
+
+.reject-btn {
+  background: #dc3545;  /* red */
+}
+
+.admin-btn:hover {
+  opacity: 0.85;
+}
+
 
 /* Responsive Design */
 @media (max-width: 768px) {

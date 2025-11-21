@@ -92,3 +92,15 @@
   font-weight: bold;
   cursor: pointer;
 }
+.warning-text {
+  color: #f3423c;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+/*Checkout button disabled when the condition happens */
+.disabled-btn {
+  background: #ccc !important;
+  cursor: not-allowed;
+}
+

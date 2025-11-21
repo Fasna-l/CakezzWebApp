@@ -22,10 +22,23 @@
   <div class="orders-main-content">
     <div class="return-card">
 
-      <h2>Return Order</h2>
-      <p class="subtitle">Please tell us why you are returning this order (mandatory)</p>
+      <h2>Return Item</h2>
+      <p class="subtitle">Please tell us why you are returning this item (mandatory)</p>
 
-      <form id="returnForm"  action="/order/return/<%= order._id %>" method="POST" class="return-form">
+      <!-- ITEM SUMMARY -->
+      <div class="return-item-box">
+    <img src="/uploads/product/<%= item.productImage %>" alt="">
+
+    <div class="return-item-details">
+        <p><strong><%= item.productName %></strong></p>
+        <p>Size: <strong><%= item.size %></strong></p>
+        <p>Qty: <strong><%= item.quantity %></strong></p>
+        <p>Price: <strong>₹<%= item.price %></strong></p>
+    </div>
+</div>
+
+
+      <form id="returnForm" action="/order/<%= order._id %>/item/<%= item._id %>/return" method="POST" class="return-form">
 
         <label for="reason">Return Reason <span class="required">*</span></label>
         <textarea

@@ -110,15 +110,17 @@ router.get("/personalize", userAuth, checkOutController.getPersonalizePage);
 //order management
 router.get("/order", userAuth, orderController.loadOrderList);
 router.get("/order/:id", userAuth, orderController.loadOrderDetails);
-// Cancel order
+// Cancel Whole order + single product
 router.get("/order/cancel/:id", userAuth, orderController.loadCancelPage);
 router.post("/order/cancel/:id", userAuth, orderController.cancelOrder);
-// Cancel single product
-//router.post("/order/cancel-item/:id", userAuth, orderController.cancelSingleItem);
 // Return order
 router.get("/order/return/:id", userAuth, orderController.loadReturnPage);
 router.post("/order/return/:id", userAuth, orderController.submitReturnRequest);
 router.get("/order/invoice/:id", userAuth, orderController.downloadInvoice);
+//return single item
+router.get("/order/:orderId/item/:itemId/return", userAuth,orderController.loadSingleReturnPage);
+router.post("/order/:orderId/item/:itemId/return", userAuth,orderController.submitSingleReturn);
+
 
 
 module.exports = router;

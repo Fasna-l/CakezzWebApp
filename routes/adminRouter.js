@@ -46,6 +46,14 @@ router.get("/orders", adminAuth, orderController.loadOrderList);
 router.get("/order-details/:id", adminAuth, orderController.loadOrderDetails);
 router.post("/order/update-status/:id", adminAuth, orderController.updateOrderStatus);
 router.post("/order/cancel/:id", adminAuth, orderController.cancelOrder);
+//order return management
+router.get("/order/:orderId/item/:itemId/approve-return", adminAuth,orderController.approveReturnItem);
+router.get("/order/:orderId/item/:itemId/reject-return", adminAuth,orderController.rejectReturnItem);
+// return requests list page
+router.get("/return-requests", adminAuth, orderController.loadReturnRequests);
+//whole-order return amangement
+router.get("/order/:id/reject-whole-return", adminAuth, orderController.rejectWholeReturn);
+router.get("/order/:id/approve-whole-return", adminAuth, orderController.approveWholeReturn);
 
 
 module.exports = router;

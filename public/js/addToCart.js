@@ -44,7 +44,8 @@ async function addItemToCart(productId, size, quantity) {
     }
 
   } catch (err) {
-    showToast("Something went wrong", "error");
+    showToast("Please login to continue.", "error");
+    //showToast("Something went wrong", "error");
   }
 }
 

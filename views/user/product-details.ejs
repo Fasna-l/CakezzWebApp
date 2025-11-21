@@ -258,11 +258,16 @@
       renderSize(e.target.dataset.size);
     }
   });
-
-  // ✅ Quantity Controls
+  // MAX LIMIT 5 allowed for a single item per user
   document.getElementById("pd-qty-plus").addEventListener("click", () => {
-    qtyInput.value = Number(qtyInput.value) + 1;
+    let currentQty = Number(qtyInput.value);
+    if (currentQty >= 5) {
+      showToast("Maximum 5 per item allowed.", "error");
+      return;
+    }
+    qtyInput.value = currentQty + 1;
   });
+
   document.getElementById("pd-qty-minus").addEventListener("click", () => {
     qtyInput.value = Math.max(1, Number(qtyInput.value) - 1);
   });

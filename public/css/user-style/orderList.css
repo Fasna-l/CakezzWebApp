@@ -138,13 +138,18 @@
 .pagination {
   margin-top:20px;
   display:flex;
+  justify-content: center;
   gap:8px;
 }
-
+.page-btn{
+  margin-top: 10px;
+  text-decoration: none;
+}
 .page-number {
   padding:8px 12px;
   border:1px solid #ddd;
   border-radius:8px;
+  text-decoration: none;
 }
 
 .page-number.active {

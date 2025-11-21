@@ -50,6 +50,35 @@
               <p><strong>Price:</strong> ₹<%= item.price %></p>
               <p><strong>Quantity:</strong> <%= item.quantity %></p>
               <p><strong>Status:</strong> <%= item.status %></p>
+
+              <!-- If user requested return -->
+              <!-- <% if (item.status === "Return Requested") { %>
+                <div class="admin-return-actions">
+
+                <a href="/admin/order/<%= order._id %>/item/<%= item._id %>/approve-return"
+                  class="admin-btn approve-btn">
+                  Approve
+                </a>
+
+                <a href="/admin/order/<%= order._id %>/item/<%= item._id %>/reject-return"
+                  class="admin-btn reject-btn">
+                  Reject
+                </a>
+
+              </div>
+
+            <% } %> --> 
+
+            <!-- If return already approved -->
+            <% if (item.status === "Returned") { %>
+              <p style="color: green; font-weight:bold;">✔ Return Approved</p>
+            <% } %>
+
+            <!-- If return rejected -->
+            <% if (item.returnStatus === "Rejected") { %>
+              <p style="color: red; font-weight:bold;">✘ Return Rejected</p>
+            <% } %>
+
             </div>
 
           </div>

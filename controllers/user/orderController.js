@@ -106,102 +106,7 @@ const loadCancelPage = async (req, res) => {
 // /* --------------------------------------------------------
 //    4. CANCEL ENTIRE ORDER + INCREASE STOCK
 // ---------------------------------------------------------*/
-// const cancelEntireOrder = async (req, res) => {
-//   try {
-//     const orderId = req.params.id;
-//     const userId = req.session.user;
-//     const reason = req.body.reason || "No reason provided";
 
-//     const order = await Order.findById(orderId);
-
-//     if (!order || order.userId.toString() !== userId.toString()) {
-//       return res.redirect("/order");
-//     }
-
-//     // Increase stock for each item
-//     for (let item of order.items) {
-//       await Product.findByIdAndUpdate(
-//         item.productId,
-//         { $inc: { stock: item.quantity } }
-//       );
-
-//       item.status = "Cancelled";
-//       item.cancellationReason = reason;
-//       item.cancelledAt = new Date();
-//     }
-
-//     // Update order-level status
-//     order.orderStatus = "Cancelled";
-//     order.cancellationReason = reason;
-//     order.cancelledAt = new Date();
-
-//     order.statusHistory.push({
-//       status: "Cancelled",
-//       comment: reason,
-//       date: new Date()
-//     });
-
-//     await order.save();
-
-//     res.redirect("/order");
-
-//   } catch (error) {
-//     console.error("cancelEntireOrder error:", error);
-//     res.redirect("/pageNotFound");
-//   }
-// };
-
-
-// /* --------------------------------------------------------
-//    5. CANCEL SINGLE PRODUCT IN ORDER
-// ---------------------------------------------------------*/
-// const cancelSingleItem = async (req, res) => {
-//   try {
-//     const orderId = req.params.id;
-//     const { itemId, reason } = req.body;
-//     const userId = req.session.user;
-
-//     const order = await Order.findById(orderId);
-
-//     if (!order || order.userId.toString() !== userId.toString()) {
-//       return res.json({ success: false, message: "Not allowed" });
-//     }
-
-//     const item = order.items.id(itemId);
-
-//     if (!item) {
-//       return res.json({ success: false, message: "Item not found" });
-//     }
-
-//     if (item.status === "Cancelled") {
-//       return res.json({ success: false, message: "Already cancelled" });
-//     }
-
-//     // Increase stock
-//     await Product.findByIdAndUpdate(
-//       item.productId,
-//       { $inc: { stock: item.quantity } }
-//     );
-
-//     item.status = "Cancelled";
-//     item.cancellationReason = reason || "No reason";
-//     item.cancelledAt = new Date();
-
-//     order.statusHistory.push({
-//       status: "Item Cancelled",
-//       comment: item.productName,
-//       date: new Date()
-//     });
-
-//     await order.save();
-
-//     return res.json({ success: true });
-
-//   } catch (error) {
-//     console.error("cancelSingleItem error:", error);
-//     return res.json({ success: false });
-//   }
-// };
 const cancelOrder = async (req, res) => {
   try {
     const { reason, itemId } = req.body;
@@ -210,41 +115,68 @@ const cancelOrder = async (req, res) => {
 
     const order = await Order.findById(orderId);
 
-    // Validate ownership
     if (!order || order.userId.toString() !== userId.toString()) {
       return res.redirect("/order");
     }
 
-    // 👉 If itemId exists → Cancel single item
+    // -------------------------------
+    // CANCEL SINGLE ITEM
+    // -------------------------------
     if (itemId) {
       const item = order.items.id(itemId);
-
       if (!item) return res.redirect(`/order/${orderId}`);
 
       // Restore stock
-      await Product.findByIdAndUpdate(
-        item.productId,
-        { $inc: { stock: item.quantity } }
-      );
+      const product = await Product.findById(item.productId);
+      const variant = product.variants.find(v => v.size === item.size);
+      if (variant) {
+        variant.stock += item.quantity;
+        await product.save();
+      }
 
+      // Update item status
       item.status = "Cancelled";
       item.cancellationReason = reason || "No reason provided";
       item.cancelledAt = new Date();
 
-      // Add history entry
-      order.statusHistory.push({
-        status: "Item Cancelled",
-        comment: `Cancelled item: ${item.productName}`,
-        date: new Date()
-      });
+      // Required because items is nested
+      order.markModified("items");
 
-    } else {
-      // 👉 Cancel full order
+      // Check if ALL items are cancelled
+      const allCancelled = order.items.every(it => it.status === "Cancelled");
+
+      if (allCancelled) {
+        order.orderStatus = "Cancelled";
+        order.cancellationReason = reason || "No reason provided";
+        order.cancelledAt = new Date();
+
+        order.statusHistory.push({
+          status: "Order Cancelled",
+          comment: "All items cancelled",
+          date: new Date()
+        });
+
+      } else {
+        order.statusHistory.push({
+          status: "Item Cancelled",
+          comment: `Cancelled item: ${item.productName}`,
+          date: new Date()
+        });
+      }
+    }
+
+    // -------------------------------
+    // CANCEL FULL ORDER
+    // -------------------------------
+    else {
       for (let it of order.items) {
-        await Product.findByIdAndUpdate(
-          it.productId,
-          { $inc: { stock: it.quantity } }
-        );
+        const product = await Product.findById(it.productId);
+        const variant = product.variants.find(v => v.size === it.size);
+        if (variant) {
+          variant.stock += it.quantity;
+          await product.save();
+        }
+
         it.status = "Cancelled";
       }
 
@@ -260,7 +192,7 @@ const cancelOrder = async (req, res) => {
     }
 
     await order.save();
-    return res.redirect("/order");
+    return res.redirect(`/order/${orderId}`);
 
   } catch (error) {
     console.error("cancelOrder error:", error);
@@ -296,13 +228,26 @@ const submitReturnRequest = async (req, res) => {
 
     if (!order) return res.redirect("/order");
 
+    // Update order status
     order.orderStatus = "Return Requested";
+
+    // Update ALL items
+    order.items.forEach(item => {
+      if (item.status === "Delivered") {
+        item.status = "Return Requested";
+        item.returnReason = reason;
+        item.returnedAt = new Date();
+      }
+    });
+
+    // Add history
     order.statusHistory.push({
       status: "Return Requested",
       comment: reason,
       date: new Date()
     });
 
+    order.markModified("items");
     await order.save();
 
     res.redirect(`/order/${orderId}`);
@@ -381,8 +326,9 @@ const downloadInvoice = async (req, res) => {
 
     doc.fontSize(13).text("Item Name", 50, tableTop);
     doc.text("Qty", 260, tableTop);
-    doc.text("Unit Price", 340, tableTop);
-    doc.text("Subtotal", 450, tableTop);
+    doc.text("Status", 310, tableTop);
+    doc.text("Unit Price", 400, tableTop);
+    doc.text("Subtotal", 500, tableTop);
 
     doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
     doc.moveDown();
@@ -397,8 +343,9 @@ const downloadInvoice = async (req, res) => {
 
       doc.fontSize(12).text(item.productName, 50, y);
       doc.text(item.quantity.toString(), 260, y);
-      doc.text(`₹${item.price}`, 340, y);
-      doc.text(`₹${subtotal}`, 450, y);
+      doc.text(item.status, 310, y);
+      doc.text(`₹${item.price}`, 400, y);
+      doc.text(`₹${subtotal}`, 500, y);
 
       doc.moveDown(0.7);
     });
@@ -460,6 +407,88 @@ const downloadInvoice = async (req, res) => {
   }
 };
 
+const loadSingleReturnPage = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    const { orderId, itemId } = req.params;
+
+    const order = await Order.findById(orderId);
+
+    if (!order || order.userId.toString() !== userId.toString()) {
+      return res.redirect("/order");
+    }
+
+    const item = order.items.id(itemId);
+    if (!item) return res.redirect(`/order/${orderId}`);
+
+    // You should only return items that are delivered
+    if (item.status !== "Delivered") {
+      return res.redirect(`/order/${orderId}`);
+    }
+
+    res.render("return-Singleitem", { order, item });
+
+  } catch (error) {
+    console.error("loadSingleReturnPage error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+const submitSingleReturn = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    const { orderId, itemId } = req.params;
+    const reason = req.body.reason;
+
+    if (!reason || reason.trim() === "") {
+      return res.send("Reason is required");
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order || order.userId.toString() !== userId.toString()) {
+      return res.redirect("/order");
+    }
+
+    const item = order.items.id(itemId);
+    if (!item) return res.redirect(`/order/${orderId}`);
+
+    // Only delivered items can be returned
+    if (item.status !== "Delivered") {
+      return res.redirect(`/order/${orderId}`);
+    }
+
+    // Update item status
+    item.status = "Return Requested";
+    item.returnReason = reason;
+    item.returnedAt = new Date();
+
+    // Add to order history
+    order.statusHistory.push({
+      status: "Item Return Requested",
+      comment: `Return requested for: ${item.productName}`,
+      date: new Date()
+    });
+
+    // If ALL items requested for return → update order-level status
+    const allReturned = order.items.every(i =>
+      ["Return Requested", "Returned"].includes(i.status)
+    );
+
+    if (allReturned) {
+      order.orderStatus = "Return Requested";
+    }
+
+    order.markModified("items");
+    await order.save();
+
+    res.redirect(`/order/${orderId}`);
+
+  } catch (error) {
+    console.error("submitSingleReturn error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
 
 
 /* --------------------------------------------------------
@@ -472,5 +501,7 @@ module.exports = {
   cancelOrder,
   loadReturnPage,
   submitReturnRequest,
-  downloadInvoice
+  downloadInvoice,
+  loadSingleReturnPage,
+  submitSingleReturn
 };

@@ -21,6 +21,13 @@
   <!-- Main Content -->
   <div class="orders-main-content">
     <div class="order-details-card">
+      <%
+        const isReturnFlow =
+          order.orderStatus === "Return Requested" ||
+          order.orderStatus === "Returned" ||
+          order.orderStatus === "Rejected" ||
+          order.orderStatus === "Return Rejected";
+      %>
 
       <div class="order-header">
         <h2>Order Details</h2>
@@ -31,33 +38,56 @@
       <!-- Modern Order Tracking -->
 <div class="winni-tracking-container">
 
-    <div class="winni-step <%= order.orderStatus === 'Pending' || order.orderStatus === 'Packed' || order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered' ? 'active' : '' %>">
+    <!-- STEP 1 -->
+    <div class="winni-step 
+        <%= !isReturnFlow &&
+            (order.orderStatus === 'Pending' || order.orderStatus === 'Packed' ||
+             order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') 
+            ? 'active' : '' %>">
         <div class="circle">1</div>
         <p>Placed</p>
     </div>
 
-    <div class="step-line <%= order.orderStatus !== 'Pending' ? 'active' : '' %>"></div>
+    <div class="step-line 
+        <%= !isReturnFlow && order.orderStatus !== 'Pending'
+            ? 'active' : '' %>"></div>
 
-    <div class="winni-step <%= order.orderStatus === 'Packed' || order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered' ? 'active' : '' %>">
+    <!-- STEP 2 -->
+    <div class="winni-step 
+        <%= !isReturnFlow &&
+            (order.orderStatus === 'Packed' || order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') 
+            ? 'active' : '' %>">
         <div class="circle">2</div>
         <p>Packed</p>
     </div>
 
-    <div class="step-line <%= ['Shipped','Delivered'].includes(order.orderStatus) ? 'active' : '' %>"></div>
+    <div class="step-line 
+        <%= !isReturnFlow && ['Shipped','Delivered'].includes(order.orderStatus) 
+            ? 'active' : '' %>"></div>
 
-    <div class="winni-step <%= order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered' ? 'active' : '' %>">
+    <!-- STEP 3 -->
+    <div class="winni-step 
+        <%= !isReturnFlow &&
+            (order.orderStatus === 'Shipped' || order.orderStatus === 'Delivered') 
+            ? 'active' : '' %>">
         <div class="circle">3</div>
         <p>Shipped</p>
     </div>
 
-    <div class="step-line <%= order.orderStatus === 'Delivered' ? 'active' : '' %>"></div>
+    <div class="step-line 
+        <%= !isReturnFlow && order.orderStatus === 'Delivered' 
+            ? 'active' : '' %>"></div>
 
-    <div class="winni-step <%= order.orderStatus === 'Delivered' ? 'active' : '' %>">
+    <!-- STEP 4 -->
+    <div class="winni-step 
+        <%= !isReturnFlow && order.orderStatus === 'Delivered' 
+            ? 'active' : '' %>">
         <div class="circle">4</div>
         <p>Delivered</p>
     </div>
 
 </div>
+
 
 
 
@@ -136,17 +166,38 @@
             <p>Qty: <strong><%= item.quantity %></strong></p>
             <p>Price: <strong>₹<%= item.price %></strong></p>
             <p>Status: <strong><%= item.status %></strong></p>
+            <!-- Refund Info -->
+            <% if (item.status === "Returned") { %>
+              <p style="color: green; font-weight: bold;">
+                Refund Processed: ₹<%= item.refundAmount %>
+              </p>
+            <% } %>
+
+            <% if (item.returnStatus === "Rejected") { %>
+              <p style="color: red; font-weight: bold;">
+                Return Rejected (No Refund)
+              </p>
+            <% } %>
           </div>
         </div>
 
       <!-- Right side button -->
       <div class="item-right">
-        <% if (item.status !== 'Cancelled' && order.orderStatus !== 'Delivered' && order.orderStatus !== 'Cancelled') { %>
+        <% if (item.status !== 'Cancelled' && item.status !== 'Delivered' && order.orderStatus !== 'Delivered' && order.orderStatus !== 'Cancelled') { %>
           <a href="/order/cancel/<%= order._id %>?item=<%= item._id %>" 
             class="cancel-item-btn">
               Cancel Item
           </a>
 
+        <% } %>
+        <% if (order.orderStatus === 'Delivered' && item.status === 'Delivered' && item.returnStatus !== 'Rejected' &&
+                item.status !== 'Returned' ) { %>
+          <!-- href="/order/return-item/<%= order._id %>?item=<%= item._id %>" -->
+          <a href="/order/<%= order._id %>/item/<%= item._id %>/return"                   
+            class="return-item-btn"
+            style="background:#99267c; padding:8px 15px; border-radius:6px; color:#f1eeee; text-decoration:none;">
+            Return Item
+          </a>
         <% } %>
       </div>
 
@@ -159,9 +210,6 @@
   </div>
 
 </div>
-
-
-
 
 <%- include('../partials/user/footer') %>
 
