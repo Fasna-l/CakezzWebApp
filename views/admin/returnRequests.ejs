@@ -5,9 +5,8 @@
     <div class="dashboard-wrapper">
         <%- include('../partials/admin/sidebar') %>
         
-        <!-- Main Content -->
         <div class="categories-container">
-            <!-- Page Title with Search -->
+            
             <div class="page-title">
                 <h2>Return Requests</h2>
 
@@ -29,7 +28,6 @@
 
             </div>
 
-            <!-- Table -->
             <div class="table-wrapper">
                 <table class="customers-table">
                     <thead>
@@ -43,97 +41,98 @@
                             <th>ACTION</th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        <% if (requests && requests.length > 0) { %>
 
-                            <% 
-                            // GROUP ITEMS BY ORDER ID
-                                let grouped = {};
-                                requests.forEach(r => {
-                                if (!grouped[r.orderId]) grouped[r.orderId] = [];
-                                grouped[r.orderId].push(r);
-                                });
-                            %>
+                    <% if (groupedOrders && groupedOrders.length > 0) { %>
 
-                            <% Object.keys(grouped).forEach(orderId => { 
-                                const items = grouped[orderId];
-                                const first = items[0];
-                            %>
+                        <% groupedOrders.forEach(order => { 
+                            const items = order.items;
+                            const first = order.first;
 
-                            <!-- MAIN ROW (ONE PER ORDER) -->
-                            <tr style="background:#37383a; font-weight:600;">
-                                <td><%= first.orderId %></td>
-                                <td><%= first.userName %></td>
-                                <td colspan="3">Multiple Items Returned</td>
-                                <td>
-                                    <span class="status-badge processing">Return Requested</span>
-                                </td>
-                                <td>
-                                <!-- WHOLE ORDER BUTTONS (ONLY ONCE) -->
+                            const isFullOrderReturn = items.length === first.totalItemCount;
+                        %>
+
+                        <!-- MAIN ROW -->
+                        <tr style="background:#37383a; font-weight:600;">
+                            <td><%= first.orderId %></td>
+                            <td><%= first.userName %></td>
+
+                            <td colspan="3">
+                                <%= items.length === 1 
+                                        ? "Single Item Returned" 
+                                        : "Multiple Items Returned" %>
+                            </td>
+
+                            <td>
+                                <span class="status-badge processing">Return Requested</span>
+                            </td>
+
+                            <td>
+                                <% if (isFullOrderReturn) { %>
+
                                     <a href="/admin/order/<%= first.orderDbId %>/approve-whole-return"
-                                        class="btn-edit"
-                                        style="display:block; margin-bottom:6px; padding:6px 10px; border-radius:6px; background:#2e7d32; color:#fff;">
-                                        Approve Full Order Return
+                                        class="return-action-btn btn-approve">
+                                        Approve All
                                     </a>
 
                                     <a href="/admin/order/<%= first.orderDbId %>/reject-whole-return"
-                                        class="btn-edit"
-                                        style="display:block; padding:6px 10px; border-radius:6px; background:#b71c1c; color:#fff;">
-                                        Reject Full Order Return
+                                        class="return-action-btn btn-reject">
+                                        Reject All
                                     </a>
 
-                                    <a href="/admin/order-details/<%= first.orderDbId %>"
-                                        class="btn-edit"
-                                        style="display:block; margin-top:6px; padding:6px 10px; border-radius:6px; background:#666; color:#fff;">
-                                        View Order
-                                    </a>
-                                </td>
-                            </tr>
+                                <% } %>
 
-                            <!-- CHILD ROWS — EACH ITEM INSIDE THE ORDER -->
-                            <% items.forEach(item => { %>
-                                <tr class="sub-item-row">
-                                <td></td>
-                                <td></td>
-                                <td><%= item.productName %></td>
-                                <td><%= new Date(item.orderDate).toLocaleDateString("en-GB") %></td>
-                                <td><%= item.quantity %></td>
-                                <td>
-                                    <span class="status-badge processing"><%= item.status %></span>
-                                </td>
-                                <td>
-                                <!-- SINGLE ITEM BUTTONS -->
-                                    <a href="/admin/order/<%= item.orderDbId %>/item/<%= item.itemId %>/approve-return"
-                                        class="btn-edit"
-                                        style="margin-right:8px; padding:6px 10px; border-radius:6px; background:#2d8bff; color:#fff;">
+                                <a href="/admin/order-details/<%= first.orderDbId %>"
+                                    class="btn-view">
+                                    View Order
+                                </a>
+                            </td>
+                        </tr>
+
+                        <!-- SUB ITEM ROWS -->
+                        <% items.forEach(item => { %>
+                        <tr class="sub-item-row">
+                            <td></td>
+                            <td></td>
+
+                            <td><%= item.item.productName %></td>
+                            <td><%= new Date(first.orderDate).toLocaleDateString("en-GB") %></td>
+                            <td><%= item.item.quantity %></td>
+                            <td>
+                                <span class="status-badge processing"><%= item.item.status %></span>
+                            </td>
+
+                            <td>
+                                <% if (!isFullOrderReturn) { %>
+                                    <a href="/admin/order/<%= first.orderDbId %>/item/<%= item.item._id %>/approve-return"
+                                        class="return-action-btn btn-approve">
                                         Approve
                                     </a>
 
-                                    <a href="/admin/order/<%= item.orderDbId %>/item/<%= item.itemId %>/reject-return"
-                                        class="btn-edit"
-                                        style="padding:6px 10px; border-radius:6px; background:#c62828; color:#fff;">
+                                    <a href="/admin/order/<%= first.orderDbId %>/item/<%= item.item._id %>/reject-return"
+                                        class="return-action-btn btn-reject">
                                         Reject
                                     </a>
-                                </td>
-                            </tr>
+                                <% } %>
+                            </td>
+                        </tr>
                         <% }) %>
 
-                    <!-- DIVIDER -->
-                    <tr><td colspan="7" style="height:10px; background:#eee;"></td></tr>
+                        <tr><td colspan="7" style="height:10px; background:#eee;"></td></tr>
 
-                    <% }) %>
+                        <% }) %>
 
                     <% } else { %>
-                    <tr>
-                        <td colspan="7" style="text-align:center;">No return requests found</td>
-                    </tr>
-                <% } %>
-                </tbody>
+                        <tr>
+                            <td colspan="7" style="text-align:center;">No return requests found</td>
+                        </tr>
+                    <% } %>
 
+                    </tbody>
                 </table>
             </div>
 
-            <!-- Pagination -->
             <div class="pagination-container">
                 <% if (currentPage > 1) { %>
                     <a href="/admin/return-requests?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search || '') %>" class="pagination-link prev">« Prev</a>

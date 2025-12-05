@@ -66,7 +66,10 @@ document.addEventListener("click", async (e) => {
     subtotalEl.textContent = "₹" + (updatedItem.quantity * updatedItem.priceAtAdd);
 
     // Update order summary
-    updateSummary(data.cart.totalAmount);
+    // updateSummary(data.cart.totalAmount);
+
+      updateSummary();
+
 
     showToast("Quantity updated");
   }
@@ -76,19 +79,55 @@ document.addEventListener("click", async (e) => {
 /* ---------------------------------------------------------
     UPDATE SUMMARY (REALTIME TOTALS)
 --------------------------------------------------------- */
-function updateSummary(totalAmount = null) {
-  if (totalAmount === null) {
-    // If no data passed, recalc from DOM
-    let sum = 0;
-    document.querySelectorAll(".item-subtotal").forEach(st => {
-      sum += Number(st.textContent.replace("₹", ""));
-    });
-    totalAmount = sum;
-  }
+// function updateSummary(totalAmount = null) {
+//   if (totalAmount === null) {
+//     // If no data passed, recalc from DOM
+//     let sum = 0;
+//     document.querySelectorAll(".item-subtotal").forEach(st => {
+//       sum += Number(st.textContent.replace("₹", ""));
+//     });
+//     totalAmount = sum;
+//   }
 
-  document.getElementById("subtotal").textContent = "₹" + totalAmount;
-  document.getElementById("total").textContent = "₹" + totalAmount;
+//   document.getElementById("subtotal").textContent = "₹" + totalAmount;
+//   document.getElementById("total").textContent = "₹" + totalAmount;
+// }
+
+/* ---------------------------------------------------------
+   UPDATE SUMMARY (REALTIME TOTALS)
+--------------------------------------------------------- */
+function updateSummary() {
+
+  // 1) Recalculate subtotal from individual item subtotals
+  let subtotal = 0;
+  document.querySelectorAll(".item-subtotal").forEach(st => {
+    subtotal += Number(st.textContent.replace("₹", ""));
+  });
+
+  // 2) TAX (5%)
+  const tax = Math.round(subtotal * 0.05);
+
+  // 3) SHIPPING (always ₹50)
+  const shipping = 50;
+
+  // 4) GRAND TOTAL
+  const grandTotal = subtotal + tax + shipping;
+
+  // 5) Update DOM elements
+  document.getElementById("subtotal").textContent = "₹" + subtotal;
+
+  // const taxRow = document.querySelector(".cart-summary .row:nth-child(2) span:last-child");
+  // if (taxRow) taxRow.textContent = "₹" + tax;
+
+  // const shipRow = document.querySelector(".cart-summary .row:nth-child(3) span:last-child");
+  // if (shipRow) shipRow.textContent = "₹" + shipping;
+
+  document.getElementById("tax").textContent = "₹" + tax;
+  document.getElementById("shipping").textContent = "₹" + shipping;
+
+  document.getElementById("total").textContent = "₹" + grandTotal;
 }
+
 
 
 //Disable checkout when invalid items exist

@@ -117,6 +117,24 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
+
+  // Clear email error while typing
+emailid.addEventListener("input", () => {
+  if (error1.innerHTML) {
+    error1.style.display = "none";
+    error1.innerHTML = "";
+  }
+});
+
+// Clear password error while typing
+passwordid.addEventListener("input", () => {
+  if (error2.innerHTML) {
+    error2.style.display = "none";
+    error2.innerHTML = "";
+  }
+});
+
+
   // Submit validation
   loginForm.addEventListener("submit", function(e) {
     emailValidateChecking();

@@ -45,8 +45,8 @@ router.post("/editProduct/:id",adminAuth, uploads.array("productImage", 4),produ
 router.get("/orders", adminAuth, orderController.loadOrderList);
 router.get("/order-details/:id", adminAuth, orderController.loadOrderDetails);
 router.post("/order/update-status/:id", adminAuth, orderController.updateOrderStatus);
-router.post("/order/cancel/:id", adminAuth, orderController.cancelOrder);
-//order return management
+router.post("/order/cancel/:id", adminAuth, orderController.cancelOrder);  
+//order single item return management
 router.get("/order/:orderId/item/:itemId/approve-return", adminAuth,orderController.approveReturnItem);
 router.get("/order/:orderId/item/:itemId/reject-return", adminAuth,orderController.rejectReturnItem);
 // return requests list page

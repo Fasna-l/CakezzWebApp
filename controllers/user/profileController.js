@@ -1,3 +1,6 @@
+const path = require("path");
+const fs = require("fs");
+const sharp = require("sharp");
 const User = require("../../models/userSchema");
 const Otp = require("../../models/otpSchema");  // import OTP Model
 const nodemailer = require("nodemailer");
@@ -7,6 +10,219 @@ const { generateOtp } = require("../../helpers/otpHelper");
 const { sendVerificationEmail } = require("../../helpers/emailHelper");
 const { securePassword } = require("../../helpers/passwordHelper");
 //const session = require("express-session"); already using express-session in app.js so no need to import here  
+
+//Load Account page(Profile Page)
+const loadAccountPage = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    const user = await User.findById(userId).lean();
+
+    // Fetch addresses or orders later
+    res.render("account", {
+      user
+    });
+  } catch (error) {
+    console.error("Account Page Error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+// Load Edit Profile Page
+const loadEditProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user);
+    if (!user) return res.redirect("/login");
+
+    res.render("edit-profile", { user });
+  } catch (error) {
+    console.error("Error loading edit profile page:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+// ✅ Update Profile - POST
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.session.user;
+    const { name, email } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.redirect("/login");
+
+    // Prepare update data
+    const updateData = { name };
+    // Block Google users from editing email
+    if (user.isGoogleUser) {
+      updateData.email = user.email;   // Google user can't change email
+    }
+    // Handle new profile image upload
+    if (req.file) {
+      console.log(" File received from Multer:", req.file.originalname);
+
+      //  Ensure the profile folder exists
+      const profileDir = path.join(__dirname, "../../public/uploads/profile");
+      if (!fs.existsSync(profileDir)) {
+        fs.mkdirSync(profileDir, { recursive: true });
+      }
+
+      //  Create a unique filename
+      const filename = `${Date.now()}-${req.file.originalname}`;
+      const uploadPath = path.join(profileDir, filename);
+
+      try {
+        //  Compress & save image using Sharp
+        await sharp(req.file.buffer)
+          .resize(300, 300, { fit: "cover" })
+          .jpeg({ quality: 85 })
+          .toFile(uploadPath);
+
+        //  Delete old profile image if it exists
+        if (user.profileImage) {
+          const oldPath = path.join(profileDir, user.profileImage);
+          if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        }
+
+        //  Save new image filename to DB
+        updateData.profileImage = filename;
+        console.log(" Profile image saved successfully:", filename);
+      } catch (err) {
+        console.error(" Sharp image processing failed:", err);
+      }
+    } else {
+      console.warn(" No image file received from frontend.");
+    }
+
+    // ✉️ Handle email change (OTP later)
+    if(!user.isGoogleUser){
+      if (email !== user.email) {
+        req.session.tempProfileData = {
+          userId,
+          name,
+          email,
+          profileImage: updateData.profileImage || user.profileImage,
+        };
+        console.log("Email changed — OTP verification to be added soon.");
+        return res.redirect("/change-email");
+      } else {
+        updateData.email = email;
+      }
+    }
+    
+
+    // 🧾 Save to database
+    await User.findByIdAndUpdate(userId, updateData);
+
+    console.log("Profile updated successfully!");
+    res.redirect("/account");
+  } catch (error) {
+    console.error("Profile update error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+  
+// ================= EMAIL CHANGE FLOW =================
+
+// Load Email Change Page
+const loadEmailChangePage = async (req, res) => {
+  try {
+    const user = await User.findById(req.session.user).lean();
+    if (user.isGoogleUser) {
+      return res.redirect("/account");
+    }
+
+    res.render("email-change", {user, message: "" });
+  } catch (error) {
+    console.error("Load Email Change Error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+// Step 1: Validate and send OTP
+const sendEmailChangeOtp = async (req, res) => {
+  try {
+    const { oldEmail, newEmail } = req.body;
+    const userId = req.session.user;
+
+    const user = await User.findById(userId);
+    if (user.isGoogleUser) {
+      return res.render("email-change", { user, message: "Google users cannot change email" });
+    }
+
+    if (!user) return res.render("email-change", { user:null, message: "User not found" });
+
+    if (user.email !== oldEmail) {
+      return res.render("email-change", { user, message: "Old email does not match your current email" });
+    }
+
+    const existingUser = await User.findOne({ email: newEmail });
+    if (existingUser) {
+      return res.render("email-change", { user, message: "This new email is already registered" });
+    }
+
+    const otp = generateOtp();
+    await Otp.deleteOne({ email: newEmail });
+    await Otp.create({ email: newEmail, otp });
+
+    const emailSent = await sendVerificationEmail(newEmail, otp, "OTP to verify your new email address");
+    if (!emailSent) {
+      return res.render("email-change", { user, message: "Failed to send OTP. Please try again." });
+    }
+
+    req.session.newEmail = newEmail;
+    console.log("Email Change OTP:", otp);
+
+    res.render("emailChange-otp",{user});
+  } catch (error) {
+    console.error("Send Email Change OTP Error:", error);
+    res.redirect("/pageNotFound");
+  }
+};
+
+// Step 2: Verify OTP and update email
+const verifyEmailChangeOtp = async (req, res) => {
+  try {
+    const { otp } = req.body;
+    const userId = req.session.user;
+    const newEmail = req.session.newEmail;
+
+    if (!userId) return res.json({ success: false, message: "User not logged in" });
+    if (!newEmail) return res.json({ success: false, message: "Session expired. Please resend OTP." });
+
+    const otpRecord = await Otp.findOne({ email: newEmail });
+    if (!otpRecord) return res.json({ success: false, message: "OTP expired or not found" });
+    if (otpRecord.otp !== otp) return res.json({ success: false, message: "Invalid OTP" });
+
+    await User.findByIdAndUpdate(userId, { email: newEmail });
+    await Otp.deleteOne({ email: newEmail });
+    delete req.session.newEmail;
+
+    return res.json({ success: true, message: "Email updated successfully!" });
+  } catch (error) {
+    console.error("Verify Email Change OTP Error:", error);
+    res.json({ success: false, message: "Server error" });
+  }
+};
+
+// Step 3: Resend OTP
+const resendEmailChangeOtp = async (req, res) => {
+  try {
+    const newEmail = req.session.newEmail;
+    if (!newEmail) {
+      return res.json({ success: false, message: "Session expired. Please restart email change process." });
+    }
+
+    const otp = generateOtp();
+    await Otp.deleteOne({ email: newEmail });
+    await Otp.create({ email: newEmail, otp });
+    await sendVerificationEmail(newEmail, otp, "Resent OTP for Email Change Verification");
+
+    console.log("Resent OTP:", otp);
+    res.json({ success: true, message: "OTP resent successfully" });
+  } catch (error) {
+    console.error("Resend Email Change OTP Error:", error);
+    res.json({ success: false, message: "Internal server error" });
+  }
+};
 
 const getForgotPassPage = async (req,res)=>{
     try {
@@ -143,6 +359,14 @@ const getChangePasswordPage = async (req, res) => {
   try {
     const userId = req.session.user; // currently an ID
     const user = await User.findById(userId);
+    // ❌ Block Google users completely
+    if (!user || user.isGoogleUser) {
+      return res.redirect("/account");
+    }
+    // if (user.isGoogleUser) {
+    //   return res.redirect("/account");
+    // }
+
     res.render("password",{user});
   } catch (error) {
     console.error("Change Password Page Error:", error);
@@ -160,7 +384,12 @@ const postChangePassword = async (req, res) => {
       return res.redirect("/login");
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId); 
+
+    if (user.isGoogleUser) {
+      return res.redirect("/account");
+    }
+
     const isMatch = await bcrypt.compare(oldpassword, user.password);
 
     if (!isMatch) {
@@ -192,13 +421,21 @@ const postChangePassword = async (req, res) => {
 };
 
 
+
 module.exports ={
-    getForgotPassPage,
-    forgotEmailValid,
-    verifyForgotPassOtp,
-    getResetPassPage,
-    resendOtp,
-    postNewPassword,
-    getChangePasswordPage,
-    postChangePassword,
+  loadAccountPage,
+  loadEditProfile,
+  updateProfile,
+  loadEmailChangePage,
+  sendEmailChangeOtp,
+  verifyEmailChangeOtp,
+  resendEmailChangeOtp,
+  getForgotPassPage,
+  forgotEmailValid,
+  verifyForgotPassOtp,
+  getResetPassPage,
+  resendOtp,
+  postNewPassword,
+  getChangePasswordPage,
+  postChangePassword,
 }

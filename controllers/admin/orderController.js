@@ -72,20 +72,52 @@ const loadOrderList = async (req, res) => {
 /* ================================================================
    2. LOAD ORDER DETAILS PAGE
 ================================================================ */
+// const loadOrderDetails = async (req, res) => {
+//   try {
+//     const orderId = req.params.id;
+
+//     const order = await Order.findById(orderId).populate("userId").lean();
+
+//     if (!order) return res.redirect("/admin/orders");
+
+//     //  Correct render path (NO admin/)
+//     res.render("adminOrderDetails", { order });
+
+//   } catch (err) {
+//     console.log("loadOrderDetails error:", err);
+//     res.redirect("/admin/pageerror");
+//   }
+// };
+
 const loadOrderDetails = async (req, res) => {
   try {
     const orderId = req.params.id;
 
     const order = await Order.findById(orderId).populate("userId").lean();
 
-    if (!order) return res.redirect("/admin/orders");
+    if (!order) {
+      return res.render("adminOrderDetails", {
+        order: {},
+        toastMessage: "Order not found!",
+        toastType: "error"
+      });
+    }
 
-    //  Correct render path (NO admin/)
-    res.render("adminOrderDetails", { order });
+    // Always send defaults to avoid undefined errors
+    res.render("adminOrderDetails", {
+      order,
+      toastMessage: "",
+      toastType: ""
+    });
 
   } catch (err) {
     console.log("loadOrderDetails error:", err);
-    res.redirect("/admin/pageerror");
+
+    res.render("adminOrderDetails", {
+      order: {},
+      toastMessage: "Something went wrong!",
+      toastType: "error"
+    });
   }
 };
 
@@ -93,39 +125,143 @@ const loadOrderDetails = async (req, res) => {
 /* ================================================================
    3. UPDATE ORDER STATUS (admin)
 ================================================================ */
+// const updateOrderStatus = async (req, res) => {
+//   try {
+//     const orderId = req.params.id;
+//     const { status } = req.body;
+
+//     const order = await Order.findById(orderId);
+
+//     if (!order) return res.redirect("/admin/orders");
+
+//     // Update main order status
+//     order.orderStatus = status;
+
+//     // ALSO UPDATE EACH ITEM STATUS
+//     order.items.forEach(item => {
+//       if (item.status !== "Cancelled") {
+//         item.status = status;
+//       }
+//     });
+
+//     // Add status history
+//     order.statusHistory.push({
+//       status,
+//       comment: "Updated by Admin",
+//       date: new Date(),
+//     });
+
+//     await order.save();
+
+//     res.redirect(`/admin/order-details/${orderId}`);
+
+//   } catch (err) {
+//     console.log("updateOrderStatus error:", err);
+//     res.redirect("/admin/pageerror");
+//   }
+// };
+
 const updateOrderStatus = async (req, res) => {
   try {
     const orderId = req.params.id;
     const { status } = req.body;
 
-    const order = await Order.findById(orderId);
+    let order = await Order.findById(orderId).populate("userId").lean();
+    if (!order) {
+      return res.render("adminOrderDetails", {
+        toastMessage: "Order not found!",
+        toastType: "error",
+        order: {}
+      });
+    }
 
-    if (!order) return res.redirect("/admin/orders");
+    const oldStatus = order.orderStatus;
 
-    // Update main order status
-    order.orderStatus = status;
+    const STATUS_FLOW = [
+      "Pending",
+      "Processing",
+      "Shipped",
+      "Out for Delivery",
+      "Delivered"
+    ];
 
-    // ALSO UPDATE EACH ITEM STATUS
-    order.items.forEach(item => {
-      if (item.status !== "Cancelled") {
+    const oldIndex = STATUS_FLOW.indexOf(oldStatus);
+    const newIndex = STATUS_FLOW.indexOf(status);
+
+    // ❌ Rule: If any item is returned or return rejected → block all updates
+    if (order.items.some(i => i.status === "Returned" || i.returnStatus === "Rejected")) {
+        return res.render("adminOrderDetails", {
+            order,
+            toastMessage: "Cannot update status after return approval/rejection.",
+            toastType: "error"
+        });
+    }
+
+
+    // ❌ Rule 1: Block backward movement (except Cancelled)
+    if (newIndex < oldIndex && status !== "Cancelled") {
+      return res.render("adminOrderDetails", {
+        order,
+        toastMessage: "Cannot select a previous status. Only forward movement allowed.",
+        toastType: "error"
+      });
+    }
+
+    // ❌ Rule 2: After Delivered → no changes allowed
+    if (oldStatus === "Delivered" && status !== "Delivered") {
+      return res.render("adminOrderDetails", {
+        order,
+        toastMessage: "Delivered orders cannot be updated.",
+        toastType: "error"
+      });
+    }
+
+    // ❌ Rule 3: After Cancelled → no changes allowed
+    if (oldStatus === "Cancelled" && status !== "Cancelled") {
+      return res.render("adminOrderDetails", {
+        order,
+        toastMessage: "Cancelled orders cannot be updated.",
+        toastType: "error"
+      });
+    }
+
+    // Load order fresh for update (lean() removed above)
+    const orderToUpdate = await Order.findById(orderId);
+
+    // Apply status
+    orderToUpdate.orderStatus = status;
+
+    orderToUpdate.items.forEach(item => {
+      if (item.status !== "Returned" && item.status !== "Cancelled") {
         item.status = status;
       }
     });
 
-    // Add status history
-    order.statusHistory.push({
+    orderToUpdate.statusHistory.push({
       status,
       comment: "Updated by Admin",
-      date: new Date(),
+      date: new Date()
     });
 
-    await order.save();
+    await orderToUpdate.save();
 
-    res.redirect(`/admin/order-details/${orderId}`);
+    // Reload updated order for rendering
+    const updatedOrder = await Order.findById(orderId).populate("userId").lean();
+
+    return res.render("adminOrderDetails", {
+      order: updatedOrder,
+      toastMessage: "Status updated successfully!",
+      toastType: "success"
+    });
 
   } catch (err) {
-    console.log("updateOrderStatus error:", err);
-    res.redirect("/admin/pageerror");
+    console.error("updateOrderStatus error:", err);
+    
+    return res.render("adminOrderDetails", {
+      toastMessage: "An error occurred while updating status.",
+      toastType: "error",
+      order: {}
+    });
   }
 };
 
@@ -255,22 +391,140 @@ const rejectReturnItem = async (req, res) => {
   }
 };
 
+// const loadReturnRequests = async (req, res) => {
+//   try {
+//     let page = parseInt(req.query.page) || 1;
+//     const limit = 3; 
+//     const skip = (page - 1) * limit;
+//     const search = req.query.search ? req.query.search.trim() : "";
+
+//     // Build search regex if present
+//     const searchRegex = search ? new RegExp(search, "i") : null;
+
+//     // Aggregation pipeline:
+//     const pipeline = [
+//       {
+//         $addFields: {
+//         totalItemCount: { $size: "$items" }   // ADD THIS BEFORE UNWIND
+//         }
+//       },
+//       { $unwind: "$items" },
+//       { $match: { "items.status": "Return Requested" } },
+
+//       // lookup user to get name
+//       {
+//         $lookup: {
+//           from: "users",
+//           localField: "userId",
+//           foreignField: "_id",
+//           as: "user"
+//         }
+//       },
+//       { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+
+//       // Optionally filter by search across orderId, productName, user.name
+//       ...(searchRegex ? [
+//         {
+//           $match: {
+//             $or: [
+//               { orderId: { $regex: searchRegex } },
+//               { "items.productName": { $regex: searchRegex } },
+//               { "user.name": { $regex: searchRegex } }
+//             ]
+//           }
+//         }
+//       ] : []),
+
+//       // Project fields we need in the table
+//       {
+//         $project: {
+//           orderId: 1,
+//           orderDbId: "$_id",
+//           orderDate: 1,
+//           totalItemCount: 1,
+//           "item._id": "$items._id",
+//           "item.productId": "$items.productId",
+//           "item.productName": "$items.productName",
+//           "item.productImage": "$items.productImage",
+//           "item.size": "$items.size",
+//           "item.price": "$items.price",
+//           "item.quantity": "$items.quantity",
+//           "item.status": "$items.status",
+//           "item.returnStatus": "$items.returnStatus",
+//           userName: "$user.name",
+//         }
+//       },
+
+//       { $sort: { orderDate: -1 } },
+
+//       // Facet to get total count + paginated data
+//       {
+//         $facet: {
+//           metadata: [{ $count: "total" }],
+//           data: [{ $skip: skip }, { $limit: limit }]
+//         }
+//       }
+//     ];
+
+//     const aggResult = await Order.aggregate(pipeline);
+
+//     const total = (aggResult[0].metadata[0] && aggResult[0].metadata[0].total) || 0;
+//     const rows = (aggResult[0].data || []).map(r => ({
+//       orderDbId: r.orderDbId,
+//       orderId: r.orderId,
+//       orderDate: r.orderDate,
+//       itemId: r.item._id,
+//       totalItemCount: r.totalItemCount,
+//       productId: r.item.productId,
+//       productName: r.item.productName,
+//       productImage: r.item.productImage,
+//       size: r.item.size,
+//       price: r.item.price,
+//       quantity: r.item.quantity,
+//       status: r.item.status,
+//       returnStatus: r.item.returnStatus,
+//       userName: r.userName || "Unknown"
+//     }));
+
+//     const totalPages = Math.ceil(total / limit);
+
+//     res.render("returnRequests", {
+//       requests: rows,
+//       currentPage: page,
+//       totalPages,
+//       search
+//     });
+
+//   } catch (err) {
+//     console.error("loadReturnRequests error:", err);
+//     res.redirect("/admin/pageerror");
+//   }
+// };
+
 const loadReturnRequests = async (req, res) => {
   try {
     let page = parseInt(req.query.page) || 1;
-    const limit = 10; // change if you want fewer/more rows per page
-    const skip = (page - 1) * limit;
+    const ORDERS_PER_PAGE = 2; // Show 2 orders per page
     const search = req.query.search ? req.query.search.trim() : "";
 
-    // Build search regex if present
     const searchRegex = search ? new RegExp(search, "i") : null;
 
-    // Aggregation pipeline:
-    const pipeline = [
-      { $unwind: "$items" },
-      { $match: { "items.status": "Return Requested" } },
+    // 1️⃣ Fetch all return request items
+    const requests = await Order.aggregate([
+      {
+        $addFields: {
+          totalItemCount: { $size: "$items" }
+        }
+      },
 
-      // lookup user to get name
+      { $unwind: "$items" },
+
+      {
+        $match: {
+          "items.status": "Return Requested"
+        }
+      },
+
       {
         $lookup: {
           from: "users",
@@ -279,74 +533,69 @@ const loadReturnRequests = async (req, res) => {
           as: "user"
         }
       },
+
       { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
 
-      // Optionally filter by search across orderId, productName, user.name
-      ...(searchRegex ? [
-        {
-          $match: {
-            $or: [
-              { orderId: { $regex: searchRegex } },
-              { "items.productName": { $regex: searchRegex } },
-              { "user.name": { $regex: searchRegex } }
-            ]
-          }
-        }
-      ] : []),
+      // Optional search
+      ...(searchRegex
+        ? [
+            {
+              $match: {
+                $or: [
+                  { orderId: { $regex: searchRegex } },
+                  { "items.productName": { $regex: searchRegex } },
+                  { "user.name": { $regex: searchRegex } }
+                ]
+              }
+            }
+          ]
+        : []),
 
-      // Project fields we need in the table
       {
         $project: {
-          orderId: 1,
           orderDbId: "$_id",
+          orderId: 1,
           orderDate: 1,
-          "item._id": "$items._id",
-          "item.productId": "$items.productId",
-          "item.productName": "$items.productName",
-          "item.productImage": "$items.productImage",
-          "item.size": "$items.size",
-          "item.price": "$items.price",
-          "item.quantity": "$items.quantity",
-          "item.status": "$items.status",
-          "item.returnStatus": "$items.returnStatus",
+          totalItemCount: 1,
           userName: "$user.name",
+
+          // KEEP ENTIRE ITEM OBJECT
+          item: "$items"
         }
       },
 
-      { $sort: { orderDate: -1 } },
+      { $sort: { orderDate: -1 } }
+    ]);
 
-      // Facet to get total count + paginated data
-      {
-        $facet: {
-          metadata: [{ $count: "total" }],
-          data: [{ $skip: skip }, { $limit: limit }]
-        }
-      }
-    ];
+    // 2️⃣ Group items by orderId in Node.js
+    let grouped = {};
 
-    const aggResult = await Order.aggregate(pipeline);
+    requests.forEach(r => {
+      if (!grouped[r.orderId]) grouped[r.orderId] = [];
+      grouped[r.orderId].push(r);
+    });
 
-    const total = (aggResult[0].metadata[0] && aggResult[0].metadata[0].total) || 0;
-    const rows = (aggResult[0].data || []).map(r => ({
-      orderDbId: r.orderDbId,
-      orderId: r.orderId,
-      orderDate: r.orderDate,
-      itemId: r.item._id,
-      productId: r.item.productId,
-      productName: r.item.productName,
-      productImage: r.item.productImage,
-      size: r.item.size,
-      price: r.item.price,
-      quantity: r.item.quantity,
-      status: r.item.status,
-      returnStatus: r.item.returnStatus,
-      userName: r.userName || "Unknown"
-    }));
+    // Convert to array format for UI
+    let groupedOrders = Object.keys(grouped).map(orderId => {
+      const rows = grouped[orderId];
 
-    const totalPages = Math.ceil(total / limit);
+      return {
+        orderId,
+        first: rows[0],            // top row info
+        items: rows,               // all items for this order
+      };
+    });
 
+    // 3️⃣ Apply pagination (AFTER grouping)
+    const totalOrders = groupedOrders.length;
+    const totalPages = Math.ceil(totalOrders / ORDERS_PER_PAGE);
+
+    const start = (page - 1) * ORDERS_PER_PAGE;
+    const paginatedOrders = groupedOrders.slice(start, start + ORDERS_PER_PAGE);
+
+    // 4️⃣ Render
     res.render("returnRequests", {
-      requests: rows,
+      groupedOrders: paginatedOrders,
       currentPage: page,
       totalPages,
       search
@@ -358,6 +607,72 @@ const loadReturnRequests = async (req, res) => {
   }
 };
 
+// const rejectWholeReturn = async (req, res) => {
+//   try {
+//     const orderId = req.params.id;
+
+//     const order = await Order.findById(orderId);
+//     if (!order) return res.redirect("/admin/orders");
+
+//     order.items.forEach(item => {
+//       if (item.status === "Return Requested") {
+//         item.status = "Delivered";
+//         item.returnStatus = "Rejected";
+//       }
+//     });
+
+//     order.orderStatus = "Return Rejected";
+
+//     order.statusHistory.push({
+//       status: "Return Rejected",
+//       comment: "Admin rejected whole return request",
+//       date: new Date(),
+//     });
+
+//     order.markModified("items");
+//     await order.save();
+
+//     res.redirect(`/admin/order-details/${orderId}`);
+//   } catch (error) {
+//     console.error("rejectWholeReturn error:", error);
+//     res.redirect("/admin/pageerror");
+//   }
+// };
+
+// const approveWholeReturn = async (req, res) => {
+//   try {
+//     const orderId = req.params.id;
+
+//     const order = await Order.findById(orderId);
+//     if (!order) return res.redirect("/admin/orders");
+
+//     order.items.forEach(item => {
+//       if (item.status === "Return Requested") {
+//         item.status = "Returned";
+//         item.returnStatus = "Approved";
+//         item.refundAmount = item.price * item.quantity;
+//         item.refundStatus = "Processed";
+//       }
+//     });
+
+//     order.orderStatus = "Returned";
+
+//     order.statusHistory.push({
+//       status: "Returned",
+//       comment: "Admin approved whole order return",
+//       date: new Date(),
+//     });
+
+//     await order.save();
+
+//     res.redirect(`/admin/order-details/${orderId}`);
+
+//   } catch (error) {
+//     console.error("approveWholeReturn error:", error);
+//     res.redirect("/admin/pageerror");
+//   }
+// };
+
 const rejectWholeReturn = async (req, res) => {
   try {
     const orderId = req.params.id;
@@ -365,12 +680,13 @@ const rejectWholeReturn = async (req, res) => {
     const order = await Order.findById(orderId);
     if (!order) return res.redirect("/admin/orders");
 
-    order.items.forEach(item => {
+    // Loop with for..of (await-safe)
+    for (const item of order.items) {
       if (item.status === "Return Requested") {
-        item.status = "Delivered";
-        item.returnStatus = "Rejected";
+        item.status = "Delivered";          // Item stays delivered
+        item.returnStatus = "Rejected";     // Mark return rejection
       }
-    });
+    }
 
     order.orderStatus = "Return Rejected";
 
@@ -380,7 +696,6 @@ const rejectWholeReturn = async (req, res) => {
       date: new Date(),
     });
 
-    order.markModified("items");
     await order.save();
 
     res.redirect(`/admin/order-details/${orderId}`);
@@ -397,14 +712,30 @@ const approveWholeReturn = async (req, res) => {
     const order = await Order.findById(orderId);
     if (!order) return res.redirect("/admin/orders");
 
-    order.items.forEach(item => {
+    // Use for..of so await works correctly
+    for (const item of order.items) {
       if (item.status === "Return Requested") {
+
         item.status = "Returned";
         item.returnStatus = "Approved";
+        item.returnedAt = new Date();
+
+        // Refund calculation
         item.refundAmount = item.price * item.quantity;
         item.refundStatus = "Processed";
+
+        // Restore product stock
+        const product = await Product.findById(item.productId);
+
+        if (product?.variants) {
+          const variant = product.variants.find(v => v.size === item.size);
+          if (variant) {
+            variant.stock += item.quantity;
+          }
+          await product.save();
+        }
       }
-    });
+    }
 
     order.orderStatus = "Returned";
 
@@ -423,6 +754,7 @@ const approveWholeReturn = async (req, res) => {
     res.redirect("/admin/pageerror");
   }
 };
+
 
 
 module.exports = {

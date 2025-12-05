@@ -495,6 +495,40 @@ body {
     margin-top: 15px;
 }
 
+.return-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.return-action-btn {
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    color: #fff;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.btn-approve {
+    background: #007bff;
+}
+
+.btn-reject {
+    background: #d32f2f;
+}
+
+.btn-view {
+    background: #666;
+    padding: 8px 14px;
+    border-radius: 6px;
+    color: #fff;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+
 
 /* Responsive Design */
 @media (max-width: 768px) {

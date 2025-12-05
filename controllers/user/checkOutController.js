@@ -202,7 +202,7 @@ const placeOrder = async (req, res) => {
 
     //  CREATE ORDER
     const order = new Order({
-      orderId: "ORD-" + crypto.randomBytes(3).toString("hex").toUpperCase(),
+     // orderId: "ORD-" + crypto.randomBytes(3).toString("hex").toUpperCase(),
       userId,
       items,
       shippingAddress: {

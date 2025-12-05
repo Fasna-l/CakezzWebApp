@@ -9,7 +9,9 @@
       <li><a href="/order" class="sidebar-link"><i class="fas fa-shopping-bag"></i> Order</a></li>
       <li><a href="/wishlist" class="sidebar-link"><i class="fas fa-heart"></i> Wishlist</a></li>
       <li><a href="/address" class="sidebar-link"><i class="fas fa-map-marker-alt"></i> Address</a></li>
-      <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li>
+      <% if (!user.isGoogleUser) { %>
+        <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li>
+      <% } %>
       <li><a href="/account" class="sidebar-link active"><i class="fas fa-user"></i> Account Detail</a></li>
       <li><a href="/wallet" class="sidebar-link"><i class="fas fa-wallet"></i> Wallet</a></li>
       <li><a href="/referral" class="sidebar-link"><i class="fas fa-share-alt"></i> Referral</a></li>
@@ -68,12 +70,20 @@
           name="email" 
           placeholder="Enter Your Email" 
           value="<%= user.email %>" 
+          <%= user.isGoogleUser ? "readonly" : "" %>
           required
         />
-        <small>
+        <!-- <small>
           Want to change your email? 
           <a href="/change-email" class="link-pink">Click here to verify a new email address.</a>
-        </small>
+        </small> -->
+        <% if (!user.isGoogleUser) { %>
+          <small>
+            Want to change your email? 
+            <a href="/change-email" class="link-pink">Click here to verify a new email address.</a>
+          </small>
+        <% } %>
+
 
         <div id="error2" class="error-message"></div>
       </div>

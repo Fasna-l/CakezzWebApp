@@ -48,25 +48,36 @@ const loadDashboard = async (req,res)=>{
     }
 }
 
+// const logout = async (req,res)=>{
+//     try {
+//         req.session.admin = null;  //Pending :admin session management
+//         req.session.destroy((err)=>{
+//             if(err){
+//                 console.log("Session destruction error",err.message);
+//                 return res.redirect("/pageerror");
+//             }
+//             res.clearCookie('connect.sid');  //Pending :admin session management
+//             return res.redirect("/admin/login")
+//         })
+
+//     } catch (error) {
+        
+//         console.log("Logout error",error);
+//         res.redirect("/pageerror")
+
+//     }
+// }
+
 const logout = async (req,res)=>{
     try {
-        req.session.admin = null;  //Pending :admin session management
-        req.session.destroy((err)=>{
-            if(err){
-                console.log("Session destruction error",err.message);
-                return res.redirect("/pageerror");
-            }
-            res.clearCookie('connect.sid');  //Pending :admin session management
-            return res.redirect("/admin/login")
-        })
-
+        req.session.admin = null;   // ❗ONLY CLEAR ADMIN
+        return res.redirect("/admin/login");
     } catch (error) {
-        
         console.log("Logout error",error);
-        res.redirect("/pageerror")
-
+        res.redirect("/admin/pageerror");
     }
 }
+
 
 module.exports = {
     loadLogin,

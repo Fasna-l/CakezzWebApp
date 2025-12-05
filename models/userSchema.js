@@ -25,6 +25,10 @@ const userSchema = new Schema({
         type: String,
         default: null
     },
+    isGoogleUser: {
+        type: Boolean,
+        default: false
+    },
     isBlocked:{
         type:Boolean,
         default:false
