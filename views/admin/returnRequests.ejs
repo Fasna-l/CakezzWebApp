@@ -38,6 +38,7 @@
                             <th>DATE</th>
                             <th>QTY</th>
                             <th>STATUS</th>
+                            <th>RETURN REASON</th>
                             <th>ACTION</th>
                         </tr>
                     </thead>
@@ -63,11 +64,10 @@
                                         ? "Single Item Returned" 
                                         : "Multiple Items Returned" %>
                             </td>
-
                             <td>
                                 <span class="status-badge processing">Return Requested</span>
                             </td>
-
+                            <td></td> <!-- RETURN REASON placeholder -->
                             <td>
                                 <% if (isFullOrderReturn) { %>
 
@@ -102,6 +102,7 @@
                             <td>
                                 <span class="status-badge processing"><%= item.item.status %></span>
                             </td>
+                            <td><%= item.item.returnReason || "—" %></td>
 
                             <td>
                                 <% if (!isFullOrderReturn) { %>
@@ -119,7 +120,7 @@
                         </tr>
                         <% }) %>
 
-                        <tr><td colspan="7" style="height:10px; background:#eee;"></td></tr>
+                        <tr><td colspan="8" style="height:10px; background:#eee;"></td></tr>
 
                         <% }) %>
 

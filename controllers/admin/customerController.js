@@ -2,7 +2,7 @@ const User = require("../../models/userSchema")
 
 
 
-const customerInfo = async (req,res)=>{
+const customerInfo = async (req,res,next)=>{
     try {
         //search button
         let search="";
@@ -47,29 +47,39 @@ const customerInfo = async (req,res)=>{
             search
         });
     } catch (error) {
-        console.error(error);
-        res.redirect("/pageerror")
+        next(error);
+        // console.error(error);
+        // res.redirect("/pageerror")
     }
 }
 
-const customerBlocked = async (req,res)=>{
+const customerBlocked = async (req,res,next)=>{
     try {
-        let id = req.query.id;
+        //let id = req.query.id;
+        let id = req.params.id;
         await User.updateOne({_id:id},{$set:{isBlocked:true}});
-        res.redirect("/admin/users")
-
+        //res.redirect("/admin/users")
+        return res.status(200).json({ success: true });
     } catch (error) {
-        res.redirect("/pageerror")
+        next(error);
+        // console.error(error);
+        // return res.status(500).json({ success: false });
+        //res.redirect("/pageerror")
     }
 }
 
-const customerUnBlocked = async (req,res)=>{
+const customerUnBlocked = async (req,res,next)=>{
     try {
-        let id = req.query.id;
+        //let id = req.query.id;
+        let id = req.params.id;
         await User.updateOne({_id:id},{$set:{isBlocked:false}});
-        res.redirect("/admin/users")
+        //res.redirect("/admin/users")
+        return res.status(200).json({ success: true });
     } catch (error) {
-        res.redirect("/pageerror")
+        next(error);
+        // console.error(error);
+        // return res.status(500).json({ success: false });
+        //res.redirect("/pageerror")
     }
 }
 

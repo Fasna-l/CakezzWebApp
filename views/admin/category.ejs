@@ -93,7 +93,7 @@
 
                                     <td>
                                         <div class="action-group">
-                                            <a href="/admin/editCategory?id=<%= category._id %>" class="btn-edit">
+                                            <a href="/admin/edit-category?id=<%= category._id %>" class="btn-edit">
                                                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
                                                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -149,46 +149,98 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+// document.querySelectorAll('.btn-status').forEach(button => {
+//   button.addEventListener('click', async function () {
+//     const id = this.getAttribute('data-id');              // Get Category ID
+//     const currentStatus = this.getAttribute('data-status'); // listed/unlisted
+
+//     // Decide API URL
+//     const url = currentStatus === 'listed'
+//       ? `/admin/list-category?id=${id}`      // If listed → unlist
+//       : `/admin/unlist-category?id=${id}`;   // If unlisted → list
+
+//     try {
+//       const response = await fetch(url);
+//       const data = await response.json();
+
+//       if (data.success) {
+//         const isListed = data.isListed;
+
+//         // ✅ 1. Change Button Text (Unlist/List)
+//         this.innerText = isListed ? "Unlist" : "List";
+
+//         // ✅ 2. Update data-status attribute
+//         this.setAttribute('data-status', isListed ? "listed" : "unlisted");
+
+//         // ✅ 3. Update Button Color (Green if listed, Red if unlisted)
+//         this.classList.remove('action-list', 'action-unlist');
+//         this.classList.add(isListed ? 'action-unlist' : 'action-list');
+
+//         // ✅ 4. Update the Status Text in Table
+//         const statusBadge = this.closest('tr').querySelector('.status-cell .status-badge');
+//         statusBadge.innerText = isListed ? "Listed" : "Unlisted";
+//         statusBadge.classList.remove('listed', 'unlisted');
+//         statusBadge.classList.add(isListed ? 'listed' : 'unlisted');
+//       }
+//     } catch (error) {
+//       console.error("Error updating category status:", error);
+//     }
+//   });
+// });
+
 document.querySelectorAll('.btn-status').forEach(button => {
   button.addEventListener('click', async function () {
-    const id = this.getAttribute('data-id');              // Get Category ID
-    const currentStatus = this.getAttribute('data-status'); // listed/unlisted
 
-    // Decide API URL
-    const url = currentStatus === 'listed'
-      ? `/admin/listCategory?id=${id}`      // If listed → unlist
-      : `/admin/unlistCategory?id=${id}`;   // If unlisted → list
+    const id = this.getAttribute('data-id');
+    const currentStatus = this.getAttribute('data-status');
+    const action = currentStatus === "listed" ? "unlist" : "list";
+
+    const result = await Swal.fire({
+      title: action === "list" ? "List this category?" : "Unlist this category?",
+      text: "Please confirm your action",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, confirm it!",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      background: "#2a2a2a",
+      color: "#fff"
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
-      const response = await fetch(url);
+      const response = await fetch(
+        `/admin/categories/${id}/${action}`,
+        { method: "PATCH" }
+      );
+
       const data = await response.json();
 
       if (data.success) {
-        const isListed = data.isListed;
-
-        // ✅ 1. Change Button Text (Unlist/List)
-        this.innerText = isListed ? "Unlist" : "List";
-
-        // ✅ 2. Update data-status attribute
-        this.setAttribute('data-status', isListed ? "listed" : "unlisted");
-
-        // ✅ 3. Update Button Color (Green if listed, Red if unlisted)
-        this.classList.remove('action-list', 'action-unlist');
-        this.classList.add(isListed ? 'action-unlist' : 'action-list');
-
-        // ✅ 4. Update the Status Text in Table
-        const statusBadge = this.closest('tr').querySelector('.status-cell .status-badge');
-        statusBadge.innerText = isListed ? "Listed" : "Unlisted";
-        statusBadge.classList.remove('listed', 'unlisted');
-        statusBadge.classList.add(isListed ? 'listed' : 'unlisted');
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: `Category ${action === "list" ? "listed" : "unlisted"} successfully`,
+          timer: 1200,
+          showConfirmButton: false,
+          background: "#2a2a2a",
+          color: "#fff"
+        }).then(() => {
+          location.reload();
+        });
+      } else {
+        throw new Error();
       }
+
     } catch (error) {
-      console.error("Error updating category status:", error);
+      Swal.fire("Error", "Something went wrong", "error");
     }
   });
 });
-
 
 // read more/read less function:
 

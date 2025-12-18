@@ -6,7 +6,7 @@ const PDFDocument = require("pdfkit");
 /* --------------------------------------------------------
    1. LOAD ORDER LIST PAGE (Search + Pagination)
 ---------------------------------------------------------*/
-const loadOrderList = async (req, res) => {
+const loadOrderList = async (req, res, next) => {
   try {
     const userId = req.session.user;
 
@@ -43,8 +43,9 @@ const loadOrderList = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("loadOrderList error:", error);
-    res.redirect("/pageNotFound");
+    next(error);
+    // console.error("loadOrderList error:", error);
+    // res.redirect("/pageNotFound");
   }
 };
 
@@ -52,7 +53,7 @@ const loadOrderList = async (req, res) => {
 /* --------------------------------------------------------
    2. LOAD ORDER DETAILS PAGE
 ---------------------------------------------------------*/
-const loadOrderDetails = async (req, res) => {
+const loadOrderDetails = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const orderId = req.params.id;
@@ -66,8 +67,9 @@ const loadOrderDetails = async (req, res) => {
     res.render("orderDetails", { order });
 
   } catch (error) {
-    console.error("loadOrderDetails error:", error);
-    res.redirect("/pageNotFound");
+    next(error);
+    // console.error("loadOrderDetails error:", error);
+    // res.redirect("/pageNotFound");
   }
 };
 
@@ -75,7 +77,7 @@ const loadOrderDetails = async (req, res) => {
 /* --------------------------------------------------------
    3. SHOW CANCEL PAGE (Optional Reason)
 ---------------------------------------------------------*/
-const loadCancelPage = async (req, res) => {
+const loadCancelPage = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const orderId = req.params.id;
@@ -96,8 +98,9 @@ const loadCancelPage = async (req, res) => {
     res.render("cancelOrder", { order, itemId });
 
   } catch (error) {
-    console.error("loadCancelPage error:", error);
-    res.redirect("/pageNotFound");
+    next(error);
+    // console.error("loadCancelPage error:", error);
+    // res.redirect("/pageNotFound");
   }
 };
 
@@ -107,7 +110,7 @@ const loadCancelPage = async (req, res) => {
 //    4. CANCEL ENTIRE ORDER + INCREASE STOCK
 // ---------------------------------------------------------*/
 
-const cancelOrder = async (req, res) => {
+const cancelOrder = async (req, res, next) => {
   try {
     const { reason, itemId } = req.body;
     const orderId = req.params.id;
@@ -196,8 +199,9 @@ const cancelOrder = async (req, res) => {
     return res.redirect(`/order/${orderId}`);
 
   } catch (error) {
-    console.error("cancelOrder error:", error);
-    return res.redirect("/pageNotFound");
+    next(error);
+    // console.error("cancelOrder error:", error);
+    // return res.redirect("/pageNotFound");
   }
 };
 
@@ -206,17 +210,18 @@ const cancelOrder = async (req, res) => {
 /* --------------------------------------------------------
    6. RETURN ORDER (Delivered Only) + Mandatory Reason
 ---------------------------------------------------------*/
-const loadReturnPage = async (req, res) => {
+const loadReturnPage = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id);
     res.render("returnOrder", { order });
   } catch (error) {
-    console.error(error);
-    res.redirect("/pageNotFound");
+    next(error);
+    // console.error(error);
+    // res.redirect("/pageNotFound");
   }
 };
 
-const submitReturnRequest = async (req, res) => {
+const submitReturnRequest = async (req, res, next) => {
   try {
     const orderId = req.params.id;
     const reason = req.body.reason;
@@ -255,8 +260,9 @@ const submitReturnRequest = async (req, res) => {
     res.redirect(`/order/${orderId}`);
 
   } catch (error) {
-    console.error("submitReturnRequest error:", error);
-    res.redirect("/pageNotFound");
+    next(error);
+    // console.error("submitReturnRequest error:", error);
+    // res.redirect("/pageNotFound");
   }
 };
 
@@ -264,7 +270,7 @@ const submitReturnRequest = async (req, res) => {
 /* --------------------------------------------------------
    7. DOWNLOAD INVOICE PDF
 ---------------------------------------------------------*/
-const downloadInvoice = async (req, res) => {
+const downloadInvoice = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id).lean();
     const user = await User.findById(order.userId).lean();
@@ -338,19 +344,32 @@ const downloadInvoice = async (req, res) => {
     /* ---------------------------------------------------------
        TABLE ROWS
     ---------------------------------------------------------*/
-    order.items.forEach(item => {
-      const y = doc.y;
+    let calculatedSubTotal = 0;
 
-      const subtotal = item.price * item.quantity;
+  order.items.forEach(item => {
+    const y = doc.y;
 
-      doc.fontSize(12).text(item.productName, 50, y);
-      doc.text(item.quantity.toString(), 260, y);
-      doc.text(item.status, 310, y);
-      doc.text(`₹${item.price}`, 400, y);
-      doc.text(`₹${subtotal}`, 500, y);
+    let itemSubtotal = 0;
 
-      doc.moveDown(0.7);
-    });
+  //  Do NOT charge for these statuses
+    if (
+      item.status !== "Cancelled" &&
+      item.status !== "Returned" &&
+      !(item.status === "Return Requested" && item.returnStatus === "Approved")
+    ) {
+      itemSubtotal = item.price * item.quantity;
+      calculatedSubTotal += itemSubtotal;
+    }
+
+    doc.fontSize(12).text(item.productName, 50, y);
+    doc.text(item.quantity.toString(), 260, y);
+    doc.text(item.status, 310, y);
+    doc.text(`₹${item.price}`, 400, y);
+    doc.text(`₹${itemSubtotal}`, 500, y);
+
+    doc.moveDown(0.7);
+  });
+
 
     doc.moveDown(1);
 
@@ -372,16 +391,33 @@ const downloadInvoice = async (req, res) => {
    doc.moveDown(0.5);
 
 
-    doc.fontSize(12).text(`Subtotal: ₹${order.subTotal}`, { align: "right" });
-    doc.text(`Tax: ₹${order.taxAmount}`, { align: "right" });
-    doc.text(`Shipping Charge: ₹${order.shippingCharge}`, { align: "right" });
-    doc.text(`Discount: ₹${order.offerDiscount}`, { align: "right" });
+    // doc.fontSize(12).text(`Subtotal: ₹${order.subTotal}`, { align: "right" });
+    // doc.text(`Tax: ₹${order.taxAmount}`, { align: "right" });
+    // doc.text(`Shipping Charge: ₹${order.shippingCharge}`, { align: "right" });
+    // doc.text(`Discount: ₹${order.offerDiscount}`, { align: "right" });
 
-    doc.moveDown(0.7);
+    // doc.moveDown(0.7);
 
-    doc.fontSize(14).text(`Grand Total: ₹${order.totalAmount}`, {
+    // doc.fontSize(14).text(`Grand Total: ₹${order.totalAmount}`, {
+    //   align: "right",
+    // });
+
+      const tax = Math.round(calculatedSubTotal * 0.05);
+      const shipping = calculatedSubTotal > 0 ? 50 : 0;
+      const discount = order.offerDiscount || 0;
+      const grandTotal = calculatedSubTotal + tax + shipping - discount;
+
+      doc.fontSize(12).text(`Subtotal: ₹${calculatedSubTotal}`, { align: "right" });
+      doc.text(`Tax: ₹${tax}`, { align: "right" });
+      doc.text(`Shipping Charge: ₹${shipping}`, { align: "right" });
+      doc.text(`Discount: ₹${discount}`, { align: "right" });
+
+      doc.moveDown(0.7);
+
+      doc.fontSize(14).text(`Grand Total: ₹${grandTotal}`, {
       align: "right",
     });
+
 
     /* ---------------------------------------------------------
        FOOTER (BOTTOM RIGHT)
@@ -404,12 +440,13 @@ const downloadInvoice = async (req, res) => {
     doc.end();
 
   } catch (error) {
-    console.error("downloadInvoice error:", error);
-    res.redirect("/pageNotFound");
+    next(error);
+    // console.error("downloadInvoice error:", error);
+    // res.redirect("/pageNotFound");
   }
 };
 
-const loadSingleReturnPage = async (req, res) => {
+const loadSingleReturnPage = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const { orderId, itemId } = req.params;
@@ -431,12 +468,13 @@ const loadSingleReturnPage = async (req, res) => {
     res.render("return-Singleitem", { order, item });
 
   } catch (error) {
-    console.error("loadSingleReturnPage error:", error);
-    res.redirect("/pageNotFound");
+    next(error);
+    // console.error("loadSingleReturnPage error:", error);
+    // res.redirect("/pageNotFound");
   }
 };
 
-const submitSingleReturn = async (req, res) => {
+const submitSingleReturn = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const { orderId, itemId } = req.params;
@@ -487,8 +525,9 @@ const submitSingleReturn = async (req, res) => {
     res.redirect(`/order/${orderId}`);
 
   } catch (error) {
-    console.error("submitSingleReturn error:", error);
-    res.redirect("/pageNotFound");
+    next(error);
+    // console.error("submitSingleReturn error:", error);
+    // res.redirect("/pageNotFound");
   }
 };
 
@@ -497,39 +536,32 @@ const submitSingleReturn = async (req, res) => {
 ---------------------------------------------------------*/
 function recalculateOrderTotals(order) {
 
-  // Include only ACTIVE items (exclude cancelled/returned)
-  const validItems = order.items.filter(
-    item =>
-      item.status !== "Cancelled" &&
-      item.status !== "Returned"
-  );
+  const validItems = order.items.filter(item => {
+    if (item.status === "Cancelled") return false;
+    if (item.status === "Returned") return false;
 
-  // SUBTOTAL
+    if (
+      item.status === "Return Requested" &&
+      item.returnStatus === "Approved"
+    ) return false;
+
+    if (item.returnStatus === "Rejected") return false;
+
+    return true;
+  });
+
   const subTotal = validItems.reduce((sum, item) => {
     return sum + item.price * item.quantity;
   }, 0);
 
-  // TAX (5%)
   const taxAmount = Math.round(subTotal * 0.05);
-
-  // SHIPPING: always 50 if subtotal > 0
   const shippingCharge = subTotal > 0 ? 50 : 0;
-  // No offers in your system
-  const offerDiscount = 0;
 
-  // FINAL TOTAL
-  const totalAmount = subTotal + taxAmount + shippingCharge;
-
-  // Apply back to order object
   order.subTotal = subTotal;
   order.taxAmount = taxAmount;
   order.shippingCharge = shippingCharge;
-  order.offerDiscount = offerDiscount;
-  order.totalAmount = totalAmount;
-
-  return order;
+  order.totalAmount = subTotal + taxAmount + shippingCharge;
 }
-
 
 /* --------------------------------------------------------
    EXPORT FUNCTIONS

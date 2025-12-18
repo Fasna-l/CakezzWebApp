@@ -5,7 +5,7 @@ const Cart = require("../../models/cartSchema");
 const mongoose = require("mongoose");
 
 // Load Shop Page
-const loadShoppage = async (req, res) => {
+const loadShoppage = async (req, res, next) => {
   try {
     const user = req.session.user;
     const categories = await Category.find({ isListed: true });
@@ -109,12 +109,13 @@ const loadShoppage = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("Shopping page error:", error);
-    res.status(500).send("Server Error");
+    next(error);
+    // console.log("Shopping page error:", error);
+    // res.status(500).send("Server Error");
   }
 };
 
-const loadProductDetails = async (req, res) => {
+const loadProductDetails = async (req, res, next) => {
   try {
     const productId = req.params.id;
     const userId = req.session.user;
@@ -145,14 +146,15 @@ const loadProductDetails = async (req, res) => {
       cartCount       // ✅ Now available in EJS for header
     });
 
-  } catch (err) {
-    console.log("Product details error:", err);
-    res.redirect("/shop");
+  } catch (error) {
+    next(error);
+    // console.log("Product details error:", err);
+    // res.redirect("/shop");
   }
 };
 
 // Load Review Page
-const loadReviewPage = async (req, res) => {
+const loadReviewPage = async (req, res, next) => {
   try {
     const productId = req.params.id;
     const product = await Product.findById(productId);
@@ -163,15 +165,16 @@ const loadReviewPage = async (req, res) => {
     res.render("reviewPage", { product, user }); // ✅ correct folder path
 
   } catch (error) {
-    console.log(error);
-    res.redirect("/pageNotFound");
+    next(error);
+    // console.log(error);
+    // res.redirect("/pageNotFound");
   }
 };
 
 
 
 // Submit Review
-const submitReview = async (req, res) => {
+const submitReview = async (req, res, next) => {
   try {
     const { rating, review } = req.body;
     const productId = req.params.id;
@@ -192,9 +195,10 @@ const submitReview = async (req, res) => {
     });
 
     res.redirect("/product/" + productId);
-  } catch (err) {
-    console.log(err);
-    res.redirect("/pageNotFound");
+  } catch (error) {
+    next(error);
+    // console.log(err);
+    // res.redirect("/pageNotFound");
   }
 };
 

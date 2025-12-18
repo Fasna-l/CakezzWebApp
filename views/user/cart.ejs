@@ -89,5 +89,14 @@
   <% } %>
 </div>
 
+<% if (typeof checkoutError !== "undefined" && checkoutError) { %>
+<script>
+Swal.fire({
+  icon: "error",
+  title: "Cannot Proceed",
+  text: "<%= checkoutError %>",
+});
+</script>
+<% } %>
 
 <%- include('../partials/user/footer') %>

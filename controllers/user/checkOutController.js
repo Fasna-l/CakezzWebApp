@@ -8,7 +8,7 @@ const crypto = require("crypto");
 /* ------------------------------------
    GET CHECKOUT PAGE
 -------------------------------------- */
-const getCheckout = async (req, res) => {
+const getCheckout = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const user = userId ? await User.findById(userId).lean() : null;
@@ -23,16 +23,17 @@ const getCheckout = async (req, res) => {
       totals: req.session.checkoutTotals || {}
     });
 
-  } catch (err) {
-    console.log(err);
-    res.redirect("/pageerror");
+  } catch (error) {
+    next(error);
+    // console.log(err);
+    // res.redirect("/pageerror");
   }
 };
 
 /* ------------------------------------
    ADD ADDRESS (CHECKOUT)
 -------------------------------------- */
-const postAddAddress = async (req, res) => {
+const postAddAddress = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const data = req.body;
@@ -53,16 +54,17 @@ const postAddAddress = async (req, res) => {
     await addressDoc.save();
     res.json({ success: true });
 
-  } catch (err) {
-    console.log(err);
-    res.json({ success: false });
+  } catch (error) {
+    next(error);
+    // console.log(err);
+    // res.json({ success: false });
   }
 };
 
 /* ------------------------------------
    EDIT ADDRESS
 -------------------------------------- */
-const getEditAddress = async (req, res) => {
+const getEditAddress = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const user = userId ? await User.findById(userId).lean() : null;
@@ -78,13 +80,14 @@ const getEditAddress = async (req, res) => {
       totals: req.session.checkoutTotals || {}
     });
 
-  } catch (err) {
-    console.log(err);
-    res.redirect("/pageerror");
+  } catch (error) {
+    next(error);
+    // console.log(err);
+    // res.redirect("/pageerror");
   }
 };
 
-const postEditAddress = async (req, res) => {
+const postEditAddress = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const addressId = req.params.id;
@@ -96,9 +99,10 @@ const postEditAddress = async (req, res) => {
     await addressDoc.save();
     res.json({ success: true });
 
-  } catch (err) {
-    console.log(err);
-    res.json({ success: false });
+  } catch (error) {
+    next(error);
+    // console.log(err);
+    // res.json({ success: false });
   }
 };
 
@@ -106,7 +110,7 @@ const postEditAddress = async (req, res) => {
    SAVE DELIVERY DATE (with validation)
 -------------------------------------- */
 
-const saveDeliveryDate = async (req, res) => {
+const saveDeliveryDate = async (req, res, next) => {
   try {
     const selectedDate = req.body.deliveryDate;
     // If empty
@@ -131,11 +135,12 @@ const saveDeliveryDate = async (req, res) => {
     delete req.session.deliveryError;
     return res.redirect("/checkout/payment");
 
-  } catch (err) {
-    console.log("saveDeliveryDate error:", err);
-    // set generic error
-    req.session.deliveryError = "Something went wrong. Please try again.";
-    return res.redirect("/personalize?from=save");
+  } catch (error) {
+    next(error);
+    // console.log("saveDeliveryDate error:", err);
+    // // set generic error
+    // req.session.deliveryError = "Something went wrong. Please try again.";
+    // return res.redirect("/personalize?from=save");
   }
 };
 
@@ -144,7 +149,7 @@ const saveDeliveryDate = async (req, res) => {
 /* ------------------------------------
    GET PAYMENT PAGE
 -------------------------------------- */
-const getPaymentPage = async (req, res) => {
+const getPaymentPage = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const user = userId ? await User.findById(userId).lean() : null;
@@ -156,16 +161,17 @@ const getPaymentPage = async (req, res) => {
       coupons: []
 });
 
-  } catch (err) {
-    console.log(err);
-    res.redirect("/pageerror");
+  } catch (error) {
+    next(error);
+    // console.log(err);
+    // res.redirect("/pageerror");
   }
 };
 
 /* ------------------------------------
    PLACE ORDER
 -------------------------------------- */
-const placeOrder = async (req, res) => {
+const placeOrder = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const paymentMethod = req.body.selectedPayment;
@@ -178,25 +184,69 @@ const placeOrder = async (req, res) => {
     const items = [];
 
     //  REDUCE STOCK FOR EACH ITEM
-    for (let cart of req.session.checkoutItems) {
-      const product = await Product.findById(cart.productId);
+    // for (let cart of req.session.checkoutItems) {
+    //   const product = await Product.findById(cart.productId);
 
-      const variant = product.variants.find(v => v.size === cart.size);
-      if (!variant) continue;
+    //   const variant = product.variants.find(v => v.size === cart.size);
+    //   if (!variant) continue;
 
-      // Reduce stock
-      variant.stock = Math.max(0, variant.stock - cart.quantity);
+    //   // Reduce stock
+    //   variant.stock = Math.max(0, variant.stock - cart.quantity);
 
+    //   await product.save();
+
+    //   // Push order item
+    //   items.push({
+    //     productId: product._id,
+    //     productName: product.productName,
+    //     productImage: product.productImage[0],
+    //     size: cart.size,
+    //     price: variant.price,
+    //     quantity: cart.quantity
+    //   });
+    // }
+
+    // SAFETY VALIDATION BEFORE STOCK REDUCTION
+    for (let cartItem of req.session.checkoutItems) {
+
+      const product = await Product.findById(cartItem.productId).populate("category");
+      const variant = product.variants.find(v => v.size === cartItem.size);
+
+      // ❌ BLOCKED PRODUCT
+      if (product.isBlocked) {
+        req.session.checkoutError = `${product.productName} is unavailable.`;
+        return res.redirect("/cart");
+      }
+
+      // ❌ DISABLED CATEGORY
+      if (product.category?.isListed === false) {
+        req.session.checkoutError = `${product.productName} belongs to a disabled category.`;
+        return res.redirect("/cart");
+      }
+
+      // ❌ STOCK CHECK
+      if (!variant || variant.stock < cartItem.quantity) {
+        req.session.checkoutError = `${product.productName} is out of stock.`;
+        return res.redirect("/cart");
+      }
+    }
+
+    // NOW SAFE: Apply stock reduction & build order items
+    for (let cartItem of req.session.checkoutItems) {
+
+      const product = await Product.findById(cartItem.productId);
+      const variant = product.variants.find(v => v.size === cartItem.size);
+
+      variant.stock -= cartItem.quantity;
       await product.save();
 
-      // Push order item
       items.push({
         productId: product._id,
         productName: product.productName,
         productImage: product.productImage[0],
-        size: cart.size,
+        size: cartItem.size,
         price: variant.price,
-        quantity: cart.quantity
+        quantity: cartItem.quantity
       });
     }
 
@@ -244,16 +294,17 @@ const placeOrder = async (req, res) => {
     //  REDIRECT
     return res.redirect(`/checkout/success/${order._id}`);
 
-  } catch (err) {
-    console.log(err);
-    return res.redirect("/pageerror");
+  } catch (error) {
+    next(error);
+    // console.log(err);
+    // return res.redirect("/pageerror");
   }
 };
 
 /* ------------------------------------
    SUCCESS PAGE
 -------------------------------------- */
-const getSuccessPage = async (req, res) => {
+const getSuccessPage = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const user = userId ? await User.findById(userId).lean() : null;
@@ -274,15 +325,16 @@ const getSuccessPage = async (req, res) => {
       deliveryDateFormatted      // OK to keep this
     });
 
-  } catch (err) {
-    console.log("getSuccessPage error:", err);
-    res.redirect("/pageNotFound");
+  } catch (error) {
+    next(error);
+    // console.log("getSuccessPage error:", err);
+    // res.redirect("/pageNotFound");
   }
 };
 
 
 
-const getPersonalizePage = async (req, res) => {
+const getPersonalizePage = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const user = userId ? await User.findById(userId).lean() : null;
@@ -307,9 +359,10 @@ const getPersonalizePage = async (req, res) => {
       deliveryError
     });
 
-  } catch (err) {
-    console.log("Personalize Page Error:", err);
-    res.redirect("/pageNotFound");
+  } catch (error) {
+    next(error);
+    // console.log("Personalize Page Error:", err);
+    // res.redirect("/pageNotFound");
   }
 };
 

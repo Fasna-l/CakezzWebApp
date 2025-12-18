@@ -8,8 +8,11 @@ const passport = require("./config/passport")
 const nocache = require('nocache');
 const userRouter = require("./routes/userRouter");
 const adminRouter = require("./routes/adminRouter");
-const User = require("./models/userSchema");
-const Cart = require("./models/cartSchema");
+const errorHandler = require("./middlewares/errorHandler");
+//const User = require("./models/userSchema");
+//const Cart = require("./models/cartSchema");
+const userContext = require("./middlewares/userContext");
+const cartCount = require("./middlewares/cartCount");
 db()
 
 app.use(nocache());
@@ -31,26 +34,30 @@ app.use(session({
 //   res.locals.user = req.session.user || null;
 //   next();
 // });
-app.use(async (req, res, next) => {
-  if (req.session.user) {
-    res.locals.user = await User.findById(req.session.user).lean();
-  } else {
-    res.locals.user = null;
-  }
-  next();
-});
+// app.use(async (req, res, next) => {
+//   if (req.session.user) {
+//     res.locals.user = await User.findById(req.session.user).lean();
+//   } else {
+//     res.locals.user = null;
+//   }
+//   next();
+// });
 
-app.use(async (req, res, next) => {
-  if (!req.session.user) {
-    res.locals.cartCount = 0;
-    return next();
-  }
+// app.use(async (req, res, next) => {
+//   if (!req.session.user) {
+//     res.locals.cartCount = 0;
+//     return next();
+//   }
 
-  const cart = await Cart.findOne({ user: req.session.user });
-  res.locals.cartCount = cart ? cart.items.length : 0;
+//   const cart = await Cart.findOne({ user: req.session.user });
+//   res.locals.cartCount = cart ? cart.items.length : 0;
 
-  next();
-});
+//   next();
+// });
+
+//custom middlewares from middleware folder
+app.use(userContext);
+app.use(cartCount);
 
 //passport middleware setting
 app.use(passport.initialize());
@@ -61,7 +68,7 @@ app.set("views",[path.join(__dirname,'views/user'),path.join(__dirname,'views/ad
 
 app.use("/",userRouter);
 app.use("/admin",adminRouter);
-
+app.use(errorHandler);
 app.listen(process.env.PORT, ()=>{
     console.log("Server Running");
 })

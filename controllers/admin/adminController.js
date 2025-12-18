@@ -14,7 +14,7 @@ const loadLogin = (req,res)=>{
     res.render("admin-login",{message:null})
 }
 
-const login = async (req,res)=>{
+const login = async (req,res,next)=>{
     try {
         const {email,password} = req.body;
         const admin = await User.findOne({email: email,isAdmin:true});
@@ -33,48 +33,31 @@ const login = async (req,res)=>{
             res.render("admin-login", { message: "Invalid email or password" });
         }
     } catch (error) {
-        console.log("login error",error);
-        return res.redirect("/pageerror")
+        next(error);
+        // console.log("login error",error);
+        // return res.redirect("/pageerror")
     }
 }
 
-const loadDashboard = async (req,res)=>{
+const loadDashboard = async (req,res,next)=>{
     if(req.session.admin){
         try {
             res.render("dashboard")
         } catch (error) {
-            res.redirect("/pageerror")
+            next(error);
+            // res.redirect("/pageerror")
         }
     }
 }
 
-// const logout = async (req,res)=>{
-//     try {
-//         req.session.admin = null;  //Pending :admin session management
-//         req.session.destroy((err)=>{
-//             if(err){
-//                 console.log("Session destruction error",err.message);
-//                 return res.redirect("/pageerror");
-//             }
-//             res.clearCookie('connect.sid');  //Pending :admin session management
-//             return res.redirect("/admin/login")
-//         })
-
-//     } catch (error) {
-        
-//         console.log("Logout error",error);
-//         res.redirect("/pageerror")
-
-//     }
-// }
-
-const logout = async (req,res)=>{
+const logout = async (req,res,next)=>{
     try {
         req.session.admin = null;   // ❗ONLY CLEAR ADMIN
         return res.redirect("/admin/login");
     } catch (error) {
-        console.log("Logout error",error);
-        res.redirect("/admin/pageerror");
+        next(error);
+        // console.log("Logout error",error);
+        // res.redirect("/admin/pageerror");
     }
 }
 

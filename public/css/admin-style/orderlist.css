@@ -528,7 +528,37 @@ body {
     white-space: nowrap;
 }
 
+/* Common action button style */
+.return-action-btn,
+.btn-view {
+  padding: 8px 14px;
+  height: 36px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
 
+/* Approve */
+.btn-approve {
+  background-color: #2563eb;
+}
+
+/* Reject */
+.btn-reject {
+  background-color: #dc2626;
+}
+
+/* View */
+.btn-view {
+  background-color: #6b7280;
+  margin-top: 10px;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {

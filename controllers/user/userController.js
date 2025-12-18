@@ -13,15 +13,16 @@ const { generateOtp } = require("../../helpers/otpHelper");
 const { sendVerificationEmail } = require("../../helpers/emailHelper");
 const { securePassword } = require("../../helpers/passwordHelper");
 
-const pageNotFound = async (req,res)=>{
+const pageNotFound = async (req,res,next)=>{
     try {
         res.render("pageNotFound")
     } catch (error) {
-        res.redirect("pageNotFound")
+      next(error);
+      // res.redirect("pageNotFound")
     }
 }
 
-const googleAuth = async (req, res) => {
+const googleAuth = async (req, res, next) => {
   try {
     const user = req.user;
 
@@ -39,14 +40,15 @@ const googleAuth = async (req, res) => {
     req.session.user = user._id;
     res.redirect("/?message=Logged in with Google successfully&icon=success");
   } catch (error) {
-    console.error("Google Authentication Error:", error);
-    res.redirect("/login?message=Google login failed&icon=warning");
+    next(error);
+    // console.error("Google Authentication Error:", error);
+    // res.redirect("/login?message=Google login failed&icon=warning");
   }
 };
 
 //Load Home Page
 
-const loadHomepage = async (req, res) => {
+const loadHomepage = async (req, res, next) => {
   try {
     const user = req.session.user;
     const categories = await Category.find({ isListed: true });
@@ -91,15 +93,16 @@ const loadHomepage = async (req, res) => {
       cartCount
     });
   } catch (error) {
-    console.log("Home page error:", error);
-    res.status(500).send("Server Error");
+    next(error);
+    // console.log("Home page error:", error);
+    // res.status(500).send("Server Error");
   }
 };
 
 
 //Load Login
 
-const loadLogin = async (req,res)=>{
+const loadLogin = async (req,res,next)=>{
     try {
         if(!req.session.user){
             return res.render("login",{message:req.query.message || ""});
@@ -107,11 +110,12 @@ const loadLogin = async (req,res)=>{
             res.redirect("/")
         }
     } catch (error) {
-        res.redirect("pageNotFound")
+        next(error);
+        //res.redirect("pageNotFound")
     }
 }
 
-const login = async (req,res)=>{
+const login = async (req,res,next)=>{
     try {
         const {email,password} = req.body;
 
@@ -136,23 +140,25 @@ const login = async (req,res)=>{
         res.redirect("/");
 
     } catch (error) {
-        console.error("login error",error);
-        res.render("login",{message:"login failed. Please try again later"});
+      next(error);
+        // console.error("login error",error);
+        // res.render("login",{message:"login failed. Please try again later"});
     }
 }
 //Load Signup page
 
-const loadSignup = async (req,res)=>{
+const loadSignup = async (req,res,next)=>{
     try {
         return res.render("signup")
     } catch (error) {
-        console.log("Signup page is not loading",error);
-        res.status(500).send("Server Error")
+      next(error);
+        // console.log("Signup page is not loading",error);
+        // res.status(500).send("Server Error")
     }
 }
 
 
-const signup = async (req,res) =>{
+const signup = async (req,res,next) =>{
     try {
         
         const {name,email,password,confirmPassword} = req.body;
@@ -192,14 +198,14 @@ const signup = async (req,res) =>{
         console.log("OTP Send",otp)
 
     } catch (error) {
-        
-        console.error("signup error",error);
-        res.redirect("/pageNotFound")
+        next(error);
+        // console.error("signup error",error);
+        // res.redirect("/pageNotFound")
 
     }
 }
 
-const verifyOtp = async (req, res) => {
+const verifyOtp = async (req, res,next) => {
     try {
         const enteredOtp = req.body.otp;
         const { email, name, password } = req.session.userData || {};
@@ -233,13 +239,14 @@ const verifyOtp = async (req, res) => {
         res.json({ success: true, redirectUrl: "/login" });
 
     } catch (error) {
-        console.error("OTP Verify Error:", error);
-        res.status(500).json({ success: false, message: "Server error" });
+      next(error);
+        // console.error("OTP Verify Error:", error);
+        // res.status(500).json({ success: false, message: "Server error" });
     }
 };
 
 //resendotp
-const resendOtp = async(req,res)=>{
+const resendOtp = async(req,res,next)=>{
     try {
 
         const {email} = req.session.userData;
@@ -260,18 +267,20 @@ const resendOtp = async(req,res)=>{
             res.status(500).json({success:false,message:"Failed to resend OTP. Please try again"});
         }
     } catch (error) {
-        console.error("Error resending otp",error);
-        res.status(500).json({success:false,message:"Internal Server Error. Please try again"})
+      next(error);
+        // console.error("Error resending otp",error);
+        // res.status(500).json({success:false,message:"Internal Server Error. Please try again"})
     }
 }
 
-const logout = async (req,res) =>{
+const logout = async (req,res,next) =>{
   try {
     req.session.user = null;
     return res.redirect("/login");
   } catch (error) {
-    console.log("Logout error",error);
-    res.redirect("/pageNotFound")
+    next(error);
+    // console.log("Logout error",error);
+    // res.redirect("/pageNotFound")
   }
 }
 

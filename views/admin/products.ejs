@@ -93,14 +93,22 @@
                                 <div class="action-group">
                                     <!-- Block/UnBlock Button -->
                                     <% if (product.isBlocked === false) { %>
-                                        <button class="btn btn-danger" style="width: 80px;" 
-                                          onclick="confirmAction(event, '/admin/blockProduct?id=<%= product._id %>', 'Block this product?')">
+                                        <!-- <button class="btn btn-danger" style="width: 80px;" 
+                                          onclick="confirmAction(event, '/admin/block-product?id=<%= product._id %>', 'Block this product?')">
+                                            Block
+                                        </button> -->
+                                        <button class="btn btn-danger"
+                                            onclick="confirmProduct('<%= product._id %>', 'block')">
                                             Block
                                         </button>
                                     <% } else { %>
-                                        <button class="btn btn-success" style="width: 80px;" 
-                                          onclick="confirmAction(event, '/admin/unblockProduct?id=<%= product._id %>', 'Unblock this product?')">
+                                        <!-- <button class="btn btn-success" style="width: 80px;" 
+                                          onclick="confirmAction(event, '/admin/unblock-product?id=<%= product._id %>', 'Unblock this product?')">
                                           Unblock
+                                        </button> -->
+                                        <button class="btn btn-success"
+                                            onclick="confirmProduct('<%= product._id %>', 'unblock')">
+                                            Unblock
                                         </button>
                                     <% } %>
                                 </div>
@@ -113,7 +121,8 @@
                             <td>
                               <!-- Edit Icon -->
                                     <!-- <a href="/admin/editProduct?id=<%= product._id %>" class="btn-edit"> </a> -->
-                                    <a href="/admin/editProduct?id=<%= product._id %>&page=<%= currentPage %>" class="btn-edit">
+                                     <!--change edit-product route-->
+                                    <a href="/admin/edit-product?id=<%= product._id %>&page=<%= currentPage %>" class="btn-edit">
    
                                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -172,6 +181,39 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+async function confirmProduct(productId, action) {
+  const result = await Swal.fire({
+    title: action === "block" ? "Block this product?" : "Unblock this product?",
+    text: "Please confirm your action",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Yes, confirm it!",
+    background: "#2a2a2a",
+    color: "#fff"
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    const response = await fetch(
+      `/admin/products/${productId}/${action}`,
+      { method: "PATCH" }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      location.reload();
+    } else {
+      throw new Error();
+    }
+  } catch (error) {
+    Swal.fire("Error", "Something went wrong", "error");
+  }
+}
+</script>
+
+<!-- <script>
   async function confirmAction(event, url, titleText) {
     event.preventDefault();
 
@@ -191,4 +233,4 @@
       window.location.href = url;
     }
   }
-</script>
+</script> -->

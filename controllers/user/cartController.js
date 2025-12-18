@@ -10,7 +10,7 @@ function findVariant(product, size) {
 /* --------------------------------------------------------
    ADD TO CART 
 -------------------------------------------------------- */
-const addToCart = async (req, res) => {
+const addToCart = async (req, res, next) => {
   try {   
 
     if (!req.session.user) {
@@ -99,15 +99,16 @@ const addToCart = async (req, res) => {
 
     return res.json({ success: true, message: "Added to cart" });
   } catch (error) {
-    console.error("addToCart error:", error);
-    return res.json({ success: false, message: "Server error" });
+    next(error);
+    // console.error("addToCart error:", error);
+    // return res.json({ success: false, message: "Server error" });
   }
 };
 
 /* --------------------------------------------------------
    UPDATE QUANTITY
 -------------------------------------------------------- */
-const updateQuantity = async (req, res) => {
+const updateQuantity = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const { productId, size, quantity } = req.body;
@@ -133,12 +134,13 @@ const updateQuantity = async (req, res) => {
 
     res.json({ success: true, cart });
   } catch (error) {
-    console.error("updateQuantity error:", error);
-    res.json({ success: false, message: "Server error" });
+    next(error);
+    // console.error("updateQuantity error:", error);
+    // res.json({ success: false, message: "Server error" });
   }
 };
 
-const removeCartItem = async (req, res) => {
+const removeCartItem = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const { productId, size } = req.body;
@@ -154,27 +156,50 @@ const removeCartItem = async (req, res) => {
 
     return res.json({ success: true, message: "Item removed" });
   } catch (error) {
-    console.error("removeCartItem error:", error);
-    return res.json({ success: false, message: "Server error" });
+    next(error);
+    // console.error("removeCartItem error:", error);
+    // return res.json({ success: false, message: "Server error" });
   }
 };
 
 /* --------------------------------------------------------
    PROCEED TO CHECKOUT
 -------------------------------------------------------- */
-const proceedToCheckout = async (req, res) => {
+const proceedToCheckout = async (req, res, next) => {
   try {
     const userId = req.session.user;
 
     const cart = await Cart.findOne({ user: userId }).populate("items.product");
+    console.log("cart:"+cart)
 
     if (!cart || cart.items.length === 0) {
       return res.redirect("/cart");
     }
 
-    // Build checkout items
+     // VALIDATION LOOP
+    for (let item of cart.items) {
+      const product = item.product;
+      const variant = product.variants.find(v => v.size === item.size);
+
+      //  BLOCKED PRODUCT
+      if (product.isBlocked || product.category?.isListed === false) {
+        req.session.checkoutError =
+          `${product.productName} is no longer available. Remove it to continue.`;
+        return res.redirect("/cart");
+      }
+
+      //  OUT OF STOCK
+      if (!variant || variant.stock < item.quantity) {
+        req.session.checkoutError =
+          `${product.productName} is out of stock. Update or remove it to proceed.`;
+        return res.redirect("/cart");
+      }
+    }
+
+    // Build checkout items only after validation passes
     const checkoutItems = cart.items.map((item) => {
       const product = item.product;
+      console.log(product)
       const variant = product.variants.find(v => v.size === item.size);
 
       return {
@@ -212,13 +237,14 @@ const proceedToCheckout = async (req, res) => {
     res.redirect("/checkout");
 
   } catch (error) {
-    console.error("proceedToCheckout error:", error);
-    res.redirect("/pageNotFound");
+    next(error);
+    // console.error("proceedToCheckout error:", error);
+    // res.redirect("/pageNotFound");
   }
 };
 
 
-const getCartPage = async (req, res) => {
+const getCartPage = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const user = userId ? await User.findById(userId).lean() : null;
@@ -285,10 +311,13 @@ const getCartPage = async (req, res) => {
       shipping,
       total,
       cartCount,
+      checkoutError: req.session.checkoutError || null
     });
+    req.session.checkoutError = null;
   } catch (error) {
-    console.error("getCartPage error:", error);
-    res.redirect("/pageNotFound");
+    next(error);
+    // console.error("getCartPage error:", error);
+    // res.redirect("/pageNotFound");
   }
 };
 

@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 
 /* ✅ Get Product Listing Page */
-const productinfo = async (req, res) => {
+const productinfo = async (req, res, next) => {
   try {
     let search = req.query.search || "";
     const page = parseInt(req.query.page) || 1;
@@ -32,23 +32,25 @@ const productinfo = async (req, res) => {
       search
     });
   } catch (error) {
-    console.error(error);
-    res.redirect("/pageerror");
+      next(error);
+    // console.error(error);
+    // res.redirect("/pageerror");
   }
 };
 
 /*  Get Add Product Page */
-const getProductAddPage = async (req, res) => {
+const getProductAddPage = async (req, res, next) => {
   try {
     const category = await Category.find({ isListed: true });
     res.render("addProducts", { cat: category });
   } catch (error) {
-    res.redirect("/pageerror");
+    next(error);
+    //res.redirect("/pageerror");
   }
 };
 
 /*  Add New Product */
-const addProduct = async (req, res) => {
+const addProduct = async (req, res, next) => {
   try {
     const { productName, description, category, variants } = req.body;
     console.log(req.body);
@@ -130,33 +132,43 @@ const addProduct = async (req, res) => {
     return res.status(200).json({ success: true });
 
   } catch (error) {
-    console.log("Error in addProduct:", error);
-    return res.status(500).json({ success: false, message: "Server Error" });
+      next(error);
+    // console.log("Error in addProduct:", error);
+    // return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
-const productBlocked = async (req,res)=>{
+const productBlocked = async (req,res,next)=>{
     try {
-        let id = req.query.id;
+        //let id = req.query.id;
+        let id = req.params.id;
         await Product.updateOne({_id:id},{$set:{isBlocked:true}});
-        res.redirect("/admin/products")
-
+        //res.redirect("/admin/products")
+        return res.status(200).json({ success: true });
     } catch (error) {
-        res.redirect("/pageerror")
+        next(error);
+        // console.error(error);
+        // return res.status(500).json({ success: false });  
+      //res.redirect("/pageerror")
     }
-}
+}  
 
-const productUnBlocked = async (req,res)=>{
+const productUnBlocked = async (req,res,next)=>{
     try {
-        let id = req.query.id;
+        //let id = req.query.id;
+        const id = req.params.id;
         await Product.updateOne({_id:id},{$set:{isBlocked:false}});
-        res.redirect("/admin/products")
+        return res.status(200).json({ success: true });
+        //res.redirect("/admin/products")
     } catch (error) {
-        res.redirect("/pageerror")
+        next(error);
+        // console.error(error);
+        // return res.status(500).json({ success: false });
+      //res.redirect("/pageerror")
     }
 }
 
-const getEditProduct = async (req,res)=>{
+const getEditProduct = async (req,res, next)=>{
     try {
         const id = req.query.id;
         const page = req.query.page || 1;
@@ -168,11 +180,12 @@ const getEditProduct = async (req,res)=>{
             page
         })
     } catch (error) {
-        res.redirect("/pageerror")
+      next(error);  
+      //res.redirect("/pageerror")
     }
 }
 
-const editProduct = async (req, res) => {
+const editProduct = async (req, res, next) => {
   try {
     const productId = req.params.id;
     const page = req.body.page || 1;
@@ -232,8 +245,9 @@ const editProduct = async (req, res) => {
     res.json({ success: true, message: "Product updated successfully!" ,redirectUrl: `/admin/products?page=${page}` });
 
   } catch (error) {
-    console.error(" Error in editProduct:", error);
-    res.json({ success: false, message: "Server Error" });
+    next(error);
+    // console.error(" Error in editProduct:", error);
+    // res.json({ success: false, message: "Server Error" });
   }
 };
 

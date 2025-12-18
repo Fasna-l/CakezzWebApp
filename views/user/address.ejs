@@ -210,11 +210,29 @@ document.addEventListener('DOMContentLoaded', function() {
       body: JSON.stringify(data)
     });
     const result = await res.json();
+    // if (result.success) {
+    //   setTimeout(() => window.location.reload(), 800);
+    // } else {
+    //   alert(result.message || "Failed to add address");
+    // }
     if (result.success) {
-      setTimeout(() => window.location.reload(), 800);
+      Swal.fire({
+        title: "Address Added!",
+        text: "Your address has been saved successfully.",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 1200
+      }).then(() => {
+        window.location.reload();
+      });
     } else {
-      alert(result.message || "Failed to add address");
+      Swal.fire({
+        icon: "error",
+        title: "Something went wrong",
+        text: result.message || "Failed to add address.",
+      });
     }
+
   });
 
   // Delete Address

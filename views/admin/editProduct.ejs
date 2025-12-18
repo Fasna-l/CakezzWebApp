@@ -13,7 +13,8 @@
       <h2 class="page-title">Edit Product</h2>
 
       <!--  Only ONE onsubmit event -->
-      <form action="/admin/editProduct/<%=product._id%>" method="POST" enctype="multipart/form-data" class="edit-product-form" onsubmit="submitProductForm(event)" novalidate>
+        <!--change route-->
+      <form action="/admin/edit-product/<%=product._id%>" method="POST" enctype="multipart/form-data" class="edit-product-form" onsubmit="submitProductForm(event)" novalidate>
         <input type="hidden" name="page" value="<%= page %>">
         <!-- Product Name -->
         <div class="form-group">
@@ -337,9 +338,9 @@ async function submitProductForm(event) {
 
   // ✅ Add deleted images if needed later
   // formData.append("removedImages", JSON.stringify(removedImages)); // (optional if deleting from server)
-
+  // change route : fetch((`/admin/edit-product/<%= product._id %>)
   try {
-    const response = await fetch(`/admin/editProduct/<%= product._id %>`, {
+    const response = await fetch(`/admin/edit-product/<%= product._id %>`, {
       method: "POST",
       body: formData
     });

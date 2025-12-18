@@ -11,7 +11,7 @@
             
             <!-- Add Category Form Card -->
             <div class="form-card">
-                <form class="add-category-form" method="post" action="/admin/editCategory/<%=category._id%>" onsubmit="return handleEditFormSubmit(event)" novalidate >
+                <form class="add-category-form" method="post" action="/admin/edit-category/<%=category._id%>" onsubmit="return handleEditFormSubmit(event)" novalidate >
                     <!-- Name Field -->
                     <div class="form-group">
                         <label for="category-name">Name :</label>
@@ -54,7 +54,7 @@
     const categoryId   = "<%= category._id %>";
 
     try {
-      const res  = await fetch(`/admin/editCategory/${categoryId}`, {
+      const res  = await fetch(`/admin/edit-category/${categoryId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ categoryName, description })
