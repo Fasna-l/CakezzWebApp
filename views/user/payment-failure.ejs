@@ -1,0 +1,30 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/payment-success.css">
+
+<div class="success-wrap">
+  <div class="success-card">
+
+    <!-- Success Icon -->
+    <div class="success-icon">
+      <img src="/images/payment-fail.png" alt="failed">
+    </div>
+
+    <!-- Heading -->
+    <h2 class="success-title">Payment Failed</h2>
+
+    <!-- Sub Text -->
+    <p class="success-msg">
+      Transaction has been declined by the bank.
+    </p>
+
+    <!-- Actions --> 
+    <div class="success-buttons">
+      <a href="/order/<%= orderId %>" class="btn view-btn">View Order</a>
+      <a href="/checkout/payment" class="btn shop-btn">Retry Payment</a>
+      <a href="/shop" class="btn shop-btn">Continue Shopping</a> 
+    </div>
+
+  </div>
+</div>
+
+<%- include('../partials/user/footer') %>

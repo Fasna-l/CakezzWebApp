@@ -67,7 +67,7 @@ const orderSchema = new mongoose.Schema({
 
   paymentMethod: {
     type: String,
-    enum: ["COD", "Razorpay", "WALLET"],
+    enum: ["COD", "RAZORPAY", "WALLET"],
     required: true,
   },
 
@@ -86,6 +86,7 @@ const orderSchema = new mongoose.Schema({
   orderStatus: {
   type: String,
   enum: [
+    "Payment Pending",
     "Pending",
     "Processing",
     "Packed",

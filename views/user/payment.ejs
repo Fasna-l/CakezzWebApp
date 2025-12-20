@@ -21,13 +21,13 @@
           </label>
 
           <label class="radio-option">
-            <input type="radio" name="paymentMethod" value="RazorPay">
-            <span>Razer Pay</span>
+            <input type="radio" name="paymentMethod" value="RAZORPAY">
+            <span>RAZORPAY</span>
           </label>
 
           <label class="radio-option">
-            <input type="radio" name="paymentMethod" value="Wallet">
-            <span>Wallet</span>
+            <input type="radio" name="paymentMethod" value="WALLET">
+            <span>WALLET</span>
           </label>
         </div>
 
@@ -106,6 +106,9 @@
   </div>
 </div>
 
+<!-- RAZORPAY SDK -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
 <script>
 // Copy coupon code
 document.querySelectorAll(".copy-btn").forEach(btn => {
@@ -128,6 +131,86 @@ function updateMethod() {
 updateMethod();
 
 radios.forEach(r => r.addEventListener("change", updateMethod));
+
+
+//place order submit (razorpay)
+
+const placeOrderForm = document.getElementById("placeOrderForm");
+
+placeOrderForm.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const paymentMethod = hidden.value;
+
+  const response = await fetch("/checkout/place-order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ selectedPayment: paymentMethod })
+  });
+
+  // COD FLOW → redirect
+  if (paymentMethod === "COD") {
+    window.location.href = response.url;
+    return;
+  }
+
+  // ONLINE PAYMENT FLOW
+  const data = await response.json();
+  if (!data.online) return;
+
+  // Create Razorpay order
+  const rpRes = await fetch("/payment/create-razorpay-order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId: data.orderId })
+  });
+
+  const rpData = await rpRes.json();
+
+  const options = {
+    key: rpData.key,
+    amount: rpData.razorpayOrder.amount,
+    currency: "INR",
+    order_id: rpData.razorpayOrder.id,
+
+    handler: async function (response) {
+      const verifyRes = await fetch("/payment/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+          orderId: data.orderId
+        })
+      });
+
+      const verifyData = await verifyRes.json();
+
+      if (verifyData.success) {
+        window.location.href = `/checkout/success/${data.orderId}`;
+      } else {
+        window.location.href = `/order-failure/${data.orderId}`;
+      }
+    },
+    //FAILURE HANDLER
+    modal: {
+      ondismiss: async function () {
+          await fetch("/payment/mark-failed", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId: data.orderId })
+        });
+        // User clicked FAILURE / closed popup / bank rejected
+        window.location.href = `/order-failure/${data.orderId}`;
+      }
+    }
+  };
+
+  const rzp = new Razorpay(options);
+  rzp.open();
+});
+
 </script>
 
 <%- include('../partials/user/footer') %>

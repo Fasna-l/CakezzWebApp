@@ -106,7 +106,8 @@ router.get("/checkout/payment",userAuth, checkOutController.getPaymentPage);
 router.post("/checkout/place-order",userAuth, checkOutController.placeOrder);
 router.get("/checkout/success/:orderId",userAuth, checkOutController.getSuccessPage);
 router.get("/personalize", userAuth, checkOutController.getPersonalizePage);
-
+// payment failure page
+router.get("/order-failure/:orderId", userAuth, checkOutController.loadPaymentFailurePage);
 
 //order management
 router.get("/order", userAuth, orderController.loadOrderList);
@@ -121,6 +122,7 @@ router.get("/order/invoice/:id", userAuth, orderController.downloadInvoice);
 //return single item
 router.get("/order/:orderId/item/:itemId/return", userAuth,orderController.loadSingleReturnPage);
 router.post("/order/:orderId/item/:itemId/return", userAuth,orderController.submitSingleReturn);
+
 
 
 

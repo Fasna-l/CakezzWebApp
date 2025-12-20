@@ -8,6 +8,7 @@ const passport = require("./config/passport")
 const nocache = require('nocache');
 const userRouter = require("./routes/userRouter");
 const adminRouter = require("./routes/adminRouter");
+const paymentRoutes = require("./routes/paymentRoutes");
 const errorHandler = require("./middlewares/errorHandler");
 //const User = require("./models/userSchema");
 //const Cart = require("./models/cartSchema");
@@ -68,6 +69,7 @@ app.set("views",[path.join(__dirname,'views/user'),path.join(__dirname,'views/ad
 
 app.use("/",userRouter);
 app.use("/admin",adminRouter);
+app.use("/payment", paymentRoutes);
 app.use(errorHandler);
 app.listen(process.env.PORT, ()=>{
     console.log("Server Running");

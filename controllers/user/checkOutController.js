@@ -177,35 +177,12 @@ const placeOrder = async (req, res, next) => {
     const paymentMethod = req.body.selectedPayment;
 
     const user = await User.findById(userId);
-
+    if (!user) return res.redirect("/login");
     const addressDoc = await Address.findOne({ user: userId });
     const selectedAddress = addressDoc.addresses.find(a => a.isDefault);
+    if (!selectedAddress) return res.redirect("/address");
 
     const items = [];
-
-    //  REDUCE STOCK FOR EACH ITEM
-    // for (let cart of req.session.checkoutItems) {
-    //   const product = await Product.findById(cart.productId);
-
-    //   const variant = product.variants.find(v => v.size === cart.size);
-    //   if (!variant) continue;
-
-    //   // Reduce stock
-    //   variant.stock = Math.max(0, variant.stock - cart.quantity);
-
-    //   await product.save();
-
-    //   // Push order item
-    //   items.push({
-    //     productId: product._id,
-    //     productName: product.productName,
-    //     productImage: product.productImage[0],
-    //     size: cart.size,
-    //     price: variant.price,
-    //     quantity: cart.quantity
-    //   });
-    // }
-
     // SAFETY VALIDATION BEFORE STOCK REDUCTION
     for (let cartItem of req.session.checkoutItems) {
 
@@ -246,8 +223,26 @@ const placeOrder = async (req, res, next) => {
         productImage: product.productImage[0],
         size: cartItem.size,
         price: variant.price,
-        quantity: cartItem.quantity
+        quantity: cartItem.quantity,
+        status: "Pending"
       });
+    }
+
+
+      /* ======================================================
+       3. SET ORDER & PAYMENT STATUS (IMPORTANT FIX)
+    ====================================================== */
+    let orderStatus;
+    let paymentStatus;
+
+    if (paymentMethod === "RAZORPAY") {
+      orderStatus = "Payment Pending";
+      paymentStatus = "Pending";
+    }
+
+    if (paymentMethod === "COD") {
+      orderStatus = "Processing";
+      paymentStatus = "Pending";
     }
 
     //  CREATE ORDER
@@ -274,7 +269,9 @@ const placeOrder = async (req, res, next) => {
       totalAmount: req.session.checkoutTotals.grandTotal,
 
       paymentMethod,
-      paymentStatus: paymentMethod === "COD" ? "Pending" : "Processing",
+      orderStatus,
+      paymentStatus,
+      //paymentStatus: paymentMethod === "COD" ? "Pending" : "Processing",
 
       deliveryDate: req.session.deliveryDate
     });
@@ -288,11 +285,25 @@ const placeOrder = async (req, res, next) => {
     );
 
     //  CLEAR SESSION CART
-    req.session.checkoutItems = [];
-    req.session.checkoutTotals = null;
+    // req.session.checkoutItems = [];
+    // req.session.checkoutTotals = null;
+    if (paymentMethod === "COD") {
+      req.session.checkoutItems = [];
+      req.session.checkoutTotals = null;
+    }
 
     //  REDIRECT
-    return res.redirect(`/checkout/success/${order._id}`);
+    if(paymentMethod === "COD"){
+      return res.redirect(`/checkout/success/${order._id}`);
+    }
+    //return res.redirect(`/checkout/success/${order._id}`);
+    if(paymentMethod === "RAZORPAY"){
+      return res.json({
+        online: true,
+        orderId: order._id
+      });
+    }
+    return res.redirect("/checkout");
 
   } catch (error) {
     next(error);
@@ -366,6 +377,40 @@ const getPersonalizePage = async (req, res, next) => {
   }
 };
 
+// const loadPaymentFailurePage = async (req, res, next) => {
+//   try {
+//     const userId = req.session.user;
+//     const user = await User.findById(userId).lean();
+
+//     res.render("payment-failure", {
+//       user
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+const loadPaymentFailurePage = async (req, res, next) => {
+  try {
+    const userId = req.session.user;
+    const user = await User.findById(userId).lean();
+
+    const orderId = req.params.orderId;
+
+    // Optional: verify order belongs to user
+    const order = await Order.findOne({ _id: orderId, userId });
+
+    if (!order) {
+      return res.redirect("/order");
+    }
+
+    res.render("payment-failure", { user , orderId });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 module.exports = {
   getCheckout,
@@ -376,5 +421,6 @@ module.exports = {
   getPaymentPage,
   placeOrder,
   getSuccessPage,
-  getPersonalizePage
+  getPersonalizePage,
+  loadPaymentFailurePage 
 };

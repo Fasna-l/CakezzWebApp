@@ -530,7 +530,6 @@ const submitSingleReturn = async (req, res, next) => {
     // res.redirect("/pageNotFound");
   }
 };
-
 /* --------------------------------------------------------
    HELPER: RECALCULATE ORDER TOTALS
 ---------------------------------------------------------*/

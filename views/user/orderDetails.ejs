@@ -37,6 +37,11 @@
   const stage3 = ['Shipped','Out for Delivery','Delivered'].includes(order.orderStatus);
   const stage4 = ['Delivered'].includes(order.orderStatus);
 %>
+
+<%
+  const isPaymentFailed = order.paymentStatus === "Failed";
+%>
+
       <div class="order-header">
         <h2>Order Details</h2>
         <p class="order-id">Order ID: <%= order.orderId %></p>
@@ -45,7 +50,7 @@
 
       <!-- Modern Order Tracking -->
 
-
+<% if (!isPaymentFailed) { %>
 <div class="winni-tracking-container">
 
   <!-- STEP 1 -->
@@ -79,6 +84,7 @@
   </div>
 
 </div>
+<% } %>
 
       <!-- TOP SUMMARY BOX -->
       <div class="order-summary-box">
@@ -96,6 +102,19 @@
         </p>
 
         <ul class="summary-list">
+          <!-- Payment Method -->
+          <li>
+            Payment Method:
+            <strong><%= order.paymentMethod %></strong>
+          </li>
+          <li>
+            Payment Status:
+            <strong class="payment-status <%= order.paymentStatus.toLowerCase() %>">
+              <%= order.paymentStatus %>
+            </strong>
+          </li>
+
+  
           <li>Total Quantity:
             <strong><%= order.items.reduce((t,i)=>t+i.quantity,0) %></strong>
           </li>
@@ -133,6 +152,14 @@
           <% if (order.orderStatus === 'Delivered') { %>
             <a href="/order/return/<%= order._id %>" class="btn btn-secondary">Request Return</a>
           <% } %>
+
+          <% if (order.paymentStatus === "Failed") { %>
+            <!-- <p class="error-text">Payment Failed</p> -->
+            <a href="/checkout/payment" class="btn retry-btn">
+            🔁 Retry Payment
+            </a>
+          <% } %>
+
 
           <a href="/order/invoice/<%= order._id %>" class="btn btn-primary">Download Invoice</a>
         </div>

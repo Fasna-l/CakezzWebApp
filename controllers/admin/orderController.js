@@ -133,6 +133,18 @@ const updateOrderStatus = async (req, res, next) => {
     const { status } = req.body;
 
     let order = await Order.findById(orderId).populate("userId").lean();
+    // 🔒 BLOCK admin updates for unpaid Razorpay orders
+    if (
+      order.paymentMethod === "RAZORPAY" &&
+      order.paymentStatus !== "Paid"
+    ) {
+      return res.render("adminOrderDetails", {
+        order,
+        toastMessage: "Cannot update order status. Online payment not completed.",
+        toastType: "error"
+      });
+    }
+
     if (!order) {
       return res.render("adminOrderDetails", {
         toastMessage: "Order not found!",
