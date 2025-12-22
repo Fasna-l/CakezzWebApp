@@ -1,0 +1,93 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/password.css">
+
+<div class="account-container">
+  <!-- Sidebar -->
+  <div class="account-sidebar">
+    <h3 class="sidebar-title">My Wallet</h3>
+    <ul class="sidebar-menu">
+      <li><a href="/order" class="sidebar-link"><i class="fas fa-shopping-bag"></i> Order</a></li>
+      <li><a href="/wishlist" class="sidebar-link"><i class="fas fa-heart"></i> Wishlist</a></li>
+      <li><a href="/address" class="sidebar-link"><i class="fas fa-map-marker-alt"></i> Address</a></li>
+      <% if (!user.isGoogleUser) { %>
+        <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li>
+      <% } %>
+      <li><a href="/account" class="sidebar-link"><i class="fas fa-user"></i> Account Detail</a></li>
+      <li><a href="/wallet" class="sidebar-link active"><i class="fas fa-wallet"></i> Wallet</a></li>
+      <li><a href="/referral" class="sidebar-link"><i class="fas fa-share-alt"></i> Referral</a></li>
+      <li><a href="/logout" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  
+    <div class="account-content">
+        <div class="account-header">
+            <h2>TRANSACTION DETAILS</h2>
+        </div>
+
+        <table class="wallet-table">
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Order Id</th>
+                    <th>Description</th>
+                    <th>Date</th>
+                    <th>Withdrawal</th>
+                    <th>Deposit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% transactions.forEach(tx => { %>
+                <tr>
+                    <td><%= tx._id %></td>
+                    <td>
+                        <% if (tx.orderId) { %>
+                            <a href="/order/<%= tx.orderId._id %>">
+                                <%= tx.orderId.orderId %>
+                            </a>
+                        <% } else { %>
+                            -
+                        <% } %>
+                    </td>
+                    <!-- <td><%= tx._id %></td> -->
+                    <td><%= tx.description %></td>
+                    <td><%= tx.createdAt.toDateString() %></td>
+
+                <% if(tx.type === 'purchase' || tx.type === 'withdrawal'){ %>
+                    <td>₹ <%= tx.amount %></td>
+                    <td>-</td>
+                <% } else { %>
+                    <td>-</td>
+                    <td>₹ <%= tx.amount %></td>
+                <% } %>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        <div class="pagination">
+  <% if (currentPage > 1) { %>
+    <a href="/wallet/history?page=<%= currentPage - 1 %>" class="pagination-link">Previous</a>
+  <% } %>
+
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <a href="/wallet/history?page=<%= i %>"
+       class="pagination-link <%= i === currentPage ? 'active' : '' %>">
+      <%= i %>
+    </a>
+  <% } %>
+
+  <% if (currentPage < totalPages) { %>
+    <a href="/wallet/history?page=<%= currentPage + 1 %>" class="pagination-link">Next</a>
+  <% } %>
+</div>
+    </div>
+  
+
+    
+</div>
+
+
+
+
+<%- include('../partials/user/footer') %>

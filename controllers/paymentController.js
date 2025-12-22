@@ -12,7 +12,8 @@ const createRazorpayOrder = async (req, res, next) => {
     }
 
     const options = {
-      amount: order.totalAmount * 100, // paise
+      amount: order.payableAmount * 100,
+      //amount: order.totalAmount * 100, // paise
       currency: "INR",
       receipt: order.orderId,
     };

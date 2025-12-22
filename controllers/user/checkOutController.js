@@ -3,6 +3,7 @@ const Product = require("../../models/productSchema");
 const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
 const Cart = require("../../models/cartSchema");
+const Wallet = require("../../models/walletSchema");
 const crypto = require("crypto");
 
 /* ------------------------------------
@@ -173,8 +174,35 @@ const getPaymentPage = async (req, res, next) => {
 -------------------------------------- */
 const placeOrder = async (req, res, next) => {
   try {
+    if (
+      !req.session.checkoutTotals ||
+      !req.session.checkoutTotals.grandTotal ||
+      !req.session.checkoutItems ||
+      req.session.checkoutItems.length === 0
+      ) {
+        req.session.checkoutError = "Your checkout session expired. Please try again.";
+        return res.redirect("/cart");
+    }
+
     const userId = req.session.user;
     const paymentMethod = req.body.selectedPayment;
+
+    let walletUsed = 0;
+    let remainingAmount = req.session.checkoutTotals.grandTotal;
+    let wallet = null;
+
+    if (paymentMethod === "WALLET") {
+      wallet = await Wallet.findOne({ userId });
+
+      if (!wallet || wallet.balance <= 0) {
+        req.session.checkoutError = "Insufficient wallet balance";
+        return res.redirect("/checkout/payment");
+      }
+
+      walletUsed = Math.min(wallet.balance, remainingAmount);
+      remainingAmount = remainingAmount - walletUsed;
+    }
+
 
     const user = await User.findById(userId);
     if (!user) return res.redirect("/login");
@@ -189,19 +217,19 @@ const placeOrder = async (req, res, next) => {
       const product = await Product.findById(cartItem.productId).populate("category");
       const variant = product.variants.find(v => v.size === cartItem.size);
 
-      // ❌ BLOCKED PRODUCT
+      //  BLOCKED PRODUCT
       if (product.isBlocked) {
         req.session.checkoutError = `${product.productName} is unavailable.`;
         return res.redirect("/cart");
       }
 
-      // ❌ DISABLED CATEGORY
+      //  DISABLED CATEGORY
       if (product.category?.isListed === false) {
         req.session.checkoutError = `${product.productName} belongs to a disabled category.`;
         return res.redirect("/cart");
       }
 
-      // ❌ STOCK CHECK
+      //  STOCK CHECK
       if (!variant || variant.stock < cartItem.quantity) {
         req.session.checkoutError = `${product.productName} is out of stock.`;
         return res.redirect("/cart");
@@ -235,15 +263,26 @@ const placeOrder = async (req, res, next) => {
     let orderStatus;
     let paymentStatus;
 
+    if (paymentMethod === "COD") {
+      orderStatus = "Processing";
+      paymentStatus = "Pending";
+    }
+
     if (paymentMethod === "RAZORPAY") {
       orderStatus = "Payment Pending";
       paymentStatus = "Pending";
     }
 
-    if (paymentMethod === "COD") {
-      orderStatus = "Processing";
-      paymentStatus = "Pending";
+    if (paymentMethod === "WALLET") {
+      if (remainingAmount === 0) {
+        orderStatus = "Processing";
+        paymentStatus = "Paid";
+      } else {
+        orderStatus = "Payment Pending";
+        paymentStatus = "Pending";
+      }
     }
+
 
     //  CREATE ORDER
     const order = new Order({
@@ -267,7 +306,8 @@ const placeOrder = async (req, res, next) => {
       shippingCharge: req.session.checkoutTotals.shipping,
       couponDiscount: 0,
       totalAmount: req.session.checkoutTotals.grandTotal,
-
+      walletUsed: walletUsed,                              
+      payableAmount: remainingAmount,//razorpay part in wallet
       paymentMethod,
       orderStatus,
       paymentStatus,
@@ -277,6 +317,19 @@ const placeOrder = async (req, res, next) => {
     });
 
     await order.save();
+
+    //  WALLET DEDUCTION
+    if (paymentMethod === "WALLET" && walletUsed > 0) {
+      await wallet.addTransaction({
+        type: "purchase",
+        amount: walletUsed,
+        orderId: order._id,
+        description: remainingAmount === 0
+          ? "Full wallet payment"
+          : "Partial wallet payment"
+      });
+    }
+
 
     //  CLEAR USER CART FROM DATABASE
     await Cart.findOneAndUpdate(
@@ -297,12 +350,19 @@ const placeOrder = async (req, res, next) => {
       return res.redirect(`/checkout/success/${order._id}`);
     }
     //return res.redirect(`/checkout/success/${order._id}`);
-    if(paymentMethod === "RAZORPAY"){
+    if (paymentMethod === "WALLET" && remainingAmount === 0) {
+      req.session.checkoutItems = [];
+      req.session.checkoutTotals = null;
+      return res.redirect(`/checkout/success/${order._id}`);
+    }
+
+    if (paymentMethod === "RAZORPAY" || (paymentMethod === "WALLET" && remainingAmount > 0)) {
       return res.json({
         online: true,
         orderId: order._id
       });
     }
+
     return res.redirect("/checkout");
 
   } catch (error) {

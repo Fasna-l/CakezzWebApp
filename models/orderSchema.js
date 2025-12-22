@@ -65,6 +65,16 @@ const orderSchema = new mongoose.Schema({
 
   totalAmount: { type: Number, required: true },
 
+  walletUsed: {
+    type: Number,
+    default: 0,
+  },
+
+  payableAmount: {
+    type: Number,
+    default: 0,
+  },
+
   paymentMethod: {
     type: String,
     enum: ["COD", "RAZORPAY", "WALLET"],

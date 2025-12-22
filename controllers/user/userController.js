@@ -6,6 +6,7 @@ const Category = require("../../models/categorySchema");
 const Product = require("../../models/productSchema");
 const Cart = require("../../models/cartSchema");
 const Otp = require("../../models/otpSchema");  // import OTP Model
+const Wallet = require("../../models/walletSchema");
 const mongoose = require("mongoose");
 const env = require("dotenv").config();
 const bcrypt = require("bcrypt");
@@ -38,6 +39,13 @@ const googleAuth = async (req, res, next) => {
     }
 
     req.session.user = user._id;
+
+     // ENSURE WALLET EXISTS FOR GOOGLE USER
+    const walletExists = await Wallet.findOne({ userId: user._id });
+    if (!walletExists) {
+      await Wallet.create({ userId: user._id });
+    }
+
     res.redirect("/?message=Logged in with Google successfully&icon=success");
   } catch (error) {
     next(error);
@@ -230,6 +238,13 @@ const verifyOtp = async (req, res,next) => {
         const hashedPassword = await securePassword(password);
         const newUser = new User({ name, email, password: hashedPassword });
         await newUser.save();
+
+        // AUTO-CREATE WALLET (STEP 1)
+        await Wallet.create({
+          userId: newUser._id,
+          balance: 0
+        });
+
         req.session.user = newUser._id;
         console.log("User data saved successfully");
 

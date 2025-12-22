@@ -1,6 +1,7 @@
 const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
+const Wallet = require("../../models/walletSchema");
 
 /* ================================================================
    1. LOAD ORDER LIST (Search + Filter + Pagination)
@@ -323,6 +324,22 @@ const approveReturnItem = async (req, res, next) => {
       await product.save();
     }
 
+     //WALLET REFUND (ONLY AFTER ADMIN APPROVAL)
+    if (order.paymentStatus === "Paid") {
+      let wallet = await Wallet.findOne({ userId: order.userId });
+
+      if (!wallet) {
+        wallet = await Wallet.create({ userId: order.userId, balance: 0 });
+      }
+
+      await wallet.addTransaction({
+        type: "refund",
+        amount: item.refundAmount,
+        orderId: order._id,
+        description: `Refund for returned item: ${item.productName}`
+      });
+    }
+
     // Push history log
     order.statusHistory.push({
       status: "Item Returned",
@@ -525,6 +542,8 @@ const approveWholeReturn = async (req, res ,next) => {
     const order = await Order.findById(orderId);
     if (!order) return res.redirect("/admin/orders");
 
+    let totalRefund = 0;
+
     // Use for..of so await works correctly
     for (const item of order.items) {
       if (item.status === "Return Requested") {
@@ -536,6 +555,8 @@ const approveWholeReturn = async (req, res ,next) => {
         // Refund calculation
         item.refundAmount = item.price * item.quantity;
         item.refundStatus = "Processed";
+
+        totalRefund += item.refundAmount;
 
         // Restore product stock
         const product = await Product.findById(item.productId);
@@ -551,6 +572,22 @@ const approveWholeReturn = async (req, res ,next) => {
     }
 
     order.orderStatus = "Returned";
+
+    // WALLET REFUND (ONCE FOR FULL ORDER)
+    if (order.paymentStatus === "Paid" && totalRefund > 0) {
+      let wallet = await Wallet.findOne({ userId: order.userId });
+
+      if (!wallet) {
+        wallet = await Wallet.create({ userId: order.userId, balance: 0 });
+      }
+
+      await wallet.addTransaction({
+        type: "refund",
+        amount: totalRefund,
+        orderId: order._id,
+        description: "Refund for returned order"
+      });
+    }
 
     order.statusHistory.push({
       status: "Returned",

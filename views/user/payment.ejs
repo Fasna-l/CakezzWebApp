@@ -148,6 +148,13 @@ placeOrderForm.addEventListener("submit", async function (e) {
     body: JSON.stringify({ selectedPayment: paymentMethod })
   });
 
+  // HANDLE BACKEND REDIRECTS (COD + WALLET FULL PAYMENT)
+  if (response.redirected) {
+    window.location.href = response.url;
+    return;
+  }
+
+
   // COD FLOW → redirect
   if (paymentMethod === "COD") {
     window.location.href = response.url;

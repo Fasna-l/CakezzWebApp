@@ -8,6 +8,7 @@ const productController = require("../controllers/user/productController");
 const cartController = require("../controllers/user/cartController");
 const checkOutController = require("../controllers/user/checkOutController");
 const orderController = require("../controllers/user/orderController");
+const walletController = require("../controllers/user/walletController");
 const {userAuth,adminAuth} = require("../middlewares/auth");
 const { uploads } = require("../helpers/multer");
 
@@ -123,6 +124,12 @@ router.get("/order/invoice/:id", userAuth, orderController.downloadInvoice);
 router.get("/order/:orderId/item/:itemId/return", userAuth,orderController.loadSingleReturnPage);
 router.post("/order/:orderId/item/:itemId/return", userAuth,orderController.submitSingleReturn);
 
+// Wallet management
+router.get("/wallet", userAuth, walletController.loadWallet);
+router.get("/wallet/history", userAuth, walletController.loadWalletHistory);
+// Wallet recharge (Razorpay)
+router.post("/wallet/recharge", userAuth, walletController.createWalletRechargeOrder);
+router.post("/wallet/recharge/verify", userAuth, walletController.verifyWalletRecharge);
 
 
 

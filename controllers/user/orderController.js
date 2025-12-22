@@ -1,6 +1,7 @@
 const Order = require("../../models/orderSchema");
 const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
+const Wallet = require("../../models/walletSchema");
 const PDFDocument = require("pdfkit");
 
 /* --------------------------------------------------------
@@ -122,6 +123,8 @@ const cancelOrder = async (req, res, next) => {
       return res.redirect("/order");
     }
 
+    // Track refund amount
+    let refundAmount = 0;
     // -------------------------------
     // CANCEL SINGLE ITEM
     // -------------------------------
@@ -129,6 +132,8 @@ const cancelOrder = async (req, res, next) => {
       const item = order.items.id(itemId);
       if (!item) return res.redirect(`/order/${orderId}`);
 
+      // Calculate refund for this item
+      refundAmount = item.price * item.quantity;
       // Restore stock
       const product = await Product.findById(item.productId);
       const variant = product.variants.find(v => v.size === item.size);
@@ -142,6 +147,8 @@ const cancelOrder = async (req, res, next) => {
       item.cancellationReason = reason || "No reason provided";
       item.cancelledAt = new Date();
 
+      item.refundAmount = refundAmount;
+      item.refundStatus = "Processed";
       // Required because items is nested
       order.markModified("items");
 
@@ -172,6 +179,7 @@ const cancelOrder = async (req, res, next) => {
     // CANCEL FULL ORDER
     // -------------------------------
     else {
+      refundAmount = order.totalAmount;
       for (let it of order.items) {
         const product = await Product.findById(it.productId);
         const variant = product.variants.find(v => v.size === it.size);
@@ -181,6 +189,8 @@ const cancelOrder = async (req, res, next) => {
         }
 
         it.status = "Cancelled";
+        it.refundAmount = it.price * it.quantity;
+        it.refundStatus = "Processed";
       }
 
       order.orderStatus = "Cancelled";
@@ -191,6 +201,25 @@ const cancelOrder = async (req, res, next) => {
         status: "Order Cancelled",
         comment: reason,
         date: new Date()
+      });
+    }
+
+    //  WALLET REFUND
+    
+    if (refundAmount > 0 && order.paymentStatus === "Paid") {
+      let wallet = await Wallet.findOne({ userId: order.userId });
+
+      if (!wallet) {
+        wallet = await Wallet.create({ userId: order.userId, balance: 0 });
+      }
+
+      await wallet.addTransaction({
+        type: "refund",
+        amount: refundAmount,
+        orderId: order._id,
+        description: itemId
+          ? "Refund for cancelled item"
+          : "Refund for cancelled order"
       });
     }
 
