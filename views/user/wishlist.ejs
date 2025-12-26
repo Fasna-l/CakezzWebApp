@@ -1,0 +1,134 @@
+<%- include('../partials/user/header') %>
+
+<link rel="stylesheet" href="/css/user-style/shop.css">
+
+<div class="shop-container">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a href="/">Home</a>
+    <span>&gt;</span>
+    <span>Wishlist</span>
+  </nav>
+
+  <!-- Wishlist Title -->
+  <div class="shop-controls-container">
+    <div class="product-count">
+      Wishlist (<span id="wishlist-page-count"><%= totalWishlistItems %></span>)
+    </div>
+  </div>
+
+  <!-- Wishlist Products Grid -->
+  <div class="products-grid">
+
+    <% if (!wishlist || wishlist.items.length === 0) { %>
+      <p>Your wishlist is empty.</p>
+    <% } %>
+
+    <% wishlist.items.forEach(item => { 
+        const product = item.product;
+        const oneKgVariant = product.variants && product.variants.length > 0 
+          ? product.variants[0] 
+          : null;
+    %>
+
+      <div class="product-card">
+
+        <!-- Product Image -->
+        <a href="/product/<%= product._id %>">
+          <img 
+            src="/uploads/product/<%= product.productImage[0] %>" 
+            alt="<%= product.productName %>" 
+            class="product-img">
+        </a>
+
+        <!-- Product Name -->
+        <h3 class="product-name">
+          <a href="/product/<%= product._id %>" class="product-link">
+            <%= product.productName %>
+          </a>
+        </h3>
+
+        <!-- Price -->
+        <p class="product-price">
+          ₹<%= product.minPrice || oneKgVariant?.price || 'N/A' %>
+        </p>
+
+        <!-- Remove from Wishlist (Heart Icon) -->
+        <div 
+          class="wishlist-icon active remove-from-wishlist"
+          data-product-id="<%= product._id %>">
+          <i class="fas fa-heart"></i>
+        </div>
+
+        <!-- Stock Info -->
+        <% if (!oneKgVariant || oneKgVariant.stock <= 0) { %>
+          <p class="out-of-stock">Out of stock (1 kg)</p>
+        <% } %>
+
+        <!-- Add to Cart Button -->
+        <button 
+          class="add-to-cart-btn from-wishlist"
+          data-product-id="<%= product._id %>"
+          data-size="1kg"
+          data-qty="1"
+          <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'disabled' : '' %>>
+          
+          <i class="fas fa-shopping-cart"></i>
+          <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
+        </button>
+
+        <!-- Rating Badge -->
+        <% 
+          let avg = 0;
+          if (product.reviews && product.reviews.length) {
+            avg = (
+              product.reviews.reduce((a, b) => a + b.rating, 0) 
+              / product.reviews.length
+            ).toFixed(1);
+          }
+        %>
+
+        <% if (avg > 0) { %>
+          <span class="rating-badge">★ <%= avg %></span>
+        <% } %>
+
+      </div>
+    <% }) %>
+
+  </div>
+
+  <!-- Pagination -->
+  <% if (wishlistTotalPages > 1) { %>
+    <div class="pagination">
+
+      <% if (wishlistCurrentPage > 1) { %>
+        <a 
+          href="/wishlist?page=<%= wishlistCurrentPage - 1 %>" 
+          class="pagination-link">
+          Previous
+        </a>
+      <% } %>
+
+      <% for (let i = 1; i <= wishlistTotalPages; i++) { %>
+        <a 
+          href="/wishlist?page=<%= i %>" 
+          class="pagination-link <%= i === wishlistCurrentPage ? 'active' : '' %>">
+          <%= i %>
+        </a>
+      <% } %>
+
+      <% if (wishlistCurrentPage < wishlistTotalPages) { %>
+        <a 
+          href="/wishlist?page=<%= wishlistCurrentPage + 1 %>" 
+          class="pagination-link">
+          Next
+        </a>
+      <% } %>
+
+    </div>
+  <% } %>
+
+</div>
+
+<%- include('../partials/user/footer') %>

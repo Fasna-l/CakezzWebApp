@@ -1,0 +1,141 @@
+const Wishlist = require("../../models/wishlistSchema");
+const Product = require("../../models/productSchema");
+
+/* ===============================
+   LOAD WISHLIST PAGE
+================================ */
+const loadWishlist = async (req, res, next) => {
+  try {
+    const userId = req.session.user;
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 4;
+    const skip = (page - 1) * limit;
+
+    const wishlist = await Wishlist.findOne({ user: userId })
+      .populate("items.product");
+
+    if (!wishlist || wishlist.items.length === 0) {
+      return res.render("wishlist", {
+        wishlist: { items: [] },
+        totalWishlistItems: 0,
+        wishlistCurrentPage: 1,
+        wishlistTotalPages: 1
+      });
+    }
+
+    const validItems = wishlist.items.filter(
+      i => i.product && !i.product.isBlocked
+    );
+
+    const totalItems = validItems.length;
+    const paginatedItems = validItems.slice(skip, skip + limit);
+
+    res.render("wishlist", {
+      wishlist: { items: paginatedItems },
+      totalWishlistItems: totalItems,
+      wishlistCurrentPage: page,
+      wishlistTotalPages: Math.ceil(totalItems / limit)
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* ===============================
+   ADD / REMOVE WISHLIST
+================================ */
+const toggleWishlist = async (req, res, next) => {
+  try {
+    if (!req.session.user) {
+      return res.json({ success: false, message: "Please login to continue" });
+    }
+
+    const { productId } = req.body;
+    const userId = req.session.user;
+
+    const product = await Product.findById(productId);
+    if (!product || product.isBlocked) {
+      return res.json({ success: false, message: "Product unavailable" });
+    }
+
+    let wishlist = await Wishlist.findOne({ user: userId });
+    if (!wishlist) wishlist = new Wishlist({ user: userId, items: [] });
+
+    const exists = wishlist.items.find(
+      i => i.product.toString() === productId
+    );
+
+    if (exists) {
+      wishlist.items = wishlist.items.filter(
+        i => i.product.toString() !== productId
+      );
+      await wishlist.save();
+      const count = wishlist.items.length;
+      return res.json({
+        success: true,
+        message: "Removed from wishlist",
+        isAdded: false,
+        wishlistCount: count
+      });
+    } else {
+      wishlist.items.push({ product: productId });
+      await wishlist.save();
+      const count = wishlist.items.length;
+      return res.json({
+        success: true,
+        message: "Added to wishlist",
+        isAdded: true,
+        wishlistCount: count
+      });
+    }
+  } catch (error) {
+    next(error)
+    //res.json({ success: false, message: "Wishlist error" });
+  }
+};
+
+/* ===============================
+   REMOVE FROM WISHLIST (PAGE)
+================================ */
+const removeFromWishlist = async (req, res, next) => {
+  try {
+    const userId = req.session.user;
+    const { productId } = req.body;
+
+    await Wishlist.updateOne(
+      { user: userId },
+      { $pull: { items: { product: productId } } }
+    );
+
+    res.json({ success: true });
+  } catch(error) {
+    next(error)
+    //res.json({ success: false });
+  }
+};
+
+/* ===============================
+   WISHLIST COUNT (LIKE CART)
+================================ */
+const wishlistCount = async (req, res, next) => {
+  try {
+    if (!req.session.user) {
+      return res.json({ count: 0 });
+    }
+
+    const wishlist = await Wishlist.findOne({ user: req.session.user });
+    res.json({ count: wishlist ? wishlist.items.length : 0 });
+  } catch (error) {
+    //res.json({ count: 0 }); // safe fallback
+    next(error);
+  }
+};
+
+
+module.exports = {
+  loadWishlist,
+  toggleWishlist,
+  removeFromWishlist,
+  wishlistCount
+};

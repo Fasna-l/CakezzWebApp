@@ -39,6 +39,13 @@ async function addItemToCart(productId, size, quantity) {
     if (data.success) {
       showToast("Added to cart");
       updateCartCount();
+
+      // REMOVE HEART AFTER ADD TO CART
+      document
+        .querySelectorAll(`.wishlist-icon[data-product-id="${productId}"]`)
+        .forEach(icon => icon.classList.remove("active"));
+
+      updateWishlistCount();
     } else {
       showToast(data.message, "error");
     }

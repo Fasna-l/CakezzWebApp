@@ -18,10 +18,6 @@ router.get("/dashboard",adminAuth, (req, res) => res.redirect("/admin/"));
 router.get("/logout",adminController.logout);
 //User Management
 router.get("/users",adminAuth,customerController.customerInfo);
-// router.get("/blockCustomer",adminAuth,customerController.customerBlocked);
-// router.get("/unblockCustomer",adminAuth,customerController.customerUnBlocked);
-// router.patch("/block-customer", adminAuth, customerController.customerBlocked);
-// router.patch("/unblock-customer", adminAuth, customerController.customerUnBlocked);
 router.patch("/customers/:id/block", adminAuth, customerController.customerBlocked);
 router.patch("/customers/:id/unblock", adminAuth, customerController.customerUnBlocked);
 
@@ -29,23 +25,8 @@ router.patch("/customers/:id/unblock", adminAuth, customerController.customerUnB
 router.get("/category",adminAuth,categoryController.categoryInfo);
 router.get("/category/add", adminAuth, categoryController.loadAddCategoryPage);
 router.post("/category/add",adminAuth,categoryController.addCategory);
-// router.get("/listCategory",adminAuth,categoryController.getListCategory);
-// router.get("/unlistCategory",adminAuth,categoryController.getUnlistCategory);
-// router.get("/editCategory",adminAuth,categoryController.getEditCategory);
-// router.post("/editCategory/:id",adminAuth,categoryController.editCategory);
-// router.get("/list-category", adminAuth, categoryController.getListCategory);
-// router.get("/unlist-category", adminAuth, categoryController.getUnlistCategory);
-router.patch(
-  "/categories/:id/list",
-  adminAuth,
-  categoryController.listCategory
-);
-
-router.patch(
-  "/categories/:id/unlist",
-  adminAuth,
-  categoryController.unlistCategory
-);
+router.patch("/categories/:id/list",adminAuth,categoryController.listCategory);
+router.patch("/categories/:id/unlist",adminAuth,categoryController.unlistCategory);
 
 router.get("/edit-category", adminAuth, categoryController.getEditCategory);
 router.post("/edit-category/:id", adminAuth, categoryController.editCategory);
@@ -53,23 +34,8 @@ router.post("/edit-category/:id", adminAuth, categoryController.editCategory);
 router.get('/products', adminAuth, productController.productinfo);
 router.get('/products/add', adminAuth, productController.getProductAddPage);
 router.post('/products/add',adminAuth,uploads.array('productImage', 6),productController.addProduct);
-// router.get("/blockProduct",adminAuth,productController.productBlocked);
-// router.get("/unblockProduct",adminAuth,productController.productUnBlocked);
-// router.get("/editProduct",adminAuth,productController.getEditProduct);
-// router.post("/editProduct/:id",adminAuth, uploads.array("productImage", 4),productController.editProduct);
-// router.get("/block-product", adminAuth, productController.productBlocked);
-// router.get("/unblock-product", adminAuth, productController.productUnBlocked);
-router.patch(
-  "/products/:id/block",
-  adminAuth,
-  productController.productBlocked
-);
-
-router.patch(
-  "/products/:id/unblock",
-  adminAuth,
-  productController.productUnBlocked
-);
+router.patch("/products/:id/block",adminAuth,productController.productBlocked);
+router.patch("/products/:id/unblock",adminAuth,productController.productUnBlocked);
 router.get("/edit-product", adminAuth, productController.getEditProduct);
 router.post("/edit-product/:id", adminAuth, uploads.array("productImage", 4), productController.editProduct);
 

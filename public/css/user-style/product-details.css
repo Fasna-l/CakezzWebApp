@@ -427,4 +427,86 @@
   color: #d81b60;       /* Dark Pink */
   text-decoration: none;
 }
+/* ===============================
+   PRODUCT DETAILS – WISHLIST FIX
+================================ */
+.product-title-row {
+  display: flex;
+  align-items: center;      /* key fix */
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.product-title-row .product-title {
+  margin: 0;                /* remove default h1 margin */
+  line-height: 1.2;         /* tighten text */
+}
+
+.product-title-row .wishlist-icon {
+  position: static !important;
+  opacity: 1 !important;
+  font-size: 20px;          /* slightly smaller for balance */
+  cursor: pointer;
+  color: #999;
+  display: flex;
+  align-items: center;      /* vertical center */
+}
+
+.product-title-row .wishlist-icon i {
+  pointer-events: none;
+  line-height: 1;           /* prevents drop */
+}
+
+.product-title-row .wishlist-icon:hover {
+  color: #e91e63;
+}
+
+.product-title-row .wishlist-icon.active i {
+  color: #e91e63;
+}
+
+/* ===============================
+   WISHLIST HEART COLOR
+================================ */
+
+.wishlist-icon i {
+  color: #999;          /* white/grey heart */
+  transition: 0.2s;
+}
+
+.wishlist-icon.active i {
+  color: #e91e63;       /* pink heart */
+}
+
+/* DEFAULT HEART (NOT WISHLISTED) */
+.wishlist-icon i {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 400; /* regular (outline) */
+  color: #ccc;
+  transition: all 0.3s ease;
+}
+
+/* ACTIVE HEART (WISHLISTED) */
+.wishlist-icon.active i {
+  font-weight: 900; /* solid (filled) */
+  color: #e91e63;   /* pink */
+}
+
+/* FIX FONT AWESOME HEART TILT (NO ROTATION) */
+.wishlist-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wishlist-icon i {
+  line-height: 1;
+  transform: translateY(0);
+}
+
+/* MICRO ALIGNMENT FIX FOR SOLID HEART */
+.wishlist-icon.active i {
+  transform: translateX(-0.5px);
+}
+
 

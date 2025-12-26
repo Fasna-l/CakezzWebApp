@@ -1,6 +1,7 @@
 const User = require("../../models/userSchema");
 const Cart = require("../../models/cartSchema");
 const Product = require("../../models/productSchema");
+const Wishlist = require("../../models/wishlistSchema");
 
 /* Helper: find variant */
 function findVariant(product, size) {
@@ -60,13 +61,6 @@ const addToCart = async (req, res, next) => {
       (i) => i.product.toString() === productId && i.size === size
     );
 
-    // if (existing) {
-    //   if (existing.quantity + qty > variant.stock) {
-    //     return res.json({ success: false, message: "Not enough stock" });
-    //   }
-    //   existing.quantity += qty;
-    // } 
-
     if (existing) {
       // MAX 5 LIMIT
       if (existing.quantity + qty > 5) {
@@ -96,6 +90,10 @@ const addToCart = async (req, res, next) => {
     }
 
     await cart.save();
+    await Wishlist.updateOne(
+      { user: userId },
+      { $pull: { items: { product: productId } } }
+    );
 
     return res.json({ success: true, message: "Added to cart" });
   } catch (error) {

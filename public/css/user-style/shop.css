@@ -725,3 +725,46 @@
   margin-bottom: 50px;
 }
 
+/* ===============================
+   WISHLIST HEART COLOR
+================================ */
+
+.wishlist-icon i {
+  color: #999;          
+  transition: 0.2s;
+}
+
+.wishlist-icon.active i {
+  color: #e91e63;       
+}
+
+/* DEFAULT HEART (NOT WISHLISTED) */
+.wishlist-icon i {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 400; 
+  color: #ccc;
+  transition: all 0.3s ease;
+}
+
+/* ACTIVE HEART (WISHLISTED) */
+.wishlist-icon.active i {
+  font-weight: 900; 
+  color: #e91e63;   
+}
+/* FIX FONT AWESOME HEART TILT (NO ROTATION) */
+.wishlist-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wishlist-icon i {
+  line-height: 1;
+  transform: translateY(0);
+}
+
+/* MICRO ALIGNMENT FIX FOR SOLID HEART */
+.wishlist-icon.active i {
+  transform: translateX(-0.5px);
+}
+

@@ -1,7 +1,9 @@
 const razorpay = require("../config/razorpay");
 const Order = require("../models/orderSchema");
+const Wallet = require("../models/walletSchema");
 const crypto = require("crypto");
 
+//create Razorpay order 
 const createRazorpayOrder = async (req, res, next) => {
   try {
     const { orderId } = req.body;
@@ -96,10 +98,48 @@ const markPaymentFailed = async (req, res, next) => {
   }
 };
 
+const retryPayment = async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.orderId);
+
+    if (!order || order.paymentStatus === "Paid") {
+      return res.redirect("/order");
+    }
+
+    // If there is still payable amount → Razorpay retry
+    if (order.payableAmount > 0) {
+      return retryRazorpay(order, res);
+    }
+
+    // If nothing pending (edge case)
+    return res.redirect(`/checkout/success/${order._id}`);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const retryRazorpay = async (order, res) => {
+  const razorpayOrder = await razorpay.orders.create({
+    amount: order.payableAmount * 100, // ✅ ONLY pending amount
+    currency: "INR",
+    receipt: `retry_${order.orderId}`
+  });
+
+  order.paymentDetails.razorpayOrderId = razorpayOrder.id;
+  await order.save();
+
+  res.render("retry-payment", {
+    order,
+    razorpayOrder,
+    key: process.env.RAZORPAY_KEY_ID
+  });
+};
+
 
 module.exports = {
   createRazorpayOrder,
   verifyPayment,
-  markPaymentFailed
+  markPaymentFailed,
+  retryPayment
 };
 

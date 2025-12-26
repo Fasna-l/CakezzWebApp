@@ -34,7 +34,19 @@
 
     <!-- ✅ Right: Product Details -->
     <div class="product-info">
-      <h1 class="product-title"><%= product.productName %></h1>
+      <!-- <h1 class="product-title"><%= product.productName %></h1> -->
+       <div class="product-title-row">
+  <h1 class="product-title"><%= product.productName %></h1>
+
+  <!-- <div class="wishlist-icon pd-wishlist"
+       data-product-id="<%= product._id %>"> -->
+  <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
+    data-product-id="<%= product._id %>"> 
+    <i class="fa-heart"></i>
+    <!-- <i class="far fa-heart"></i> -->
+  </div>
+</div>
+
 
       
 
@@ -144,14 +156,20 @@
       <p id="pd-soldout" class="soldout-text" style="display:none;">Sold Out</p>
 
       <!-- ✅ Rating & Reviews (Optional Future Section) -->
-      <div class="rating-review-row">
-        <button class="wishlist-btn" title="Add to Wishlist">♥</button>
+      <!-- <div class="rating-review-row">
+        <button class="wishlist-btn" title="Add to Wishlist">♥</button> -->
         <!-- <button class="review-btn"
           onclick="window.location.href='/product/<%= product._id %>/review'">
           WRITE A REVIEW
         </button> -->
 
-      </div>
+      <!-- </div> -->
+      <!-- <div class="rating-review-row">
+        <div class="wishlist-icon" data-product-id="<%= product._id %>">
+          <i class="far fa-heart"></i>
+        </div>
+      </div> -->
+
 
       <!-- ✅ Reviews Section -->
 <div class="reviews-section">

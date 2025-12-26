@@ -9,6 +9,7 @@ const cartController = require("../controllers/user/cartController");
 const checkOutController = require("../controllers/user/checkOutController");
 const orderController = require("../controllers/user/orderController");
 const walletController = require("../controllers/user/walletController");
+const wishlistController = require("../controllers/user/wishlistController");
 const {userAuth,adminAuth} = require("../middlewares/auth");
 const { uploads } = require("../helpers/multer");
 
@@ -90,6 +91,15 @@ router.get("/cart-count", userAuth, async (req, res) => {
 });
 router.get("/cart/checkout", userAuth, cartController.proceedToCheckout);
 
+//wishlist management
+// wishlist page
+router.get("/wishlist", userAuth, wishlistController.loadWishlist);
+
+// add / remove wishlist
+router.post("/wishlist/toggle", userAuth, wishlistController.toggleWishlist);
+router.post("/wishlist/remove", userAuth, wishlistController.removeFromWishlist);
+router.get("/wishlist-count", userAuth, wishlistController.wishlistCount);
+
 
 //checkout
 router.get("/checkout",userAuth, checkOutController.getCheckout);
@@ -130,6 +140,8 @@ router.get("/wallet/history", userAuth, walletController.loadWalletHistory);
 // Wallet recharge (Razorpay)
 router.post("/wallet/recharge", userAuth, walletController.createWalletRechargeOrder);
 router.post("/wallet/recharge/verify", userAuth, walletController.verifyWalletRecharge);
+
+
 
 
 

@@ -7,6 +7,7 @@ const Product = require("../../models/productSchema");
 const Cart = require("../../models/cartSchema");
 const Otp = require("../../models/otpSchema");  // import OTP Model
 const Wallet = require("../../models/walletSchema");
+const Wishlist = require("../../models/wishlistSchema");
 const mongoose = require("mongoose");
 const env = require("dotenv").config();
 const bcrypt = require("bcrypt");
@@ -94,11 +95,21 @@ const loadHomepage = async (req, res, next) => {
     // ✅ Get User if logged in
     const userData = user ? await User.findById(user) : null;
 
+    let wishlistProductIds = [];
+
+    if (req.session.user) {
+      const wishlist = await Wishlist.findOne({ user: req.session.user }).lean();
+      wishlistProductIds = wishlist
+        ? wishlist.items.map(i => i.product.toString())
+        : [];
+    }
+
     return res.render("home", {
       user: userData,
       latestProducts,
       bestProducts,
-      cartCount
+      cartCount,
+      wishlistProductIds
     });
   } catch (error) {
     next(error);

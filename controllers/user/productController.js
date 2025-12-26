@@ -2,6 +2,7 @@ const User = require("../../models/userSchema");
 const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Cart = require("../../models/cartSchema");
+const Wishlist = require("../../models/wishlistSchema");
 const mongoose = require("mongoose");
 
 // Load Shop Page
@@ -91,6 +92,14 @@ const loadShoppage = async (req, res, next) => {
     const products = await Product.aggregate(pipeline);
     const totalPages = Math.ceil(totalProducts / limit);
 
+    let wishlistProductIds = [];
+
+    if (req.session.user) {
+      const wishlist = await Wishlist.findOne({ user: req.session.user }).lean();
+      wishlistProductIds = wishlist
+        ? wishlist.items.map(i => i.product.toString())
+        : [];
+    }
     // ✅ Render
     return res.render("shop", {
       user: user ? await User.findById(user) : null,
@@ -105,7 +114,8 @@ const loadShoppage = async (req, res, next) => {
       priceRange,
       minPrice,
       maxPrice,
-      cartCount
+      cartCount,
+      wishlistProductIds
     });
 
   } catch (error) {
@@ -139,11 +149,20 @@ const loadProductDetails = async (req, res, next) => {
 
     const user = userId ? await User.findById(userId).lean() : null; // ✅ added
 
+    let wishlistProductIds = [];
+
+    if (req.session.user) {
+      const wishlist = await Wishlist.findOne({ user: req.session.user }).lean();
+      wishlistProductIds = wishlist
+        ? wishlist.items.map(i => i.product.toString())
+        : [];
+    }
     res.render("product-details", {
       product,
       relatedProducts,
       user,
-      cartCount       // ✅ Now available in EJS for header
+      cartCount,       // ✅ Now available in EJS for header
+      wishlistProductIds
     });
 
   } catch (error) {
