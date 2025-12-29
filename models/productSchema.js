@@ -29,6 +29,12 @@ const productSchema = new Schema({
         required:true,
         default:'Available'
      },
+     productOffer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Offer",
+        default: null,
+    },
+
      reviews: [
     {
         user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },

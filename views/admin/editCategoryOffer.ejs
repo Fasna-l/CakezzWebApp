@@ -1,0 +1,130 @@
+<%- include('../partials/admin/header') %>
+<link rel="stylesheet" href="/css/admin-style/addCategory.css">
+<link rel="stylesheet" href="/css/admin-style/couponbutton.css">
+
+<div class="dashboard-container">
+  <div class="dashboard-wrapper">
+    <%- include('../partials/admin/sidebar') %>
+
+    <div class="add-category-container">
+      <h1 class="page-title">Category Offer</h1>
+
+      <div class="form-card">
+        <form class="add-category-form" onsubmit="return handleFormSubmit(event)" novalidate>
+
+          <input type="hidden" id="offerId" value="<%= offer._id %>">
+
+          <!-- Category (locked) -->
+          <div class="form-group">
+            <label>Category :</label>
+            <input type="text" value="<%= offer.category.categoryName %>" disabled>
+            <input type="hidden" id="category" value="<%= offer.category._id %>">
+          </div>
+
+          <!-- Start Date -->
+          <div class="form-group">
+            <label>Start Date :</label>
+            <input type="date" id="startDate"
+              value="<%= offer.startDate.toISOString().split('T')[0] %>">
+            <div id="startDate-error" class="error-message"></div>
+          </div>
+
+          <!-- Discount -->
+          <div class="form-group">
+            <label>Discount (%) :</label>
+            <input type="number" id="discount"
+              value="<%= offer.discount %>" min="1" max="90">
+            <div id="discount-error" class="error-message"></div>
+          </div>
+
+          <!-- End Date -->
+          <div class="form-group">
+            <label>End Date :</label>
+            <input type="date" id="endDate"
+              value="<%= offer.endDate.toISOString().split('T')[0] %>">
+            <div id="endDate-error" class="error-message"></div>
+          </div>
+
+          <div style="display:flex; gap:20px; justify-content:center;">
+            <button type="submit" class="btn-add">Update</button>
+            <button type="button" class="btn-delete"
+              onclick="deleteOffer('<%= offer._id %>')">Delete</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  const category = document.getElementById("category");
+  const startDate = document.getElementById("startDate");
+  const endDate = document.getElementById("endDate");
+  const discount = document.getElementById("discount");
+  const offerId = document.getElementById("offerId").value;
+
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    fetch("/admin/category-offer/update", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        offerId,
+        categoryId: category.value,
+        startDate: startDate.value,
+        endDate: endDate.value,
+        discount: discount.value
+      })
+    })
+    .then(() => Swal.fire("Updated!", "", "success"))
+    .then(() => location.reload());
+  }
+
+  function validateForm() {
+    clearErrors();
+    let valid = true;
+
+    if (!startDate.value) {
+      showError("startDate-error", "Start date required");
+      valid = false;
+    }
+    if (!endDate.value) {
+      showError("endDate-error", "End date required");
+      valid = false;
+    }
+    if (discount.value < 1 || discount.value > 90) {
+      showError("discount-error", "Discount must be 1–90%");
+      valid = false;
+    }
+    return valid;
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.innerText = msg;
+    el.style.display = "block";
+  }
+
+  function clearErrors() {
+    document.querySelectorAll(".error-message").forEach(e => {
+      e.innerText = "";
+      e.style.display = "none";
+    });
+  }
+
+  function deleteOffer(id) {
+    Swal.fire({ title: "Delete offer?", showCancelButton: true })
+      .then(r => {
+        if (r.isConfirmed)
+          fetch(`/admin/category-offer/delete/${id}`, { method: "DELETE" })
+            .then(() => location.href = "/admin/category");
+      });
+  }
+</script>
+
+<%- include('../partials/admin/footer') %>

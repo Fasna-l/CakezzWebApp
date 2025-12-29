@@ -115,9 +115,26 @@
                             </td>
 
                             <!-- Offer Button (disabled for now) -->
-                            <td>
-                                <button class="btn-offer">Offer</button>
+                             <td>
+                              <% if (!product.productOffer) { %>
+                                <a 
+                                  href="/admin/offer/add?productId=<%= product._id %>" 
+                                  class="btn btn-primary btn-sm">
+                                  Add Offer
+                                </a>
+                              <% } else { %>
+                                <a 
+                                  href="/admin/offer/edit/<%= product.productOffer %>?productId=<%= product._id %>" 
+                                  class="btn btn-warning btn-sm">
+                                  Edit Offer
+                                </a>
+                              <% } %>
                             </td>
+
+                            <!-- <td>
+                                <button class="btn-offer">Offer</button>
+                            </td> -->
+
                             <td>
                               <!-- Edit Icon -->
                                     <!-- <a href="/admin/editProduct?id=<%= product._id %>" class="btn-edit"> </a> -->

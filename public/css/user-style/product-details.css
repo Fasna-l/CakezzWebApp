@@ -509,4 +509,78 @@
   transform: translateX(-0.5px);
 }
 
+/* =========================
+   RELATED PRODUCTS GRID
+========================= */
+
+.related-products .products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.related-products .product-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.related-products .product-card:hover {
+  transform: translateY(-4px);
+}
+
+.related-products .product-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.related-products .product-name {
+  font-size: 15px;
+  margin: 8px 0 4px;
+}
+
+.related-products .product-price {
+  font-weight: 600;
+  color: #e91e63;
+}
+
+.related-products .add-to-cart-btn {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.related-products .wishlist-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+/* OFFER BADGE */
+.offer-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #e53935;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+/* OFFER TEXT (Product Details Page) */
+.offer-text {
+  margin: 6px 0;
+  color: #2e7d32;
+  font-size: 14px;
+  font-weight: 500;
+}
+
 

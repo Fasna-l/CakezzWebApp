@@ -1,0 +1,206 @@
+/* ===============================
+   RELATED PRODUCTS – SHOP STYLE
+   (Scoped only to product details)
+================================ */
+
+.related-products {
+  margin-top: 50px;
+}
+
+.related-products .related-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #212121;
+}
+
+/* Grid */
+.related-products .products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 25px;
+}
+
+/* Card */
+.related-products .product-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 15px;
+  position: relative;
+  text-align: center;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.related-products .product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+/* Image */
+.related-products .product-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Name */
+.related-products .product-name {
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+.related-products .product-link {
+  text-decoration: none;
+  color: #212121;
+}
+
+.related-products .product-link:hover {
+  color: #e91e63;
+}
+
+/* Price */
+.related-products .product-price {
+  margin-top: 6px;
+  color: #e91e63;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* Wishlist */
+.related-products .wishlist-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #fff;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  cursor: pointer;
+  z-index: 2;
+}
+
+.related-products .wishlist-icon i {
+  color: #ccc;
+  font-size: 16px;
+}
+
+.related-products .wishlist-icon.active i {
+  color: #e91e63;
+  font-weight: 900;
+}
+
+/* Out of Stock */
+.related-products .out-of-stock {
+  color: red;
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+/* Add to Cart */
+.related-products .add-to-cart-btn {
+  margin-top: 12px;
+  width: 100%;
+  background-color: #d81b60;
+  color: #fff;
+  padding: 10px 0;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.related-products .add-to-cart-btn:hover {
+  background-color: #c2185b;
+}
+
+.related-products .add-to-cart-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  color: #666;
+}
+
+/* Rating Badge */
+.related-products .rating-badge {
+  position: absolute;
+  bottom: 80px;
+  right: 15px;
+  background-color: #4caf50;
+  color: #fff;
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+/* ===============================
+   RELATED PRODUCTS – FIX RATING
+================================ */
+
+.related-products .product-card {
+  position: relative;
+}
+
+/* Override shop rating badge ONLY here */
+.related-products .rating-badge {
+  position: absolute;
+  top: 210px;
+  left: 210px;
+  bottom: auto;
+  right: auto;
+
+  background-color: #4caf50;
+  color: #fff;
+
+  font-size: 12px;
+  padding: 4px 6px;
+  border-radius: 4px;
+
+  width: auto;          /* 🔥 IMPORTANT */
+  height: auto;
+  min-width: unset;
+  min-height: unset;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  line-height: 1;
+  white-space: nowrap;
+}
+
+
+/* ===============================
+   RELATED PRODUCTS – SHOP BADGE CLONE
+================================ */
+
+/* Exact same style as shop page */
+.related-products .offer-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+
+  background: #ff3d3d;
+  color: #fff;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  padding: 4px 8px;
+  border-radius: 4px;
+
+  z-index: 5;
+}
+
+/* If shop uses category color, match it */
+.related-products .offer-badge.cat {
+  background: #ff9800;
+}

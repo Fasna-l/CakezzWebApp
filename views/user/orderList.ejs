@@ -120,7 +120,53 @@
         </div>
 
         <!-- Pagination -->
+
         <div class="pagination">
+  <% if (pagination.totalPages > 1) { %>
+
+    <!-- Prev -->
+    <% if (pagination.currentPage > 1) { %>
+      <a href="?page=<%= pagination.currentPage - 1 %>" class="page-btn">Prev</a>
+    <% } %>
+
+    <!-- First page + dots -->
+    <% if (pagination.currentPage > 3) { %>
+      <a href="?page=1" class="page-number">1</a>
+      <span class="dots">…</span>
+    <% } %>
+
+    <!-- Middle pages -->
+    <% for (
+      let i = Math.max(1, pagination.currentPage - 2);
+      i <= Math.min(pagination.totalPages, pagination.currentPage + 2);
+      i++
+    ) { %>
+      <a 
+        href="?page=<%= i %>" 
+        class="page-number <%= pagination.currentPage === i ? 'active' : '' %>"
+      >
+        <%= i %>
+      </a>
+    <% } %>
+
+    <!-- Last page + dots -->
+    <% if (pagination.currentPage < pagination.totalPages - 2) { %>
+      <span class="dots">…</span>
+      <a href="?page=<%= pagination.totalPages %>" class="page-number">
+        <%= pagination.totalPages %>
+      </a>
+    <% } %>
+
+    <!-- Next -->
+    <% if (pagination.currentPage < pagination.totalPages) { %>
+      <a href="?page=<%= pagination.currentPage + 1 %>" class="page-btn">Next</a>
+    <% } %>
+
+  <% } %>
+</div>
+
+
+        <!-- <div class="pagination">
           <% if (pagination.totalPages > 1) { %>
 
             <a href="?page=<%= Math.max(1, pagination.currentPage - 1) %>" class="page-btn">Prev</a>
@@ -139,7 +185,7 @@
 
       <% } else { %>
         <p class="no-orders">You have no orders yet.</p>
-      <% } %>
+      <% } %> -->
 
     </div>
   </div>

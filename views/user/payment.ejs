@@ -34,12 +34,24 @@
         <!-- COUPONS -->
         <div class="coupon-box">
           <h3 class="section-title">Available coupons</h3>
+          <% if (!coupons.length) { %>
+            <p class="no-coupons">No coupons available for this order</p>
+          <% } %>
 
           <% coupons.forEach(c => { %>
             <div class="coupon-row">
-              <span class="coupon-name"><%= c.name %></span>
+              <div>
+                <strong><%= c.code %></strong>
+                <p style="font-size:12px;color:#666;"><%= c.description %></p>
+              </div>
               <button class="btn small copy-btn" data-code="<%= c.code %>">Copy</button>
             </div>
+
+
+            <!-- <div class="coupon-row">
+              <span class="coupon-name"><%= c.name %></span>
+              <button class="btn small copy-btn" data-code="<%= c.code %>">Copy</button>
+            </div> -->
           <% }) %>
         </div>
 
@@ -64,12 +76,15 @@
 <% }) %>
 
         <!-- APPLY COUPON -->
-        <form id="applyCouponForm" method="POST" action="/checkout/apply-coupon">
+        <!-- <form id="applyCouponForm" method="POST" action="/checkout/apply-coupon"> -->
           <div class="apply-coupon-box">
             <input type="text" name="couponCode" id="couponCode" placeholder="Gift or discount code">
-            <button class="btn apply-btn">Apply</button>
+            <button type="button" class="btn apply-btn" id="applyCouponBtn" >Apply</button>
+            <button type="button" class="btn small" id="removeCouponBtn" style="display:none;">
+              Remove
+            </button>
           </div>
-        </form>
+        <!-- </form> -->
 
         <!-- PRICE BOX -->
         <div class="price-box">
@@ -77,7 +92,7 @@
           <div class="price-row"><span>Shipping</span><span><%= totals.shipping === 0 ? "Free" : "₹" + totals.shipping %></span></div>
           <div class="price-row"><span>Tax:</span><span>₹<%= totals.tax %></span></div>
 
-          <% if (totals.discount > 0) { %>
+          <% if (totals.discount && totals.discount > 0) { %>  
             <div class="price-row discount">
               <span>Discount:</span><span>- ₹<%= totals.discount %></span>
             </div>
@@ -219,5 +234,48 @@ placeOrderForm.addEventListener("submit", async function (e) {
 });
 
 </script>
+<script>
+const applyBtn = document.getElementById("applyCouponBtn");
+const removeBtn = document.getElementById("removeCouponBtn");
+const couponInput = document.getElementById("couponCode");
+
+applyBtn.addEventListener("click", async () => {
+  const code = couponInput.value.trim();
+  if (!code) return alert("Enter a coupon code");
+
+  const res = await fetch("/coupon/apply", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ couponCode: code })
+  });
+
+  const data = await res.json();
+
+  if (!data.success) {
+    alert(data.message);
+    return;
+  }
+
+  // Reload page to reflect updated totals
+  location.reload();
+});
+
+removeBtn.addEventListener("click", async () => {
+  await fetch("/coupon/remove", { method: "POST" });
+  location.reload();
+});
+</script>
+
+<% if (appliedCoupon) { %>
+<script>
+  // Coupon already applied → update UI
+  couponInput.value = "<%= appliedCoupon.code %>";
+  couponInput.disabled = true;
+
+  removeBtn.style.display = "inline-block";
+  applyBtn.style.display = "none";
+</script>
+<% } %>
+
 
 <%- include('../partials/user/footer') %>

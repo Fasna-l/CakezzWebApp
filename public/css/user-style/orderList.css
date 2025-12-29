@@ -217,3 +217,23 @@
   color: #888;
   margin-top: 3px;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 25px;
+}
+
+.page-number,
+.page-btn {
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+.dots {
+  padding: 6px 4px;
+  font-size: 14px;
+}

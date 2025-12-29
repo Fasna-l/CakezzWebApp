@@ -35,6 +35,14 @@
       %>
         <div class="col-lg-3 col-md-6">
           <div class="cake-card">
+            <% if (product.offerPercentage > 0) { %>
+              <span class="offer-badge">
+                <%= product.offerPercentage %>%
+                <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
+              </span>
+            <% } %>
+
+
             <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
               data-product-id="<%= product._id %>">
               <i class="fa-heart"></i>
@@ -53,10 +61,32 @@
 
             <div class="cake-card-body">
               <h5 class="cake-card-title"><%= product.productName %></h5>
+              <div class="price-rating-row">
+  <p class="cake-card-subtitle">
+    Starting from ₹<%= product.offerPercentage
+  ? Math.round(oneKgVariant.price - (oneKgVariant.price * product.offerPercentage) / 100)
+  : oneKgVariant.price
+%>
 
-              <p class="cake-card-subtitle">
+  </p>
+
+  <% 
+    let avg = 0;
+    if(product.reviews && product.reviews.length){
+      avg = (product.reviews.reduce((a, b) => a + b.rating, 0) / product.reviews.length).toFixed(1);
+    }
+  %>
+
+  <% if(avg > 0){ %>
+    <span class="rating-badgelatestprdct rating-inline">★ <%= avg %></span>
+  <% } %>
+</div>
+
+              
+              <!-- <p class="cake-card-subtitle">
                 Starting from ₹ <%= oneKgVariant?.price || 'N/A' %>
-              </p>
+
+              </p> -->
 
               <% if (!oneKgVariant || oneKgVariant.stock <= 0) { %>
                 <p style="color:red; font-weight:600;">Sold Out (1 kg)</p>
@@ -98,6 +128,15 @@
         %>
           <div class="swiper-slide">
             <div class="product-card">
+
+              <% if (product.offerPercentage > 0) { %>
+                <span class="offer-badge">
+                  <%= product.offerPercentage %>%
+                  <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
+                </span>
+              <% } %>
+
+
               
               <!-- <div class="wishlist-icon" data-product-id="<%= product._id %>"> -->
               <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
@@ -112,7 +151,21 @@
               </a>
 
               <div class="price-container">
-                ₹<%= threeKgVariant?.price || product.maxPrice || 'N/A' %>
+                ₹<%=
+  threeKgVariant
+    ? Math.max(
+        0,
+        product.offerPercentage
+          ? Math.round(
+              threeKgVariant.price -
+              (threeKgVariant.price * product.offerPercentage) / 100
+            )
+          : threeKgVariant.price
+      )
+    : product.maxPrice || "N/A"
+%>
+
+                <!-- ₹<%= threeKgVariant?.price || product.maxPrice || 'N/A' %> -->
               </div>
 
               <% if (!threeKgVariant || threeKgVariant.stock <= 0) { %>
@@ -132,6 +185,16 @@
                 </button>
 
                 <h5 class="product-title"><%= product.productName %></h5>
+                <% 
+                  let avg = 0;
+                    if(product.reviews && product.reviews.length){
+                      avg = (product.reviews.reduce((a, b) => a + b.rating, 0) / product.reviews.length).toFixed(1);
+                    }
+                %>
+
+                <% if(avg > 0){ %>
+                  <span class="rating-badge">★ <%= avg %></span>
+                <% } %>
               </div>
             </div>
           </div>

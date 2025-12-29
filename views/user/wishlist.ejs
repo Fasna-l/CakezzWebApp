@@ -16,6 +16,7 @@
     <div class="product-count">
       Wishlist (<span id="wishlist-page-count"><%= totalWishlistItems %></span>)
     </div>
+    <h6>Default Weight :1 kg</h6>
   </div>
 
   <!-- Wishlist Products Grid -->
@@ -34,6 +35,14 @@
 
       <div class="product-card">
 
+        <% if (product.offerPercentage > 0) { %>
+          <span class="offer-badge">
+            <%= product.offerPercentage %>%
+            <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
+          </span>
+        <% } %>
+
+
         <!-- Product Image -->
         <a href="/product/<%= product._id %>">
           <img 
@@ -50,9 +59,16 @@
         </h3>
 
         <!-- Price -->
-        <p class="product-price">
+         <p class="product-price">
+            ₹<%= product.offerPercentage > 0
+              ? product.finalPrice
+              : oneKgVariant?.price || 'N/A'
+            %>
+          </p>
+
+        <!-- <p class="product-price">
           ₹<%= product.minPrice || oneKgVariant?.price || 'N/A' %>
-        </p>
+        </p> -->
 
         <!-- Remove from Wishlist (Heart Icon) -->
         <div 

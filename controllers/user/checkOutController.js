@@ -4,6 +4,8 @@ const Order = require("../../models/orderSchema");
 const User = require("../../models/userSchema");
 const Cart = require("../../models/cartSchema");
 const Wallet = require("../../models/walletSchema");
+const Coupon = require("../../models/couponSchema");
+const calculateBestOffer = require("../../helpers/offerCalculator");
 const crypto = require("crypto");
 
 /* ------------------------------------
@@ -155,19 +157,53 @@ const getPaymentPage = async (req, res, next) => {
     const userId = req.session.user;
     const user = userId ? await User.findById(userId).lean() : null;
 
+    const totals = req.session.checkoutTotals || {};
+    const cartTotal = totals.subTotal || 0;
+    const now = new Date();
+
+    const coupons = await Coupon.find({
+      isActive: true,
+      expiryDate: { $gt: now },
+      minPurchaseAmount: { $lte: cartTotal }
+    }).lean();
+
+    const appliedCoupon = req.session.appliedCoupon || null;
+
     res.render("payment", {
       user,
       checkoutItems: req.session.checkoutItems || [],
-      totals: req.session.checkoutTotals || {},
-      coupons: []
-});
+      totals,
+      coupons,
+      appliedCoupon
+    });
 
   } catch (error) {
     next(error);
-    // console.log(err);
-    // res.redirect("/pageerror");
   }
 };
+
+
+// const getPaymentPage = async (req, res, next) => {
+//   try {
+//     const userId = req.session.user;
+//     const user = userId ? await User.findById(userId).lean() : null;
+
+//     const appliedCoupon = req.session.appliedCoupon || null;
+
+//     res.render("payment", {
+//       user,
+//       checkoutItems: req.session.checkoutItems || [],
+//       totals: req.session.checkoutTotals || {},
+//       coupons: [],
+//       appliedCoupon
+// });
+
+//   } catch (error) {
+//     next(error);
+//     // console.log(err);
+//     // res.redirect("/pageerror");
+//   }
+// };
 
 /* ------------------------------------
    PLACE ORDER
@@ -239,21 +275,28 @@ const placeOrder = async (req, res, next) => {
     // NOW SAFE: Apply stock reduction & build order items
     for (let cartItem of req.session.checkoutItems) {
 
-      const product = await Product.findById(cartItem.productId);
+      //const product = await Product.findById(cartItem.productId);
+      const product = await Product.findById(cartItem.productId)
+        .populate("category");
+
       const variant = product.variants.find(v => v.size === cartItem.size);
 
       variant.stock -= cartItem.quantity;
       await product.save();
+
+      const offer = await calculateBestOffer(product, variant.price);
 
       items.push({
         productId: product._id,
         productName: product.productName,
         productImage: product.productImage[0],
         size: cartItem.size,
-        price: variant.price,
+        price: offer.finalPrice,
         quantity: cartItem.quantity,
         status: "Pending"
       });
+
+
     }
 
 
@@ -283,6 +326,9 @@ const placeOrder = async (req, res, next) => {
       }
     }
 
+    const couponSession = req.session.appliedCoupon;
+
+    const couponDiscount = couponSession ? couponSession.discount : 0;
 
     //  CREATE ORDER
     const order = new Order({
@@ -304,7 +350,7 @@ const placeOrder = async (req, res, next) => {
       offerDiscount: req.session.checkoutTotals.offerDiscount || 0,
       taxAmount: req.session.checkoutTotals.tax,
       shippingCharge: req.session.checkoutTotals.shipping,
-      couponDiscount: 0,
+      couponDiscount,
       totalAmount: req.session.checkoutTotals.grandTotal,
       walletUsed: walletUsed,                              
       payableAmount: remainingAmount,//razorpay part in wallet
@@ -317,6 +363,40 @@ const placeOrder = async (req, res, next) => {
     });
 
     await order.save();
+
+    /* ------------------------------------
+   UPDATE COUPON USAGE (AFTER ORDER)
+------------------------------------ */
+if (req.session.appliedCoupon) {
+  const coupon = await Coupon.findById(
+    req.session.appliedCoupon.couponId
+  );
+
+  if (coupon) {
+    // global usage
+    coupon.usedCount += 1;
+
+    // per-user usage
+    const userUsage = coupon.usersUsed.find(
+      u => u.user.toString() === req.session.user.toString()
+    );
+
+    if (userUsage) {
+      userUsage.count += 1;
+    } else {
+      coupon.usersUsed.push({
+        user: req.session.user,
+        count: 1,
+      });
+    }
+
+    await coupon.save();
+  }
+
+  // VERY IMPORTANT: clear session
+  delete req.session.appliedCoupon;
+}
+
 
     //  WALLET DEDUCTION
     if (paymentMethod === "WALLET" && walletUsed > 0) {
@@ -437,18 +517,6 @@ const getPersonalizePage = async (req, res, next) => {
   }
 };
 
-// const loadPaymentFailurePage = async (req, res, next) => {
-//   try {
-//     const userId = req.session.user;
-//     const user = await User.findById(userId).lean();
-
-//     res.render("payment-failure", {
-//       user
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
 
 const loadPaymentFailurePage = async (req, res, next) => {
   try {

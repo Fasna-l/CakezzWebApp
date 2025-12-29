@@ -1,5 +1,7 @@
 const Wishlist = require("../../models/wishlistSchema");
 const Product = require("../../models/productSchema");
+const calculateBestOffer = require("../../helpers/offerCalculator");
+
 
 /* ===============================
    LOAD WISHLIST PAGE
@@ -13,7 +15,11 @@ const loadWishlist = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     const wishlist = await Wishlist.findOne({ user: userId })
-      .populate("items.product");
+      .populate({
+        path: "items.product",
+        populate: { path: "category" }
+      });
+
 
     if (!wishlist || wishlist.items.length === 0) {
       return res.render("wishlist", {
@@ -31,12 +37,33 @@ const loadWishlist = async (req, res, next) => {
     const totalItems = validItems.length;
     const paginatedItems = validItems.slice(skip, skip + limit);
 
-    res.render("wishlist", {
-      wishlist: { items: paginatedItems },
-      totalWishlistItems: totalItems,
-      wishlistCurrentPage: page,
-      wishlistTotalPages: Math.ceil(totalItems / limit)
-    });
+const wishlistItemsWithOffer = await Promise.all(
+  paginatedItems.map(async (item) => {
+    const product = item.product;
+    const variant = product.variants[0]; // 1kg display
+
+    const offer = await calculateBestOffer(product, variant.price);
+
+    return {
+      ...item.toObject(),
+      product: {
+        ...product.toObject(),
+        finalPrice: offer.finalPrice,
+        originalPrice: variant.price,
+        offerPercentage: offer.discountPercentage,
+        appliedOfferType: offer.appliedOfferType
+      }
+    };
+  })
+);
+
+res.render("wishlist", {
+  wishlist: { items: wishlistItemsWithOffer },
+  totalWishlistItems: totalItems,
+  wishlistCurrentPage: page,
+  wishlistTotalPages: Math.ceil(totalItems / limit)
+});
+
   } catch (error) {
     next(error);
   }

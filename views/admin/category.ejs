@@ -12,7 +12,7 @@
             <h2>Categories</h2>
             <a href="/admin/category/add" class="btn-add-category"> Add Category</a>
 
-        <form action="/admin/category" method="get" class="search-form">   <!--onsubmit="return handleFormSubmit(event)"-->
+        <form action="/admin/category" method="get" class="search-form">  
             <div class="search-box">
                 <input type="text" class="search-input" placeholder="Search categories..." name="search" value="<%= search || '' %>">
                 <button class="search-button-text" type="submit">Search</button>
@@ -58,12 +58,33 @@
  
 
                                     <!-- Offer (Display Only) -->
-                                    <td>
+                                     <td>
+                                        <% if (category.categoryOffer) { %>
+                                            <a 
+                                                href="/admin/category-offer/edit/<%= category.categoryOffer %>" 
+                                                class="btn-offer"
+                                                style="text-decoration: none;"
+                                            >
+                                                Edit Offer
+                                            </a>
+                                        <% } else { %>
+                                            <a 
+                                                href="/admin/category-offer/add?categoryId=<%= category._id %>" 
+                                                class="btn-offer"
+                                                style="text-decoration: none;"
+                                            >
+                                                Add Offer
+                                            </a>
+                                        <% } %>
+                                     </td>
+
+                                    <!-- <td>
                                         <button class="btn-offer">
-                                         <!-- <%= category.offer ? 'Edit Offer' : 'Add Offer' %> -->   
-                                        <%= category.categoryOffer && category.categoryOffer.name ? 'Edit Offer' : 'Add Offer' %>
+                                           
+                                        <%= category.categoryOffer ? 'Edit Offer' : 'Add Offer' %>
+
                                         </button>
-                                    </td>
+                                    </td> -->
 
                                     <!-- List / Unlist -->
                                    
@@ -151,45 +172,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// document.querySelectorAll('.btn-status').forEach(button => {
-//   button.addEventListener('click', async function () {
-//     const id = this.getAttribute('data-id');              // Get Category ID
-//     const currentStatus = this.getAttribute('data-status'); // listed/unlisted
-
-//     // Decide API URL
-//     const url = currentStatus === 'listed'
-//       ? `/admin/list-category?id=${id}`      // If listed → unlist
-//       : `/admin/unlist-category?id=${id}`;   // If unlisted → list
-
-//     try {
-//       const response = await fetch(url);
-//       const data = await response.json();
-
-//       if (data.success) {
-//         const isListed = data.isListed;
-
-//         // ✅ 1. Change Button Text (Unlist/List)
-//         this.innerText = isListed ? "Unlist" : "List";
-
-//         // ✅ 2. Update data-status attribute
-//         this.setAttribute('data-status', isListed ? "listed" : "unlisted");
-
-//         // ✅ 3. Update Button Color (Green if listed, Red if unlisted)
-//         this.classList.remove('action-list', 'action-unlist');
-//         this.classList.add(isListed ? 'action-unlist' : 'action-list');
-
-//         // ✅ 4. Update the Status Text in Table
-//         const statusBadge = this.closest('tr').querySelector('.status-cell .status-badge');
-//         statusBadge.innerText = isListed ? "Listed" : "Unlisted";
-//         statusBadge.classList.remove('listed', 'unlisted');
-//         statusBadge.classList.add(isListed ? 'listed' : 'unlisted');
-//       }
-//     } catch (error) {
-//       console.error("Error updating category status:", error);
-//     }
-//   });
-// });
-
 document.querySelectorAll('.btn-status').forEach(button => {
   button.addEventListener('click', async function () {
 

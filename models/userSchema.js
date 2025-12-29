@@ -37,6 +37,18 @@ const userSchema = new Schema({
         type:Boolean,
         default:false
     },
+    referralCode: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+
+    referredBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
+
     createdOn:{
         type:String,
         default: () => {

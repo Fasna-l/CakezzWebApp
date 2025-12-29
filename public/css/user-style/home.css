@@ -181,7 +181,7 @@ body {
 .cake-card-subtitle {
   font-size: 0.9rem;
   color: #666;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
 }
 .cake-add-to-cart-btn {
   background-color: #c2185b;
@@ -701,3 +701,48 @@ body {
   transform: translateX(-0.5px);
 }
 
+.rating-badge {
+  display: inline-block;
+  background: #4caf50;
+  color: #000;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 4px;
+  margin-top: 6px;
+}
+.rating-badgelatestprdct {
+  display: inline-block;
+  background: #4caf50;
+  color: #000;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 4px;
+  margin-top: 0px;
+  margin-bottom: 50px;
+  margin:4px
+}
+
+
+/* OFFER BADGE */
+.offer-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #e53935;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+/* OFFER TEXT (Product Details Page) */
+.offer-text {
+  margin: 6px 0;
+  color: #2e7d32;
+  font-size: 14px;
+  font-weight: 500;
+}

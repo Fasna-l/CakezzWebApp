@@ -10,6 +10,8 @@ const checkOutController = require("../controllers/user/checkOutController");
 const orderController = require("../controllers/user/orderController");
 const walletController = require("../controllers/user/walletController");
 const wishlistController = require("../controllers/user/wishlistController");
+const couponController = require("../controllers/user/couponController");
+const referralController = require("../controllers/user/referralController")
 const {userAuth,adminAuth} = require("../middlewares/auth");
 const { uploads } = require("../helpers/multer");
 
@@ -141,8 +143,12 @@ router.get("/wallet/history", userAuth, walletController.loadWalletHistory);
 router.post("/wallet/recharge", userAuth, walletController.createWalletRechargeOrder);
 router.post("/wallet/recharge/verify", userAuth, walletController.verifyWalletRecharge);
 
+// coupons 
+router.get("/coupon/available", userAuth, couponController.getAvailableCoupons);
+router.post("/coupon/apply", userAuth, couponController.applyCoupon);
+router.post("/coupon/remove", userAuth, couponController.removeCoupon);
 
-
-
+//referral 
+router.get("/referral", userAuth, referralController.loadReferralPage);
 
 module.exports = router;

@@ -145,4 +145,6 @@ orderSchema.pre("validate", function (next) {
   next();
 });
 
-module.exports = mongoose.model("Order", orderSchema);
+
+const Order = mongoose.model("Order", orderSchema);
+module.exports = Order

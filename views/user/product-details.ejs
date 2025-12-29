@@ -1,5 +1,7 @@
 <%- include('../partials/user/header') %>
 <link rel="stylesheet" href="/css/user-style/product-details.css">
+<link rel="stylesheet" href="/css/user-style/product-details-related.css">
+<!-- <link rel="stylesheet" href="/css/user-style/shop.css"> -->
 
 <div class="product-details-container">
 
@@ -37,6 +39,14 @@
       <!-- <h1 class="product-title"><%= product.productName %></h1> -->
        <div class="product-title-row">
   <h1 class="product-title"><%= product.productName %></h1>
+  
+  <% if (product.offerPercentage > 0) { %>
+  <span class="offer-badge">
+    <%= product.offerPercentage %>%
+    <%= product.appliedOfferType === "category" ? "COFF" : "OFF" %>
+  </span>
+<% } %>
+
 
   <!-- <div class="wishlist-icon pd-wishlist"
        data-product-id="<%= product._id %>"> -->
@@ -55,6 +65,16 @@
         <div class="price-wrapper">
           <span class="current-price" id="pd-price">₹0</span>
         </div>
+        <% if (product.offerPercentage > 0) { %>
+  <p class="offer-text">
+    🎉 <%= product.offerPercentage %>%
+    <%= product.appliedOfferType === "category"
+      ? "Category Offer applied"
+      : "Product Offer applied" %>
+  </p>
+<% } %>
+
+
         <span class="inclusive-text">Inclusive of all taxes</span>
       </div>
 
@@ -143,11 +163,12 @@
           <button class="qty-btn plus" id="pd-qty-plus">+</button>
         </div>
         <button 
-  id="pd-add-to-cart"
-  class="add-to-cart-btn"
-  data-product-id="<%= product._id %>">
-  ADD TO CART
-</button>
+          type="button"
+          id="pd-add-to-cart"
+          class="add-to-cart-btn"
+          data-product-id="<%= product._id %>">
+          ADD TO CART   
+        </button>
 
 
       </div>
@@ -199,8 +220,100 @@
     </div>
   </div>
 
-  <!-- ✅ Related Products -->
-  <div class="related-products">
+<!-- ✅ Related Products -->
+<div class="related-products">
+  <h2 class="related-title">Related Products</h2>
+
+  <!-- reuse shop grid -->
+  <div class="products-grid">
+
+    <% if (relatedProducts && relatedProducts.length > 0) { %>
+      <% relatedProducts.forEach(product => { 
+        const oneKgVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+      %>
+
+        <div class="product-card">
+
+          <% if (product.offerPercentage > 0) { %>
+            <span class="offer-badge">
+              <%= product.offerPercentage %>%
+              <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
+            </span>
+          <% } %>
+
+
+          <!-- Product Image -->
+          <a href="/product/<%= product._id %>">
+            <img 
+              src="/uploads/product/<%= product.productImage[0] %>" 
+              alt="<%= product.productName %>" 
+              class="product-img"
+            >
+          </a>
+
+          <!-- Product Name -->
+          <h3 class="product-name">
+            <a href="/product/<%= product._id %>" class="product-link">
+              <%= product.productName %>
+            </a>
+          </h3>
+
+          <!-- Price -->
+          <p class="product-price">
+            ₹<%= product.offerPercentage
+  ? Math.round(oneKgVariant.price - (oneKgVariant.price * product.offerPercentage) / 100)
+  : oneKgVariant.price
+%>
+
+            <!-- ₹<%= product.minPrice || oneKgVariant?.price || "N/A" %> -->
+          </p>
+
+          <!-- Wishlist -->
+          <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
+               data-product-id="<%= product._id %>">
+            <i class="fa-heart"></i>
+          </div>
+
+          <!-- Stock -->
+          <% if (!oneKgVariant || oneKgVariant.stock <= 0) { %>
+            <p class="out-of-stock">Out of stock (1 kg)</p>
+          <% } %>
+
+          <!-- Add to Cart -->
+          <button
+            class="add-to-cart-btn"
+            data-product-id="<%= product._id %>"
+            data-size="1kg"
+            data-qty="1"
+            <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'disabled' : '' %>>
+            <i class="fas fa-shopping-cart"></i>
+            <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
+          </button>
+
+          <!-- Rating -->
+          <% 
+            let avg = 0;
+            if (product.reviews && product.reviews.length) {
+              avg = (product.reviews.reduce((a, b) => a + b.rating, 0) / product.reviews.length).toFixed(1);
+            }
+          %>
+
+          <% if (avg > 0) { %>
+            <span class="rating-badge">★ <%= avg %></span>
+          <% } %>
+
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p>No related products found.</p>
+    <% } %>
+
+  </div>
+</div>
+
+
+
+  <!-- <div class="related-products">
     <h2 class="related-title">Related Products</h2>
     <div class="related-grid">
       <% if (relatedProducts && relatedProducts.length) { %>
@@ -216,9 +329,16 @@
       <% } %>
     </div>
   </div>
-</div>
+</div> -->
 
 <!-- ✅ JavaScript -->
+ <!-- <script>
+  const productFinalPrice = JSON.parse( `<%- JSON.stringify(product.finalPrice || 0) %>`);
+</script> -->
+<script>
+  const offerPercentage = JSON.parse(`<%= product.offerPercentage || 0 %>`);
+</script>
+
 <script>
   const mainImage = document.getElementById("mainImage");
   const priceEl = document.getElementById("pd-price");
@@ -248,22 +368,58 @@
     element.classList.add("active-thumb");
   }
 
-  // ✅ Update Price, Stock & Button when selecting weight
   function renderSize(size) {
-    const v = variants.find(item => item.size === size);
-    priceEl.textContent = '₹' + v.price;
-    stockEl.textContent = v.stock + ' items';
+  const v = variants.find(item => item.size === size);
+  if (!v) return;
 
-    if (v.stock <= 0) {
-      soldOut.style.display = "block";          // Show sold-out message
-      addBtn.disabled = true;                  // Disable Add to Cart
-      addBtn.textContent = "OUT OF STOCK";     // Change button label
-    } else {
-      soldOut.style.display = "none";
-      addBtn.disabled = false;
-      addBtn.textContent = "ADD TO CART";
-    }
+  let finalPrice = v.price;
+
+  if (offerPercentage > 0) {
+    const discount = Math.round((v.price * offerPercentage) / 100);
+    finalPrice = v.price - discount;
   }
+
+  priceEl.textContent = `₹${finalPrice}`;
+  stockEl.textContent = `${v.stock} items`;
+
+  if (v.stock <= 0) {
+    soldOut.style.display = "block";
+    addBtn.disabled = true;
+    addBtn.textContent = "OUT OF STOCK";
+  } else {
+    soldOut.style.display = "none";
+    addBtn.disabled = false;
+    addBtn.textContent = "ADD TO CART";
+  }
+}
+
+
+  // ✅ Update Price, Stock & Button when selecting weight
+  // function renderSize(size) {
+  //   const v = variants.find(item => item.size === size);
+    
+  // let finalPrice = v.price;
+
+  // if (offerPercentage > 0) {
+  //   const discount = Math.round((v.price * offerPercentage) / 100);
+  //   finalPrice = v.price - discount;
+  // }
+
+  // priceEl.textContent = `₹${finalPrice}`;
+  //   //priceEl.textContent = '₹' + (productFinalPrice || v.price);
+  //   //priceEl.textContent = '₹' + v.price;
+  //   stockEl.textContent = v.stock + ' items';
+
+  //   if (v.stock <= 0) {
+  //     soldOut.style.display = "block";          // Show sold-out message
+  //     addBtn.disabled = true;                  // Disable Add to Cart
+  //     addBtn.textContent = "OUT OF STOCK";     // Change button label
+  //   } else {
+  //     soldOut.style.display = "none";
+  //     addBtn.disabled = false;
+  //     addBtn.textContent = "ADD TO CART";
+  //   }
+  // }
 
   // ✅ Default size select
   renderSize(variants[0].size);

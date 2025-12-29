@@ -14,6 +14,7 @@ const bcrypt = require("bcrypt");
 const { generateOtp } = require("../../helpers/otpHelper");
 const { sendVerificationEmail } = require("../../helpers/emailHelper");
 const { securePassword } = require("../../helpers/passwordHelper");
+const calculateBestOffer = require("../../helpers/offerCalculator");
 
 const pageNotFound = async (req,res,next)=>{
     try {
@@ -68,29 +69,72 @@ const loadHomepage = async (req, res, next) => {
 
     // ✅ Latest Products (with totalStock)
     let latestProducts = await Product.aggregate([
-      { $match: { isBlocked: false, category: { $in: categories.map(c => c._id) } } },
-      {
-        $addFields: {
-          totalStock: { $sum: "$variants.stock" },
-          minPrice: { $min: "$variants.price" }
-        }
-      },
-      { $sort: { createdAt: -1 } },
-      { $limit: 4 }
-    ]);
+  { $match: { isBlocked: false, category: { $in: categories.map(c => c._id) } } },
+
+  {
+    $lookup: {
+      from: "categories",
+      localField: "category",
+      foreignField: "_id",
+      as: "category"
+    }
+  },
+  { $unwind: "$category" },
+
+  {
+    $addFields: {
+      totalStock: { $sum: "$variants.stock" },
+      minPrice: { $min: "$variants.price" }
+    }
+  },
+  { $sort: { createdAt: -1 } },
+  { $limit: 4 }
+]);
+
 
     // ✅ Best Products (Top priced items)
     let bestProducts = await Product.aggregate([
-      { $match: { isBlocked: false, category: { $in: categories.map(c => c._id) } } },
-      {
-        $addFields: {
-          totalStock: { $sum: "$variants.stock" },
-          maxPrice: { $max: "$variants.price" }
-        }
-      },
-      { $sort: { maxPrice: -1 } },
-      { $limit: 8 }
-    ]);
+  { $match: { isBlocked: false, category: { $in: categories.map(c => c._id) } } },
+
+  {
+    $lookup: {
+      from: "categories",
+      localField: "category",
+      foreignField: "_id",
+      as: "category"
+    }
+  },
+  { $unwind: "$category" },
+
+  {
+    $addFields: {
+      totalStock: { $sum: "$variants.stock" },
+      maxPrice: { $max: "$variants.price" }
+    }
+  },
+  { $sort: { maxPrice: -1 } },
+  { $limit: 8 }
+]);
+
+
+    // ✅ APPLY BEST OFFER (Product vs Category)
+for (let product of latestProducts) {
+  const basePrice = product.minPrice;
+  const offer = await calculateBestOffer(product, basePrice);
+
+  product.offerPercentage = offer.discountPercentage;
+  product.appliedOfferType = offer.appliedOfferType;
+  //product.finalPrice = offer.finalPrice;
+}
+
+for (let product of bestProducts) {
+  const basePrice = product.maxPrice;
+  const offer = await calculateBestOffer(product, basePrice);
+
+  product.offerPercentage = offer.discountPercentage;
+  product.appliedOfferType = offer.appliedOfferType;
+  //product.finalPrice = offer.finalPrice;
+}
 
     // ✅ Get User if logged in
     const userData = user ? await User.findById(user) : null;
@@ -180,7 +224,7 @@ const loadSignup = async (req,res,next)=>{
 const signup = async (req,res,next) =>{
     try {
         
-        const {name,email,password,confirmPassword} = req.body;
+        const {name,email,password,confirmPassword, referralCode} = req.body;
 
         if(password !== confirmPassword){
             return res.render("signup",{message:"Passwords do not match"});
@@ -211,7 +255,7 @@ const signup = async (req,res,next) =>{
         await Otp.deleteOne({email}); //remove old OTP if exists
         await Otp.create({email,otp});
 
-        req.session.userData = { name, email, password };
+        req.session.userData = { name, email, password , referralCode: referralCode || null};
         
         res.render("verify-otp");
         console.log("OTP Send",otp)
@@ -227,7 +271,7 @@ const signup = async (req,res,next) =>{
 const verifyOtp = async (req, res,next) => {
     try {
         const enteredOtp = req.body.otp;
-        const { email, name, password } = req.session.userData || {};
+        const { email, name, password, referralCode} = req.session.userData || {};
 
         if (!email) {
             return res.status(400).json({ success: false, message: "Session expired. Please signup again." });
@@ -247,8 +291,58 @@ const verifyOtp = async (req, res,next) => {
         //  Save user after OTP match
         //const hashedPassword = await bcrypt.hash(password, 10);
         const hashedPassword = await securePassword(password);
-        const newUser = new User({ name, email, password: hashedPassword });
+
+        // Generate referral code for NEW user
+        const generateReferralCode = () =>
+          Math.random().toString(36).substring(2, 8).toUpperCase();
+        
+        let referrerUser = null;
+
+        if (referralCode) {
+          referrerUser = await User.findOne({ referralCode });
+        }
+
+
+
+        const newUser = new User({ name, email, password: hashedPassword ,referralCode: generateReferralCode(), referredBy: referrerUser ? referrerUser._id : null });
         await newUser.save();
+
+        // ================= REFERRAL REWARD =================
+        if (referralCode) {
+  const referrer = await User.findOne({ referralCode });
+
+  if (referrer) {
+    const Coupon = require("../../models/couponSchema");
+
+    // 🔒 CHECK IF REFERRAL COUPON ALREADY EXISTS
+    const existingReferralCoupon = await Coupon.findOne({
+      assignedUser: referrer._id,
+      description: "Referral reward coupon"
+    });
+
+    if (!existingReferralCoupon) {
+      const couponCode =
+        "REF-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+      await Coupon.create({
+        name: "Referral Coupon",
+        code: couponCode,
+        description: "Referral reward coupon",
+        discountType: "percentage",
+        discountValue: 10,
+        minPurchaseAmount: 500,
+        maxDiscountAmount: 200,
+        expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        isActive: true,
+        usageLimit: 1,
+        perUserLimit: 1,
+        assignedUser: referrer._id
+      });
+    }
+  }
+}
+
+
 
         // AUTO-CREATE WALLET (STEP 1)
         await Wallet.create({

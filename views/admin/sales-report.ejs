@@ -1,0 +1,119 @@
+<%- include('../partials/admin/header') %>
+<link rel="stylesheet" href="/css/admin-style/category.css">
+
+<div class="dashboard-container">
+  <div class="dashboard-wrapper">
+    <%- include('../partials/admin/sidebar') %>
+
+    <div class="categories-container">
+
+      <div class="page-title"
+     style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+
+  <!-- Title -->
+  <h2 style="margin:0;">Sales Report</h2>
+
+  <!-- Search + Filter -->
+  <form action="/admin/sales-report" method="get"
+        style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+
+    <!-- Search -->
+    <input
+      type="text"
+      name="search"
+      class="search-input"
+      placeholder="Search Order ID..."
+      value="<%= search %>"
+      style="width:200px;"
+    >
+
+    <!-- Filter -->
+    <select name="range" class="search-input" style="width:150px;">
+      <option value="">Filter By</option>
+      <option value="today" <%= range==="today"?"selected":"" %>>Today</option>
+      <option value="week" <%= range==="week"?"selected":"" %>>This Week</option>
+      <option value="month" <%= range==="month"?"selected":"" %>>This Month</option>
+      <option value="year" <%= range==="year"?"selected":"" %>>This Year</option>
+      <option value="custom" <%= range==="custom"?"selected":"" %>>Custom</option>
+    </select>
+
+    <!-- Dates -->
+    <input type="date" name="startDate" class="search-input" style="width:140px;" value="<%= startDate %>">
+    <input type="date" name="endDate" class="search-input" style="width:140px;" value="<%= endDate %>">
+
+    <!-- Apply -->
+    <button class="search-button-text" type="submit" style="height:40px;">
+      Apply
+    </button>
+
+    <!-- Clear -->
+    <% if (search || range || startDate || endDate) { %>
+      <a href="/admin/sales-report"
+         class="search-button-text"
+         style="background:#777;text-decoration:none;height:40px;display:flex;align-items:center;">
+        Clear
+      </a>
+    <% } %>
+
+  </form>
+</div>
+
+      <div class="table-wrapper">
+        <table class="categories-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Date</th>
+              <th>Payment</th>
+              <th>Subtotal</th>
+              <th>Discount</th>
+              <th>Paid</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% if (sales.length) { %>
+              <% sales.forEach(o => { 
+                const paid = o.paymentMethod === "COD"
+                  ? (o.totalAmount || 0)
+                  : (o.payableAmount || o.totalAmount || 0);
+              %>
+              <tr>
+                <td><%= o.orderId %></td>
+                <td><%= new Date(o.orderDate).toLocaleDateString() %></td>
+                <td><%= o.paymentMethod %></td>
+                <td>₹<%= (o.subTotal || 0).toFixed(2) %></td>
+                <td>₹<%= ((o.offerDiscount || 0) + (o.couponDiscount || 0)).toFixed(2) %></td>
+                <td>₹<%= paid.toFixed(2) %></td>
+                <td><%= o.orderStatus %></td>
+              </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="7" style="text-align:center;">No sales data found</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:15px;">
+        <a href="/admin/sales-report/pdf?<%= new URLSearchParams({ search, range, startDate, endDate }).toString() %>" class="btn-add-category">PDF</a>
+        <a href="/admin/sales-report/excel?<%= new URLSearchParams({ search, range, startDate, endDate }).toString() %>" class="btn-add-category">Excel</a>
+      </div>
+
+      <div class="pagination-container">
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <a href="/admin/sales-report?page=<%= i %>&search=<%= search %>&range=<%= range %>&startDate=<%= startDate %>&endDate=<%= endDate %>"
+             class="pagination-link <%= i === currentPage ? 'current' : '' %>">
+            <%= i %>
+          </a>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/admin/footer') %>

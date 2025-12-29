@@ -2,6 +2,8 @@ const User = require("../../models/userSchema");
 const Cart = require("../../models/cartSchema");
 const Product = require("../../models/productSchema");
 const Wishlist = require("../../models/wishlistSchema");
+const calculateBestOffer = require("../../helpers/offerCalculator");
+
 
 /* Helper: find variant */
 function findVariant(product, size) {
@@ -61,7 +63,7 @@ const addToCart = async (req, res, next) => {
       (i) => i.product.toString() === productId && i.size === size
     );
 
-    if (existing) {
+    if (existing) { 
       // MAX 5 LIMIT
       if (existing.quantity + qty > 5) {
         return res.json({
@@ -111,7 +113,13 @@ const updateQuantity = async (req, res, next) => {
     const userId = req.session.user;
     const { productId, size, quantity } = req.body;
 
-    let cart = await Cart.findOne({ user: userId }).populate("items.product");
+    //let cart = await Cart.findOne({ user: userId }).populate("items.product");
+    let cart = await Cart.findOne({ user: userId })
+      .populate({
+        path: "items.product",
+        populate: { path: "category" }
+      });
+
 
     if (!cart) return res.json({ success: false, message: "Cart not found" });
 
@@ -130,7 +138,47 @@ const updateQuantity = async (req, res, next) => {
     item.quantity = quantity;
     await cart.save();
 
-    res.json({ success: true, cart });
+    // STEP 6: AUTO REMOVE COUPON IF CART CHANGES
+if (req.session.appliedCoupon) {
+  delete req.session.appliedCoupon;
+
+  if (req.session.checkoutTotals) {
+    delete req.session.checkoutTotals.discount;
+    req.session.checkoutTotals.grandTotal =
+      req.session.checkoutTotals.subTotal +
+      req.session.checkoutTotals.shipping +
+      req.session.checkoutTotals.tax;
+  }
+}
+
+    const cartItems = await Promise.all(
+  cart.items.map(async (item) => {
+    const variant = item.product.variants.find(v => v.size === item.size);
+    const offer = await calculateBestOffer(item.product, variant.price);
+
+    return {
+      productId: item.product._id.toString(),
+      size: item.size,
+      price: offer.finalPrice,
+      quantity: item.quantity,
+      subtotal: offer.finalPrice * item.quantity
+    };
+  })
+);
+
+const subtotal = cartItems.reduce((a, b) => a + b.subtotal, 0);
+const tax = Math.round(subtotal * 0.05);
+const shipping = 50;
+const total = subtotal + tax + shipping;
+
+res.json({
+  success: true,
+  cartItems,
+  summary: { subtotal, tax, shipping, total }
+});
+
+
+    // res.json({ success: true, cart });
   } catch (error) {
     next(error);
     // console.error("updateQuantity error:", error);
@@ -152,7 +200,55 @@ const removeCartItem = async (req, res, next) => {
       return res.json({ success: false, message: "Item not found" });
     }
 
-    return res.json({ success: true, message: "Item removed" });
+    // STEP 6: AUTO REMOVE COUPON IF CART CHANGES
+if (req.session.appliedCoupon) {
+  delete req.session.appliedCoupon;
+
+  if (req.session.checkoutTotals) {
+    delete req.session.checkoutTotals.discount;
+    req.session.checkoutTotals.grandTotal =
+      req.session.checkoutTotals.subTotal +
+      req.session.checkoutTotals.shipping +
+      req.session.checkoutTotals.tax;
+  }
+}
+
+// const cart = await Cart.findOne({ user: userId }).populate("items.product");
+const cart = await Cart.findOne({ user: userId })
+  .populate({
+    path: "items.product",
+    populate: { path: "category" }
+  });
+
+
+const cartItems = await Promise.all(
+  cart.items.map(async (item) => {
+    const variant = item.product.variants.find(v => v.size === item.size);
+    const offer = await calculateBestOffer(item.product, variant.price);
+
+    return {
+      productId: item.product._id.toString(),
+      size: item.size,
+      price: offer.finalPrice,
+      quantity: item.quantity,
+      subtotal: offer.finalPrice * item.quantity
+    };
+  })
+);
+
+const subtotal = cartItems.reduce((a, b) => a + b.subtotal, 0);
+const tax = Math.round(subtotal * 0.05);
+const shipping = 50;
+const total = subtotal + tax + shipping;
+
+return res.json({
+  success: true,
+  cartItems,
+  summary: { subtotal, tax, shipping, total }
+});
+
+
+    // return res.json({ success: true, message: "Item removed" });
   } catch (error) {
     next(error);
     // console.error("removeCartItem error:", error);
@@ -167,7 +263,13 @@ const proceedToCheckout = async (req, res, next) => {
   try {
     const userId = req.session.user;
 
-    const cart = await Cart.findOne({ user: userId }).populate("items.product");
+    //const cart = await Cart.findOne({ user: userId }).populate("items.product");
+    const cart = await Cart.findOne({ user: userId })
+      .populate({
+        path: "items.product",
+        populate: { path: "category" }
+      });
+
     console.log("cart:"+cart)
 
     if (!cart || cart.items.length === 0) {
@@ -194,23 +296,27 @@ const proceedToCheckout = async (req, res, next) => {
       }
     }
 
-    // Build checkout items only after validation passes
-    const checkoutItems = cart.items.map((item) => {
-      const product = item.product;
-      console.log(product)
-      const variant = product.variants.find(v => v.size === item.size);
+    const checkoutItems = [];
 
-      return {
-        productId: product._id,
-        product: {
-          name: product.productName,
-          image: product.productImage[0]
-        },
-        size: item.size,
-        quantity: item.quantity,
-        price: variant.price
-      };
-    });
+for (let item of cart.items) {
+  const product = item.product;
+  const variant = product.variants.find(v => v.size === item.size);
+
+  const offer = await calculateBestOffer(product, variant.price);
+
+  checkoutItems.push({
+    productId: product._id,
+    product: {
+      name: product.productName,
+      image: product.productImage[0]
+    },
+    size: item.size,
+    quantity: item.quantity,
+    price: offer.finalPrice
+  });
+}
+
+    
 
     // Calculate totals
     let subTotal = 0;
@@ -247,7 +353,12 @@ const getCartPage = async (req, res, next) => {
     const userId = req.session.user;
     const user = userId ? await User.findById(userId).lean() : null;
 
-    const cart = await Cart.findOne({ user: userId }).populate("items.product");
+    //const cart = await Cart.findOne({ user: userId }).populate("items.product");
+    const cart = await Cart.findOne({ user: userId })
+      .populate({
+        path: "items.product",
+        populate: { path: "category" }
+      });
 
     const cartCount = cart ? cart.items.length : 0;
 
@@ -260,37 +371,32 @@ const getCartPage = async (req, res, next) => {
       });
     }
 
-    // const cartItems = cart.items.map((item) => ({
-    //   productId: item.product._id,
-    //   name: item.product.productName,
-    //   size: item.size,
-    //   image: item.product.productImage[0],
-    //   price: item.priceAtAdd,
-    //   quantity: item.quantity,
-    //   subtotal: item.quantity * item.priceAtAdd,
-    // }));
+    const cartItems = await Promise.all(
+      cart.items.map(async (item) => {
 
-    const cartItems = cart.items.map((item) => {
+        const isUnavailable =
+          item.product.isBlocked ||
+          (item.product.category?.isListed === false);
 
-      const isUnavailable =
-        item.product.isBlocked ||
-        (item.product.category?.isListed === false);
+        const variant = item.product.variants.find(v => v.size === item.size);
+        const isOutOfStock = variant?.stock <= 0;
 
-      const variant = item.product.variants.find(v => v.size === item.size);
-      const isOutOfStock = variant?.stock <= 0;
+        const offer = await calculateBestOffer(item.product, variant.price);
+        const finalPrice = offer.finalPrice;
 
-      return {
-        productId: item.product._id,
-        name: item.product.productName,
-        size: item.size,
-        image: item.product.productImage[0],
-        price: item.priceAtAdd,
-        quantity: item.quantity,
-        subtotal: item.quantity * item.priceAtAdd,
-        isUnavailable,
-        isOutOfStock
-      };
-    });
+        return {
+          productId: item.product._id,
+          name: item.product.productName,
+          size: item.size,
+          image: item.product.productImage[0],
+          price: finalPrice,
+          quantity: item.quantity,
+          subtotal: finalPrice * item.quantity,
+          isUnavailable,
+          isOutOfStock
+        };
+      })
+    );
 
 
     const subtotal = cartItems.reduce((a, b) => a + b.subtotal, 0);

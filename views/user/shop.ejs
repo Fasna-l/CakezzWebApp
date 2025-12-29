@@ -54,6 +54,17 @@
          const oneKgVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
     %>
       <div class="product-card">
+        <% if (product.offerPercentage > 0) { %>
+          <span class="offer-badge">
+            <%= product.offerPercentage %>%
+            <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
+          </span>
+        <% } %>
+
+        <!-- <% if (product.offerPercentage && product.offerPercentage > 0) { %>
+          <span class="offer-badge"><%= product.offerPercentage %>% OFF</span>
+        <% } %> -->
+
         <a href="/product/<%= product._id %>">
           <img src="/uploads/product/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="product-img">
         </a>
@@ -61,8 +72,16 @@
         <h3 class="product-name">
           <a href="/product/<%= product._id %>" class="product-link"><%= product.productName %></a>
         </h3>
+        <p class="product-price">
 
-        <p class="product-price">₹<%= product.minPrice || oneKgVariant?.price || "N/A" %></p>
+          ₹<%= product.offerPercentage
+            ? Math.round(oneKgVariant.price - (oneKgVariant.price * product.offerPercentage) / 100)
+            : oneKgVariant.price
+          %>
+
+          <!-- ₹<%= product.finalPrice || product.minPrice || oneKgVariant?.price %> -->
+        </p>
+
         <!-- <div class="wishlist-icon"><i class="far fa-heart"></i></div> -->
         <!-- <div class="wishlist-icon" data-product-id="<%= product._id %>"> -->
         <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"

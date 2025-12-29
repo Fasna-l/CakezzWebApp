@@ -5,6 +5,10 @@ const customerController = require("../controllers/admin/customerController");
 const categoryController = require("../controllers/admin/categoryController");
 const productController = require("../controllers/admin/productController");
 const orderController = require("../controllers/admin/orderController");
+const adminCouponController = require("../controllers/admin/adminCouponController");
+const offerController = require("../controllers/admin/offerController");
+const categoryOfferController = require("../controllers/admin/categoryOfferController");
+const salesReportController = require("../controllers/admin/salesReportController");
 const {userAuth,adminAuth} = require("../middlewares/auth")
 const multer = require("multer");
 const { uploads } = require("../helpers/multer");
@@ -52,6 +56,39 @@ router.get("/return-requests", adminAuth, orderController.loadReturnRequests);
 //whole-order return amangement
 router.get("/order/:id/reject-whole-return", adminAuth, orderController.rejectWholeReturn);
 router.get("/order/:id/approve-whole-return", adminAuth, orderController.approveWholeReturn);
+ 
+// coupon management
+router.get("/coupons", adminAuth, adminCouponController.listCoupons);
+router.get("/coupons/add", adminAuth, adminCouponController.loadAddCoupon);
+router.post("/coupons/add", adminAuth, adminCouponController.createCoupon);
+router.get("/coupons/edit/:id", adminAuth, adminCouponController.loadEditCoupon);
+router.post("/coupons/edit/:id", adminAuth, adminCouponController.updateCoupon);
+router.patch("/coupons/toggle/:id", adminAuth, adminCouponController.toggleCoupon);
+router.delete("/coupons/:id", adminAuth, adminCouponController.deleteCoupon);
 
+//offer management
+// router.get("/offers", adminAuth, offerController.listOffers);
+// Add offer page
+router.get("/offer/add", adminAuth, offerController.loadAddOffer);
+router.post("/offer/add", adminAuth, offerController.addOffer);
+// Edit offer
+router.get("/offer/edit/:id", adminAuth, offerController.loadEditOffer);
+router.post("/offer/update", adminAuth, offerController.updateOffer);
+// Delete offer
+router.delete("/offer/delete/:id", adminAuth, offerController.deleteOffer);
+// Assign product offer
+// router.post("/offer/assign-product", adminAuth, offerController.assignProductOffer);
+
+//category offer
+router.get("/category-offer/add", adminAuth, categoryOfferController.loadAddCategoryOffer);
+router.post("/category-offer/add", adminAuth, categoryOfferController.addCategoryOffer);
+router.get("/category-offer/edit/:id", adminAuth, categoryOfferController.loadEditCategoryOffer);
+router.post("/category-offer/update", adminAuth, categoryOfferController.updateCategoryOffer);
+router.delete("/category-offer/delete/:id", adminAuth, categoryOfferController.deleteCategoryOffer);
+
+//salesreport
+router.get("/sales-report",adminAuth,salesReportController.getSalesReport);
+router.get("/sales-report/pdf",adminAuth,salesReportController.exportSalesReportPDF);
+router.get("/sales-report/excel",adminAuth,salesReportController.exportSalesReportExcel);
 
 module.exports = router;

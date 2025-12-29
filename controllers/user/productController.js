@@ -3,6 +3,7 @@ const Product = require("../../models/productSchema");
 const Category = require("../../models/categorySchema");
 const Cart = require("../../models/cartSchema");
 const Wishlist = require("../../models/wishlistSchema");
+const calculateBestOffer = require("../../helpers/offerCalculator");
 const mongoose = require("mongoose");
 
 // Load Shop Page
@@ -90,6 +91,17 @@ const loadShoppage = async (req, res, next) => {
     });
 
     const products = await Product.aggregate(pipeline);
+    
+    // ✅ APPLY BEST OFFER (Product vs Category)
+for (let product of products) {
+  const basePrice = product.minPrice;
+  const offer = await calculateBestOffer(product, basePrice);
+
+  product.offerPercentage = offer.discountPercentage;
+  product.appliedOfferType = offer.appliedOfferType;
+  //product.finalPrice = offer.finalPrice;
+}
+
     const totalPages = Math.ceil(totalProducts / limit);
 
     let wishlistProductIds = [];
@@ -141,11 +153,40 @@ const loadProductDetails = async (req, res, next) => {
       return res.redirect("/shop");
     }
 
+          // ✅ APPLY BEST OFFER
+const basePrice = product.variants[0].price;
+const offer = await calculateBestOffer(product, basePrice);
+
+product.offerPercentage = offer.discountPercentage;
+product.appliedOfferType = offer.appliedOfferType;
+//product.finalPrice = offer.finalPrice;
+
+
+    // const relatedProducts = await Product.find({
+    //   category: product.category._id,
+    //   _id: { $ne: productId },
+    //   isBlocked: false
+    // }).limit(4).lean();
+
     const relatedProducts = await Product.find({
-      category: product.category._id,
-      _id: { $ne: productId },
-      isBlocked: false
-    }).limit(4).lean();
+  category: product.category._id,
+  _id: { $ne: productId },
+  isBlocked: false
+})
+.populate("category")
+.limit(4)
+.lean();
+
+
+    for (let p of relatedProducts) {
+  const basePrice = p.variants[0]?.price || 0;
+  const offer = await calculateBestOffer(p, basePrice);
+
+  p.offerPercentage = offer.discountPercentage;
+  p.appliedOfferType = offer.appliedOfferType
+  //p.finalPrice = offer.finalPrice;
+}
+
 
     const user = userId ? await User.findById(userId).lean() : null; // ✅ added
 

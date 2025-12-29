@@ -628,3 +628,41 @@ input:checked + .slider:before {
     color: #1abc9c;  /* Teal hover color */
     text-decoration: none;
 }
+
+
+/*coupon related css */
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.active {
+  background: #e6f7ec;
+  color: #0f9d58;
+}
+
+.status-badge.inactive {
+  background: #fdecea;
+  color: #d93025;
+}
+
+.btn-toggle {
+  border: none;
+  padding: 6px 12px;
+  font-size: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-enable {
+  background: #0f9d58;
+  color: white;
+}
+
+.btn-disable {
+  background: #d93025;
+  color: white;
+}

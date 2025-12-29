@@ -15,8 +15,14 @@ document.addEventListener("click", async (e) => {
 
     const data = await res.json();
     if (data.success) {
+      // item.remove();
+      // updateSummary();
+      // await updateCartCount();
+      
       item.remove();
-      updateSummary();
+      // Update summary using backend values
+      updateSummaryFromBackend(data.summary);
+
       await updateCartCount();
       showToast("Item removed");
     } else {
@@ -55,20 +61,34 @@ document.addEventListener("click", async (e) => {
     }
 
     // Update quantity visually
-    qtyEl.textContent = qty;
+    // Update quantity
+qtyEl.textContent = qty;
 
-    // Update subtotal of this item
-    const subtotalEl = item.querySelector(".item-subtotal");
-    const updatedItem = data.cart.items.find(
-      i => i.product._id.toString() === productId && i.size === size
-    );
+// Find updated item from backend response
+const updatedItem = data.cartItems.find(
+  i => i.productId === productId && i.size === size
+);
 
-    subtotalEl.textContent = "₹" + (updatedItem.quantity * updatedItem.priceAtAdd);
+// Update price & subtotal
+item.querySelector(".price").textContent = "₹" + updatedItem.price;
+item.querySelector(".item-subtotal").textContent = "₹" + updatedItem.subtotal;
 
-    // Update order summary
-    // updateSummary(data.cart.totalAmount);
+// Update summary using backend values
+updateSummaryFromBackend(data.summary);
+    // qtyEl.textContent = qty;
 
-      updateSummary();
+    // // Update subtotal of this item
+    // const subtotalEl = item.querySelector(".item-subtotal");
+    // const updatedItem = data.cart.items.find(
+    //   i => i.product._id.toString() === productId && i.size === size
+    // );
+
+    // subtotalEl.textContent = "₹" + (updatedItem.quantity * updatedItem.priceAtAdd);
+
+    // // Update order summary
+    // // updateSummary(data.cart.totalAmount);
+
+    //   updateSummary();
 
 
     showToast("Quantity updated");
@@ -128,6 +148,12 @@ function updateSummary() {
   document.getElementById("total").textContent = "₹" + grandTotal;
 }
 
+function updateSummaryFromBackend(summary) {
+  document.getElementById("subtotal").textContent = "₹" + summary.subtotal;
+  document.getElementById("tax").textContent = "₹" + summary.tax;
+  document.getElementById("shipping").textContent = "₹" + summary.shipping;
+  document.getElementById("total").textContent = "₹" + summary.total;
+}
 
 
 //Disable checkout when invalid items exist

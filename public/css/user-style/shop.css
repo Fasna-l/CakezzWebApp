@@ -768,3 +768,24 @@
   transform: translateX(-0.5px);
 }
 
+/* OFFER BADGE */
+.offer-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #e53935;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+/* OFFER TEXT (Product Details Page) */
+.offer-text {
+  margin: 6px 0;
+  color: #2e7d32;
+  font-size: 14px;
+  font-weight: 500;
+}
