@@ -47,7 +47,7 @@ const loadAddCoupon = async (req, res) => {
 ================================= */
 const createCoupon = async (req, res, next) => {
   try {
-    const {
+    let {
       code,
       name,
       description,
@@ -55,7 +55,8 @@ const createCoupon = async (req, res, next) => {
       minPurchaseAmount,
       maxDiscountAmount,
       expiryDate,
-      usageLimit
+      usageLimit,
+      //perUserLimit
     } = req.body;
 
     if (!code || !name || !description || !discountValue || !expiryDate) {
@@ -71,6 +72,26 @@ const createCoupon = async (req, res, next) => {
       return res.status(400).json({ message: "Discount must be 1–100%" });
     }
 
+    // 🚀 Convert empty fields to null
+    // usageLimit
+if (usageLimit === "" || usageLimit === undefined) {
+  usageLimit = null;
+} else {
+  usageLimit = Number(usageLimit);
+}
+
+// perUserLimit
+// if (perUserLimit === "" || perUserLimit === undefined) {
+//   perUserLimit = 1;
+// } else {
+//   perUserLimit = Number(perUserLimit);
+// }
+    // usageLimit = usageLimit === "" || usageLimit === undefined ? null : Number(usageLimit);
+    // perUserLimit = perUserLimit === "" || perUserLimit === undefined ? null : Number(perUserLimit);
+
+    // usageLimit = usageLimit?.trim() === "" ? null : Number(usageLimit);
+    // perUserLimit = perUserLimit?.trim() === "" ? null : Number(perUserLimit);
+
     await Coupon.create({
       code: code.toUpperCase(),
       name,
@@ -79,7 +100,8 @@ const createCoupon = async (req, res, next) => {
       minPurchaseAmount: minPurchaseAmount || 0,
       maxDiscountAmount: maxDiscountAmount || null,
       expiryDate,
-      usageLimit: usageLimit || null
+      usageLimit,
+      perUserLimit:1
     });
 
     res.status(201).json({ success: true });
@@ -87,6 +109,50 @@ const createCoupon = async (req, res, next) => {
     next(error);
   }
 };
+
+
+// const createCoupon = async (req, res, next) => {
+//   try {
+//     const {
+//       code,
+//       name,
+//       description,
+//       discountValue,
+//       minPurchaseAmount,
+//       maxDiscountAmount,
+//       expiryDate,
+//       usageLimit
+//     } = req.body;
+
+//     if (!code || !name || !description || !discountValue || !expiryDate) {
+//       return res.status(400).json({ message: "Missing required fields" });
+//     }
+
+//     const exists = await Coupon.findOne({ code: code.toUpperCase() });
+//     if (exists) {
+//       return res.status(400).json({ message: "Coupon code already exists" });
+//     }
+
+//     if (discountValue < 1 || discountValue > 100) {
+//       return res.status(400).json({ message: "Discount must be 1–100%" });
+//     }
+
+//     await Coupon.create({
+//       code: code.toUpperCase(),
+//       name,
+//       description,
+//       discountValue,
+//       minPurchaseAmount: minPurchaseAmount || 0,
+//       maxDiscountAmount: maxDiscountAmount || null,
+//       expiryDate,
+//       usageLimit: usageLimit || null
+//     });
+
+//     res.status(201).json({ success: true });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 /* =================================
    LOAD EDIT COUPON PAGE
@@ -107,19 +173,43 @@ const loadEditCoupon = async (req, res, next) => {
 ================================= */
 const updateCoupon = async (req, res, next) => {
   try {
-    const {
-      name,  
+    let {
+      name,
       discountValue,
       minPurchaseAmount,
       maxDiscountAmount,
       description,
       expiryDate,
-      usageLimit
+      usageLimit,
+      //perUserLimit
     } = req.body;
 
     if (discountValue < 1 || discountValue > 100) {
       return res.status(400).json({ message: "Invalid discount" });
     }
+
+    // 🚀 Convert blanks to null
+    
+    // usageLimit
+if (usageLimit === "" || usageLimit === undefined) {
+  usageLimit = null;
+} else {
+  usageLimit = Number(usageLimit);
+}
+
+// perUserLimit
+// if (perUserLimit === "" || perUserLimit === undefined) {
+//   perUserLimit = 1;
+// } else {
+//   perUserLimit = Number(perUserLimit);
+// }
+    
+    //usageLimit = usageLimit === "" || usageLimit === undefined ? null : Number(usageLimit);
+    //perUserLimit = perUserLimit === "" || perUserLimit === undefined ? null : Number(perUserLimit);
+
+    
+    //usageLimit = usageLimit?.trim() === "" ? null : Number(usageLimit);
+    //perUserLimit = perUserLimit?.trim() === "" ? null : Number(perUserLimit);
 
     await Coupon.findByIdAndUpdate(req.params.id, {
       name,
@@ -128,7 +218,8 @@ const updateCoupon = async (req, res, next) => {
       maxDiscountAmount: maxDiscountAmount || null,
       description,
       expiryDate,
-      usageLimit: usageLimit || null
+      usageLimit,
+      perUserLimit:1
     });
 
     res.status(200).json({ success: true });
@@ -136,6 +227,39 @@ const updateCoupon = async (req, res, next) => {
     next(error);
   }
 };
+
+
+// const updateCoupon = async (req, res, next) => {
+//   try {
+//     const {
+//       name,  
+//       discountValue,
+//       minPurchaseAmount,
+//       maxDiscountAmount,
+//       description,
+//       expiryDate,
+//       usageLimit
+//     } = req.body;
+
+//     if (discountValue < 1 || discountValue > 100) {
+//       return res.status(400).json({ message: "Invalid discount" });
+//     }
+
+//     await Coupon.findByIdAndUpdate(req.params.id, {
+//       name,
+//       discountValue,
+//       minPurchaseAmount,
+//       maxDiscountAmount: maxDiscountAmount || null,
+//       description,
+//       expiryDate,
+//       usageLimit: usageLimit || null
+//     });
+
+//     res.status(200).json({ success: true });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 /* =================================
    ENABLE / DISABLE COUPON

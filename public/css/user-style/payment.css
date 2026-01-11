@@ -22,7 +22,7 @@
 }
 
 /* Left side */
-.payment-left {}
+/* .payment-left {} */
 
 .section-title {
   font-size: 18px;
@@ -58,7 +58,7 @@
   padding: 8px 0;
 }
 
-.copy-btn {
+/* .copy-btn {
   background: #ffb6cf;
   color: #fff;
   border-radius: 6px;
@@ -68,10 +68,33 @@
 
 .copy-btn:hover {
   background: #ff94ba;
+} */
+
+.copy-btn {
+  background: #ff2b7a;
+  color: white;
+  border-radius: 6px;
+  padding: 8px 14px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(255, 43, 122, 0.25);
 }
 
+.copy-btn:hover {
+  background: #e0266e;
+  box-shadow: 0 3px 10px rgba(255, 43, 122, 0.35);
+}
+
+.copy-btn:active {
+  transform: scale(0.96);
+}
+
+
 /* Right Side Summary */
-.payment-summary {}
+/* .payment-summary {} */
 
 .summary-item {
   display: flex;

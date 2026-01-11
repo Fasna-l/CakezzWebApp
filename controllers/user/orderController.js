@@ -37,7 +37,9 @@ const loadOrderList = async (req, res, next) => {
       currentPage: page
     };
 
+    const user = await User.findById(userId).lean();
     res.render("orderList", {
+      user,
       orders,
       pagination,
       q: search
@@ -65,7 +67,11 @@ const loadOrderDetails = async (req, res, next) => {
       return res.redirect("/order");
     }
 
-    res.render("orderDetails", { order });
+    const cancelCouponError = req.session.cancelCouponError || null;
+    req.session.cancelCouponError = null;
+
+    const user = await User.findById(userId).lean();
+    res.render("orderDetails", {user, order , cancelCouponError });
 
   } catch (error) {
     next(error);
@@ -91,12 +97,29 @@ const loadCancelPage = async (req, res, next) => {
     }
 
     // If already cancelled/delivered → cannot cancel
-    if (order.orderStatus === "Cancelled" || order.orderStatus === "Delivered") {
+    // if (order.orderStatus === "Cancelled" || order.orderStatus === "Delivered") {
+    //   return res.redirect(`/order/${orderId}`);
+    // }
+
+    if (order.orderStatus !== "Pending") {
       return res.redirect(`/order/${orderId}`);
     }
 
+    // 🟩 NEW CHECK: If single item cancel requested
+    if (itemId) {
+      const item = order.items.id(itemId);
+      if (!item) return res.redirect(`/order/${orderId}`);
+
+      // item must also be pending to cancel
+      if (item.status !== "Pending") {
+        return res.redirect(`/order/${orderId}`);
+      }
+    }
+
+
     // Pass itemId to EJS
-    res.render("cancelOrder", { order, itemId });
+    const user = await User.findById(userId).lean();
+    res.render("cancelOrder", {user, order, itemId });
 
   } catch (error) {
     next(error);
@@ -123,6 +146,11 @@ const cancelOrder = async (req, res, next) => {
       return res.redirect("/order");
     }
 
+    // ❗ Block cancel if order not Pending
+    if (order.orderStatus !== "Pending") {
+      return res.redirect(`/order/${orderId}`);
+    }
+
     // Track refund amount
     let refundAmount = 0;
     // -------------------------------
@@ -131,6 +159,35 @@ const cancelOrder = async (req, res, next) => {
     if (itemId) {
       const item = order.items.id(itemId);
       if (!item) return res.redirect(`/order/${orderId}`);
+
+      if (item.status !== "Pending") {
+        return res.redirect(`/order/${orderId}`);
+      }
+
+  //     if (itemId) {
+
+  // const item = order.items.id(itemId);
+  // if (!item) return res.redirect(`/order/${orderId}`);
+
+  // Compute current subtotal of non-cancelled items
+      const currentSubtotal = order.items.reduce((sum, it) =>
+      it.status !== "Cancelled" ? sum + it.price * it.quantity : sum
+    , 0);
+
+      const itemValue = item.price * item.quantity;
+      const newSubtotal = currentSubtotal - itemValue;
+
+  // If coupon applied & violation happens → block single cancel
+      if (order.couponCode && newSubtotal < order.couponMinPurchase) {
+    // Redirect back with an error message
+        req.session.cancelCouponError = 
+          `Cannot cancel this item because it will break the coupon minimum purchase condition (₹${order.couponMinPurchase}). Cancel entire order instead.`;
+
+        return res.redirect(`/order/${orderId}`);
+      }
+
+  // If OK → continue to normal single item cancel logic...
+//}
 
       // Calculate refund for this item
       refundAmount = item.price * item.quantity;
@@ -160,6 +217,9 @@ const cancelOrder = async (req, res, next) => {
         order.cancellationReason = reason || "No reason provided";
         order.cancelledAt = new Date();
 
+        order.refundAmount = refundAmount;
+        order.refundStatus = "Processed";
+
         order.statusHistory.push({
           status: "Order Cancelled",
           comment: "All items cancelled",
@@ -178,31 +238,71 @@ const cancelOrder = async (req, res, next) => {
     // -------------------------------
     // CANCEL FULL ORDER
     // -------------------------------
-    else {
-      refundAmount = order.totalAmount;
-      for (let it of order.items) {
-        const product = await Product.findById(it.productId);
-        const variant = product.variants.find(v => v.size === it.size);
-        if (variant) {
-          variant.stock += it.quantity;
-          await product.save();
-        }
+    // -------------------------------
+// CANCEL FULL ORDER (FIXED)
+// -------------------------------
+else {
+  refundAmount = 0;
 
-        it.status = "Cancelled";
-        it.refundAmount = it.price * it.quantity;
-        it.refundStatus = "Processed";
+  for (let it of order.items) {
+
+    // only refund for non-cancelled items
+    if (it.status !== "Cancelled") {
+      refundAmount += it.price * it.quantity;
+
+      // restore stock
+      const product = await Product.findById(it.productId);
+      const variant = product.variants.find(v => v.size === it.size);
+      if (variant) {
+        variant.stock += it.quantity;
+        await product.save();
       }
 
-      order.orderStatus = "Cancelled";
-      order.cancellationReason = reason || "No reason provided";
-      order.cancelledAt = new Date();
-
-      order.statusHistory.push({
-        status: "Order Cancelled",
-        comment: reason,
-        date: new Date()
-      });
+      it.refundAmount = it.price * it.quantity;
+      it.refundStatus = "Processed";
     }
+
+    // mark status cancelled for all items
+    it.status = "Cancelled";
+  }
+
+  order.orderStatus = "Cancelled";
+  order.cancellationReason = reason || "No reason provided";
+  order.cancelledAt = new Date();
+
+  order.statusHistory.push({
+    status: "Order Cancelled",
+    comment: reason,
+    date: new Date()
+  });
+}
+
+
+    // else {
+    //   refundAmount = order.totalAmount;
+    //   for (let it of order.items) {
+    //     const product = await Product.findById(it.productId);
+    //     const variant = product.variants.find(v => v.size === it.size);
+    //     if (variant) {
+    //       variant.stock += it.quantity;
+    //       await product.save();
+    //     }
+
+    //     it.status = "Cancelled";
+    //     it.refundAmount = it.price * it.quantity;
+    //     it.refundStatus = "Processed";
+    //   }
+
+    //   order.orderStatus = "Cancelled";
+    //   order.cancellationReason = reason || "No reason provided";
+    //   order.cancelledAt = new Date();
+
+    //   order.statusHistory.push({
+    //     status: "Order Cancelled",
+    //     comment: reason,
+    //     date: new Date()
+    //   });
+    // }
 
     //  WALLET REFUND
     
@@ -221,9 +321,11 @@ const cancelOrder = async (req, res, next) => {
           ? "Refund for cancelled item"
           : "Refund for cancelled order"
       });
+      order.refundAmount = refundAmount;
+      order.refundStatus = "Processed";
     }
 
-    recalculateOrderTotals(order);
+    //recalculateOrderTotals(order);
     await order.save();
     return res.redirect(`/order/${orderId}`);
 
@@ -242,7 +344,8 @@ const cancelOrder = async (req, res, next) => {
 const loadReturnPage = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id);
-    res.render("returnOrder", { order });
+    const user = await User.findById(order.userId).lean();
+    res.render("returnOrder", { user,order });
   } catch (error) {
     next(error);
     // console.error(error);
@@ -494,7 +597,8 @@ const loadSingleReturnPage = async (req, res, next) => {
       return res.redirect(`/order/${orderId}`);
     }
 
-    res.render("return-Singleitem", { order, item });
+    const user = await User.findById(order.userId).lean();
+    res.render("return-Singleitem", { user, order, item });
 
   } catch (error) {
     next(error);
@@ -563,6 +667,8 @@ const submitSingleReturn = async (req, res, next) => {
    HELPER: RECALCULATE ORDER TOTALS
 ---------------------------------------------------------*/
 function recalculateOrderTotals(order) {
+
+  //if (order.orderStatus === "Cancelled") return;
 
   const validItems = order.items.filter(item => {
     if (item.status === "Cancelled") return false;

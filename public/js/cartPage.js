@@ -15,15 +15,12 @@ document.addEventListener("click", async (e) => {
 
     const data = await res.json();
     if (data.success) {
-      // item.remove();
-      // updateSummary();
-      // await updateCartCount();
-      
       item.remove();
       // Update summary using backend values
       updateSummaryFromBackend(data.summary);
 
       await updateCartCount();
+      evaluateCheckoutButton();
       showToast("Item removed");
     } else {
       showToast(data.message, "error");
@@ -75,43 +72,10 @@ item.querySelector(".item-subtotal").textContent = "₹" + updatedItem.subtotal;
 
 // Update summary using backend values
 updateSummaryFromBackend(data.summary);
-    // qtyEl.textContent = qty;
-
-    // // Update subtotal of this item
-    // const subtotalEl = item.querySelector(".item-subtotal");
-    // const updatedItem = data.cart.items.find(
-    //   i => i.product._id.toString() === productId && i.size === size
-    // );
-
-    // subtotalEl.textContent = "₹" + (updatedItem.quantity * updatedItem.priceAtAdd);
-
-    // // Update order summary
-    // // updateSummary(data.cart.totalAmount);
-
-    //   updateSummary();
-
-
     showToast("Quantity updated");
+    evaluateCheckoutButton();
   }
 });
-
-
-/* ---------------------------------------------------------
-    UPDATE SUMMARY (REALTIME TOTALS)
---------------------------------------------------------- */
-// function updateSummary(totalAmount = null) {
-//   if (totalAmount === null) {
-//     // If no data passed, recalc from DOM
-//     let sum = 0;
-//     document.querySelectorAll(".item-subtotal").forEach(st => {
-//       sum += Number(st.textContent.replace("₹", ""));
-//     });
-//     totalAmount = sum;
-//   }
-
-//   document.getElementById("subtotal").textContent = "₹" + totalAmount;
-//   document.getElementById("total").textContent = "₹" + totalAmount;
-// }
 
 /* ---------------------------------------------------------
    UPDATE SUMMARY (REALTIME TOTALS)
@@ -123,28 +87,16 @@ function updateSummary() {
   document.querySelectorAll(".item-subtotal").forEach(st => {
     subtotal += Number(st.textContent.replace("₹", ""));
   });
-
   // 2) TAX (5%)
   const tax = Math.round(subtotal * 0.05);
-
   // 3) SHIPPING (always ₹50)
   const shipping = 50;
-
   // 4) GRAND TOTAL
   const grandTotal = subtotal + tax + shipping;
-
   // 5) Update DOM elements
   document.getElementById("subtotal").textContent = "₹" + subtotal;
-
-  // const taxRow = document.querySelector(".cart-summary .row:nth-child(2) span:last-child");
-  // if (taxRow) taxRow.textContent = "₹" + tax;
-
-  // const shipRow = document.querySelector(".cart-summary .row:nth-child(3) span:last-child");
-  // if (shipRow) shipRow.textContent = "₹" + shipping;
-
   document.getElementById("tax").textContent = "₹" + tax;
   document.getElementById("shipping").textContent = "₹" + shipping;
-
   document.getElementById("total").textContent = "₹" + grandTotal;
 }
 
@@ -174,8 +126,60 @@ window.addEventListener("DOMContentLoaded", () => {
     checkoutBtn.classList.add("disabled-btn");
 
     const msg = document.createElement("p");
-    msg.className = "warning-text";
+    //msg.className = "warning-text";
+    msg.className = "warning-text cart-warning";
     msg.textContent = "⚠ Please remove unavailable items before checkout.";
     checkoutBtn.parentNode.insertBefore(msg, checkoutBtn);
   }
+
+
+  evaluateCheckoutButton();
+
 });
+
+// ===============================================
+// CHECKOUT BUTTON ENABLE/DISABLE LOGIC
+// ===============================================
+function evaluateCheckoutButton() {
+  const checkoutBtn = document.querySelector(".checkout-btn");
+  const items = document.querySelectorAll(".cart-item");
+  const warning = document.querySelector(".warning-text.cart-warning");
+
+  if (!checkoutBtn) return;
+
+  let hasError = false;
+
+  items.forEach(i => {
+    if (i.dataset.unavailable === "true" || i.dataset.outofstock === "true") {
+      hasError = true;
+    }
+  });
+
+  // If no items
+  if (items.length === 0) {
+    checkoutBtn.disabled = true;
+    checkoutBtn.classList.add("disabled-btn");
+    if (warning) warning.remove();
+    return;
+  }
+
+  if (hasError) {
+    checkoutBtn.disabled = true;
+    checkoutBtn.classList.add("disabled-btn");
+
+    // If warning doesn't exist, add it
+    if (!warning) {
+      const msg = document.createElement("p");
+      msg.className = "warning-text cart-warning";
+      msg.textContent = "⚠ Please remove unavailable items before checkout.";
+      checkoutBtn.parentNode.insertBefore(msg, checkoutBtn);
+    }
+
+  } else {
+    checkoutBtn.disabled = false;
+    checkoutBtn.classList.remove("disabled-btn");
+
+    // Remove existing warning
+    if (warning) warning.remove();
+  }
+}

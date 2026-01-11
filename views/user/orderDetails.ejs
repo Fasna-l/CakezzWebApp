@@ -47,6 +47,12 @@
         <p class="order-id">Order ID: <%= order.orderId %></p>
       </div>
 
+      <% if (cancelCouponError) { %>
+        <p style="color:red; font-weight:bold; margin:6px 0;">
+          <%= cancelCouponError %>
+        </p>
+      <% } %>
+
 
       <!-- Modern Order Tracking -->
 
@@ -131,6 +137,16 @@
             <strong><%= order.orderStatus %></strong>
           </li>
         </ul>
+        <!-- REFUND INFO FOR CANCELLED ORDERS -->
+         <!-- <% if (order.orderStatus === 'Cancelled') { %>
+  <div class="refund-info">
+    <strong>Refund:</strong> ₹<%= order.refundAmount || 0 %><br>
+    <span>Status: <%= order.refundStatus || 'Processed' %></span>
+  </div>
+<% } %> -->
+
+        
+       
 
         <!-- Delivery Address -->
         <div class="address-block">
@@ -144,9 +160,13 @@
         <!-- ACTION BUTTONS -->
         <div class="order-btn-group">
 
-          <% if (!['Cancelled', 'Delivered', 'Return Requested', 'Return Rejected', 'Returned'].includes(order.orderStatus)) { %>
+          <% if (order.orderStatus === "Pending") { %>
             <a href="/order/cancel/<%= order._id %>" class="btn btn-danger">Cancel Order</a>
           <% } %>
+
+          <!-- <% if (!['Cancelled', 'Delivered', 'Return Requested', 'Return Rejected', 'Returned'].includes(order.orderStatus)) { %>
+            <a href="/order/cancel/<%= order._id %>" class="btn btn-danger">Cancel Order</a>
+          <% } %> -->
 
 
           <% if (order.orderStatus === 'Delivered') { %>
@@ -205,12 +225,18 @@
           </a>
 
         <% } %> -->
-        <% if (!['Cancelled', 'Delivered', 'Return Requested', 'Returned'].includes(item.status)) { %>
+        <% if (order.orderStatus === "Pending" && item.status === "Pending") { %>
+          <a href="/order/cancel/<%= order._id %>?item=<%= item._id %>" class="cancel-item-btn">
+            Cancel Item
+          </a>
+        <% } %>
+
+        <!-- <% if (!['Cancelled', 'Delivered', 'Return Requested', 'Returned'].includes(item.status)) { %>
           <a href="/order/cancel/<%= order._id %>?item=<%= item._id %>" 
             class="cancel-item-btn">
             Cancel Item
           </a>
-        <% } %>
+        <% } %> -->
 
         <% if (order.orderStatus === 'Delivered' && item.status === 'Delivered' && item.returnStatus !== 'Rejected' &&
                 item.status !== 'Returned' ) { %>

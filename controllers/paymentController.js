@@ -1,5 +1,7 @@
 const razorpay = require("../config/razorpay");
 const Order = require("../models/orderSchema");
+const Product = require("../models/productSchema");
+const Cart = require("../models/cartSchema");
 const Wallet = require("../models/walletSchema");
 const crypto = require("crypto");
 
@@ -48,40 +50,105 @@ const verifyPayment = async (req, res, next) => {
     } = req.body;
 
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
-
     const expectedSign = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(sign)
       .digest("hex");
 
+    const order = await Order.findById(orderId);
+
+    if (!order) return res.json({ success: false });
+
     if (expectedSign !== razorpay_signature) {
-      await Order.findByIdAndUpdate(orderId, {
-        paymentStatus: "Failed",
-        orderStatus: "Payment Failed"
-      });
+      order.paymentStatus = "Failed";
+      order.orderStatus = "Payment Failed";
+      await order.save();
       return res.json({ success: false });
     }
 
-    await Order.findByIdAndUpdate(orderId, {
-      paymentStatus: "Paid",
-      orderStatus: "Processing",
-      "paymentDetails.razorpayPaymentId": razorpay_payment_id,
-      "paymentDetails.razorpaySignature": razorpay_signature,
-      $set: {
-      "items.$[].status": "Processing" //  update all items
+    // ============= STOCK DEDUCTION AFTER SUCCESS ============
+    for (let item of order.items) {
+      const product = await Product.findById(item.productId);
+      const variant = product.variants.find(v => v.size === item.size);
+
+      if (variant) {
+        variant.stock -= item.quantity;
+        await product.save();
+      }
     }
-    });
+
+    // UPDATE ORDER STATUS
+    order.paymentStatus = "Paid";
+    order.orderStatus = "Pending";
+    //order.orderStatus = "Processing";
+    order.paymentDetails.razorpayPaymentId = razorpay_payment_id;
+    order.paymentDetails.razorpaySignature = razorpay_signature;
+
+    //order.items.forEach(it => { it.status = "Processing" });
+    order.items.forEach(it => { it.status = "Pending" });
+    await order.save();
+
+    // CLEAR CART ONLY AFTER SUCCESS
+    await Cart.findOneAndUpdate(
+      { user: order.userId },
+      { $set: { items: [] } }
+    );
 
     req.session.checkoutItems = [];
     req.session.checkoutTotals = null;
 
-    res.json({ success: true });
+    return res.json({ success: true });
+
   } catch (error) {
-    next(error)
-    // console.error(error);
-    // res.status(500).json({ success: false });
+    next(error);
   }
 };
+
+
+// const verifyPayment = async (req, res, next) => {
+//   try {
+//     const {
+//       razorpay_order_id,
+//       razorpay_payment_id,
+//       razorpay_signature,
+//       orderId,
+//     } = req.body;
+
+//     const sign = razorpay_order_id + "|" + razorpay_payment_id;
+
+//     const expectedSign = crypto
+//       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+//       .update(sign)
+//       .digest("hex");
+
+//     if (expectedSign !== razorpay_signature) {
+//       await Order.findByIdAndUpdate(orderId, {
+//         paymentStatus: "Failed",
+//         orderStatus: "Payment Failed"
+//       });
+//       return res.json({ success: false });
+//     }
+
+//     await Order.findByIdAndUpdate(orderId, {
+//       paymentStatus: "Paid",
+//       orderStatus: "Processing",
+//       "paymentDetails.razorpayPaymentId": razorpay_payment_id,
+//       "paymentDetails.razorpaySignature": razorpay_signature,
+//       $set: {
+//       "items.$[].status": "Processing" //  update all items
+//     }
+//     });
+
+//     req.session.checkoutItems = [];
+//     req.session.checkoutTotals = null;
+
+//     res.json({ success: true });
+//   } catch (error) {
+//     next(error)
+//     // console.error(error);
+//     // res.status(500).json({ success: false });
+//   }
+// };
 
 const markPaymentFailed = async (req, res, next) => {
   try {

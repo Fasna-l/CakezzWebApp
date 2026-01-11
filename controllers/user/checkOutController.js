@@ -182,29 +182,6 @@ const getPaymentPage = async (req, res, next) => {
   }
 };
 
-
-// const getPaymentPage = async (req, res, next) => {
-//   try {
-//     const userId = req.session.user;
-//     const user = userId ? await User.findById(userId).lean() : null;
-
-//     const appliedCoupon = req.session.appliedCoupon || null;
-
-//     res.render("payment", {
-//       user,
-//       checkoutItems: req.session.checkoutItems || [],
-//       totals: req.session.checkoutTotals || {},
-//       coupons: [],
-//       appliedCoupon
-// });
-
-//   } catch (error) {
-//     next(error);
-//     // console.log(err);
-//     // res.redirect("/pageerror");
-//   }
-// };
-
 /* ------------------------------------
    PLACE ORDER
 -------------------------------------- */
@@ -215,9 +192,9 @@ const placeOrder = async (req, res, next) => {
       !req.session.checkoutTotals.grandTotal ||
       !req.session.checkoutItems ||
       req.session.checkoutItems.length === 0
-      ) {
-        req.session.checkoutError = "Your checkout session expired. Please try again.";
-        return res.redirect("/cart");
+    ) {
+      req.session.checkoutError = "Your checkout session expired. Please try again.";
+      return res.redirect("/cart");
     }
 
     const userId = req.session.user;
@@ -239,50 +216,29 @@ const placeOrder = async (req, res, next) => {
       remainingAmount = remainingAmount - walletUsed;
     }
 
-
     const user = await User.findById(userId);
     if (!user) return res.redirect("/login");
+
     const addressDoc = await Address.findOne({ user: userId });
     const selectedAddress = addressDoc.addresses.find(a => a.isDefault);
     if (!selectedAddress) return res.redirect("/address");
 
     const items = [];
-    // SAFETY VALIDATION BEFORE STOCK REDUCTION
-    for (let cartItem of req.session.checkoutItems) {
 
+    // SAFETY CHECK BEFORE ORDER CREATE (NO STOCK DEDUCTION HERE)
+    for (let cartItem of req.session.checkoutItems) {
       const product = await Product.findById(cartItem.productId).populate("category");
       const variant = product.variants.find(v => v.size === cartItem.size);
 
-      //  BLOCKED PRODUCT
-      if (product.isBlocked) {
+      if (product.isBlocked || product.category?.isListed === false) {
         req.session.checkoutError = `${product.productName} is unavailable.`;
         return res.redirect("/cart");
       }
 
-      //  DISABLED CATEGORY
-      if (product.category?.isListed === false) {
-        req.session.checkoutError = `${product.productName} belongs to a disabled category.`;
-        return res.redirect("/cart");
-      }
-
-      //  STOCK CHECK
       if (!variant || variant.stock < cartItem.quantity) {
         req.session.checkoutError = `${product.productName} is out of stock.`;
         return res.redirect("/cart");
       }
-    }
-
-    // NOW SAFE: Apply stock reduction & build order items
-    for (let cartItem of req.session.checkoutItems) {
-
-      //const product = await Product.findById(cartItem.productId);
-      const product = await Product.findById(cartItem.productId)
-        .populate("category");
-
-      const variant = product.variants.find(v => v.size === cartItem.size);
-
-      variant.stock -= cartItem.quantity;
-      await product.save();
 
       const offer = await calculateBestOffer(product, variant.price);
 
@@ -295,44 +251,41 @@ const placeOrder = async (req, res, next) => {
         quantity: cartItem.quantity,
         status: "Pending"
       });
-
-
     }
 
-
-      /* ======================================================
-       3. SET ORDER & PAYMENT STATUS (IMPORTANT FIX)
-    ====================================================== */
     let orderStatus;
     let paymentStatus;
 
     if (paymentMethod === "COD") {
-      orderStatus = "Processing";
+      orderStatus = "Pending";
+      //orderStatus = "Processing";
       paymentStatus = "Pending";
     }
 
     if (paymentMethod === "RAZORPAY") {
-      orderStatus = "Payment Pending";
+      orderStatus = "Pending";
+      //orderStatus = "Payment Pending";
       paymentStatus = "Pending";
     }
 
     if (paymentMethod === "WALLET") {
       if (remainingAmount === 0) {
-        orderStatus = "Processing";
+        orderStatus = "Pending";
+        //orderStatus = "Processing";
         paymentStatus = "Paid";
       } else {
-        orderStatus = "Payment Pending";
+        orderStatus = "Pending";
+        //orderStatus = "Payment Pending";
         paymentStatus = "Pending";
       }
     }
 
     const couponSession = req.session.appliedCoupon;
-
     const couponDiscount = couponSession ? couponSession.discount : 0;
-
-    //  CREATE ORDER
+    const couponCode = couponSession ? couponSession.code : null;
+    const couponMinPurchase = couponSession ? couponSession.minPurchaseAmount : 0;
+    
     const order = new Order({
-     // orderId: "ORD-" + crypto.randomBytes(3).toString("hex").toUpperCase(),
       userId,
       items,
       shippingAddress: {
@@ -351,54 +304,33 @@ const placeOrder = async (req, res, next) => {
       taxAmount: req.session.checkoutTotals.tax,
       shippingCharge: req.session.checkoutTotals.shipping,
       couponDiscount,
+      couponCode,
+      couponMinPurchase,
       totalAmount: req.session.checkoutTotals.grandTotal,
-      walletUsed: walletUsed,                              
-      payableAmount: remainingAmount,//razorpay part in wallet
+      walletUsed,
+      payableAmount: remainingAmount,
       paymentMethod,
       orderStatus,
       paymentStatus,
-      //paymentStatus: paymentMethod === "COD" ? "Pending" : "Processing",
-
       deliveryDate: req.session.deliveryDate
     });
 
     await order.save();
 
-    /* ------------------------------------
-   UPDATE COUPON USAGE (AFTER ORDER)
------------------------------------- */
-if (req.session.appliedCoupon) {
-  const coupon = await Coupon.findById(
-    req.session.appliedCoupon.couponId
-  );
-
-  if (coupon) {
-    // global usage
-    coupon.usedCount += 1;
-
-    // per-user usage
-    const userUsage = coupon.usersUsed.find(
-      u => u.user.toString() === req.session.user.toString()
-    );
-
-    if (userUsage) {
-      userUsage.count += 1;
-    } else {
-      coupon.usersUsed.push({
-        user: req.session.user,
-        count: 1,
-      });
+    // Update coupon usage
+    if (couponSession) {
+      const coupon = await Coupon.findById(couponSession.couponId);
+      if (coupon) {
+        coupon.usedCount += 1;
+        const userUsage = coupon.usersUsed.find(u => u.user.toString() === userId.toString());
+        if (userUsage) userUsage.count += 1;
+        else coupon.usersUsed.push({ user: userId, count: 1 });
+        await coupon.save();
+      }
+      delete req.session.appliedCoupon;
     }
 
-    await coupon.save();
-  }
-
-  // VERY IMPORTANT: clear session
-  delete req.session.appliedCoupon;
-}
-
-
-    //  WALLET DEDUCTION
+    // Wallet Debit Logic
     if (paymentMethod === "WALLET" && walletUsed > 0) {
       await wallet.addTransaction({
         type: "purchase",
@@ -410,47 +342,266 @@ if (req.session.appliedCoupon) {
       });
     }
 
-
-    //  CLEAR USER CART FROM DATABASE
-    await Cart.findOneAndUpdate(
-      { user: userId },
-      { $set: { items: [] } }
-    );
-
-    //  CLEAR SESSION CART
-    // req.session.checkoutItems = [];
-    // req.session.checkoutTotals = null;
-    if (paymentMethod === "COD") {
-      req.session.checkoutItems = [];
-      req.session.checkoutTotals = null;
-    }
-
-    //  REDIRECT
-    if(paymentMethod === "COD"){
-      return res.redirect(`/checkout/success/${order._id}`);
-    }
-    //return res.redirect(`/checkout/success/${order._id}`);
-    if (paymentMethod === "WALLET" && remainingAmount === 0) {
+    // CLEAR SESSION ONLY FOR COD or WALLET FULL
+    if (paymentMethod === "COD" || (paymentMethod === "WALLET" && remainingAmount === 0)) {
       req.session.checkoutItems = [];
       req.session.checkoutTotals = null;
       return res.redirect(`/checkout/success/${order._id}`);
     }
 
-    if (paymentMethod === "RAZORPAY" || (paymentMethod === "WALLET" && remainingAmount > 0)) {
-      return res.json({
-        online: true,
-        orderId: order._id
-      });
-    }
-
-    return res.redirect("/checkout");
+    // RAZORPAY or PARTIAL WALLET
+    return res.json({ online: true, orderId: order._id });
 
   } catch (error) {
     next(error);
-    // console.log(err);
-    // return res.redirect("/pageerror");
   }
 };
+
+
+
+// const placeOrder = async (req, res, next) => {
+//   try {
+//     if (
+//       !req.session.checkoutTotals ||
+//       !req.session.checkoutTotals.grandTotal ||
+//       !req.session.checkoutItems ||
+//       req.session.checkoutItems.length === 0
+//       ) {
+//         req.session.checkoutError = "Your checkout session expired. Please try again.";
+//         return res.redirect("/cart");
+//     }
+
+//     const userId = req.session.user;
+//     const paymentMethod = req.body.selectedPayment;
+
+//     let walletUsed = 0;
+//     let remainingAmount = req.session.checkoutTotals.grandTotal;
+//     let wallet = null;
+
+//     if (paymentMethod === "WALLET") {
+//       wallet = await Wallet.findOne({ userId });
+
+//       if (!wallet || wallet.balance <= 0) {
+//         req.session.checkoutError = "Insufficient wallet balance";
+//         return res.redirect("/checkout/payment");
+//       }
+
+//       walletUsed = Math.min(wallet.balance, remainingAmount);
+//       remainingAmount = remainingAmount - walletUsed;
+//     }
+
+
+//     const user = await User.findById(userId);
+//     if (!user) return res.redirect("/login");
+//     const addressDoc = await Address.findOne({ user: userId });
+//     const selectedAddress = addressDoc.addresses.find(a => a.isDefault);
+//     if (!selectedAddress) return res.redirect("/address");
+
+//     const items = [];
+//     // SAFETY VALIDATION BEFORE STOCK REDUCTION
+//     for (let cartItem of req.session.checkoutItems) {
+
+//       const product = await Product.findById(cartItem.productId).populate("category");
+//       const variant = product.variants.find(v => v.size === cartItem.size);
+
+//       //  BLOCKED PRODUCT
+//       if (product.isBlocked) {
+//         req.session.checkoutError = `${product.productName} is unavailable.`;
+//         return res.redirect("/cart");
+//       }
+
+//       //  DISABLED CATEGORY
+//       if (product.category?.isListed === false) {
+//         req.session.checkoutError = `${product.productName} belongs to a disabled category.`;
+//         return res.redirect("/cart");
+//       }
+
+//       //  STOCK CHECK
+//       if (!variant || variant.stock < cartItem.quantity) {
+//         req.session.checkoutError = `${product.productName} is out of stock.`;
+//         return res.redirect("/cart");
+//       }
+//     }
+
+//     // NOW SAFE: Apply stock reduction & build order items
+//     for (let cartItem of req.session.checkoutItems) {
+
+//       //const product = await Product.findById(cartItem.productId);
+//       const product = await Product.findById(cartItem.productId)
+//         .populate("category");
+
+//       const variant = product.variants.find(v => v.size === cartItem.size);
+
+//       variant.stock -= cartItem.quantity;
+//       await product.save();
+
+//       const offer = await calculateBestOffer(product, variant.price);
+
+//       items.push({
+//         productId: product._id,
+//         productName: product.productName,
+//         productImage: product.productImage[0],
+//         size: cartItem.size,
+//         price: offer.finalPrice,
+//         quantity: cartItem.quantity,
+//         status: "Pending"
+//       });
+
+
+//     }
+
+
+//       /* ======================================================
+//        3. SET ORDER & PAYMENT STATUS (IMPORTANT FIX)
+//     ====================================================== */
+//     let orderStatus;
+//     let paymentStatus;
+
+//     if (paymentMethod === "COD") {
+//       orderStatus = "Processing";
+//       paymentStatus = "Pending";
+//     }
+
+//     if (paymentMethod === "RAZORPAY") {
+//       orderStatus = "Payment Pending";
+//       paymentStatus = "Pending";
+//     }
+
+//     if (paymentMethod === "WALLET") {
+//       if (remainingAmount === 0) {
+//         orderStatus = "Processing";
+//         paymentStatus = "Paid";
+//       } else {
+//         orderStatus = "Payment Pending";
+//         paymentStatus = "Pending";
+//       }
+//     }
+
+//     const couponSession = req.session.appliedCoupon;
+
+//     const couponDiscount = couponSession ? couponSession.discount : 0;
+
+//     //  CREATE ORDER
+//     const order = new Order({
+//      // orderId: "ORD-" + crypto.randomBytes(3).toString("hex").toUpperCase(),
+//       userId,
+//       items,
+//       shippingAddress: {
+//         name: user.name,
+//         addressType: selectedAddress.addressType,
+//         streetAddress: selectedAddress.streetAddress,
+//         city: selectedAddress.city,
+//         district: selectedAddress.district,
+//         state: selectedAddress.state,
+//         landmark: selectedAddress.landmark,
+//         pinCode: selectedAddress.pincode,
+//         phoneNumber: selectedAddress.phone
+//       },
+//       subTotal: req.session.checkoutTotals.subTotal,
+//       offerDiscount: req.session.checkoutTotals.offerDiscount || 0,
+//       taxAmount: req.session.checkoutTotals.tax,
+//       shippingCharge: req.session.checkoutTotals.shipping,
+//       couponDiscount,
+//       totalAmount: req.session.checkoutTotals.grandTotal,
+//       walletUsed: walletUsed,                              
+//       payableAmount: remainingAmount,//razorpay part in wallet
+//       paymentMethod,
+//       orderStatus,
+//       paymentStatus,
+//       //paymentStatus: paymentMethod === "COD" ? "Pending" : "Processing",
+
+//       deliveryDate: req.session.deliveryDate
+//     });
+
+//     await order.save();
+
+//     /* ------------------------------------
+//    UPDATE COUPON USAGE (AFTER ORDER)
+// ------------------------------------ */
+// if (req.session.appliedCoupon) {
+//   const coupon = await Coupon.findById(
+//     req.session.appliedCoupon.couponId
+//   );
+
+//   if (coupon) {
+//     // global usage
+//     coupon.usedCount += 1;
+
+//     // per-user usage
+//     const userUsage = coupon.usersUsed.find(
+//       u => u.user.toString() === req.session.user.toString()
+//     );
+
+//     if (userUsage) {
+//       userUsage.count += 1;
+//     } else {
+//       coupon.usersUsed.push({
+//         user: req.session.user,
+//         count: 1,
+//       });
+//     }
+
+//     await coupon.save();
+//   }
+
+//   // VERY IMPORTANT: clear session
+//   delete req.session.appliedCoupon;
+// }
+
+
+//     //  WALLET DEDUCTION
+//     if (paymentMethod === "WALLET" && walletUsed > 0) {
+//       await wallet.addTransaction({
+//         type: "purchase",
+//         amount: walletUsed,
+//         orderId: order._id,
+//         description: remainingAmount === 0
+//           ? "Full wallet payment"
+//           : "Partial wallet payment"
+//       });
+//     }
+
+
+//     //  CLEAR USER CART FROM DATABASE
+//     await Cart.findOneAndUpdate(
+//       { user: userId },
+//       { $set: { items: [] } }
+//     );
+
+//     //  CLEAR SESSION CART
+//     // req.session.checkoutItems = [];
+//     // req.session.checkoutTotals = null;
+//     if (paymentMethod === "COD") {
+//       req.session.checkoutItems = [];
+//       req.session.checkoutTotals = null;
+//     }
+
+//     //  REDIRECT
+//     if(paymentMethod === "COD"){
+//       return res.redirect(`/checkout/success/${order._id}`);
+//     }
+//     //return res.redirect(`/checkout/success/${order._id}`);
+//     if (paymentMethod === "WALLET" && remainingAmount === 0) {
+//       req.session.checkoutItems = [];
+//       req.session.checkoutTotals = null;
+//       return res.redirect(`/checkout/success/${order._id}`);
+//     }
+
+//     if (paymentMethod === "RAZORPAY" || (paymentMethod === "WALLET" && remainingAmount > 0)) {
+//       return res.json({
+//         online: true,
+//         orderId: order._id
+//       });
+//     }
+
+//     return res.redirect("/checkout");
+
+//   } catch (error) {
+//     next(error);
+//     // console.log(err);
+//     // return res.redirect("/pageerror");
+//   }
+// };
 
 /* ------------------------------------
    SUCCESS PAGE

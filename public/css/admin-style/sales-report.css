@@ -1,0 +1,23 @@
+/* === SALES REPORT PAGE ONLY === */
+
+/* Fix date picker icon visibility for dark background */
+input.sales-date::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
+/* Filter + Input Field Styling */
+.sales-filter-input {
+  border: 1px solid #555 !important;
+  border-radius: 6px !important;
+  background: #1e1e1e !important;
+  color: #fff !important;
+  padding: 6px 10px !important;
+  font-size: 14px !important;
+}
+
+/* Export Buttons Responsive */
+.sales-export-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}

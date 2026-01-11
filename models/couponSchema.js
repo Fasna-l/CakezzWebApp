@@ -65,6 +65,7 @@ const couponSchema = new mongoose.Schema({
 
   perUserLimit: {
     type: Number,
+    //default:null
     default: 1,
   },
   assignedUser: {
@@ -91,7 +92,7 @@ const couponSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
-});
+},{ timestamps: true });
 
 
 const Coupon = mongoose.model("Coupon", couponSchema);
