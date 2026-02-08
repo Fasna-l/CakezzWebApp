@@ -21,6 +21,7 @@
              data-size="<%= item.size %>"
              data-unavailable="<%= item.isUnavailable %>"
              data-outofstock="<%= item.isOutOfStock %>"
+             data-insufficientstock="<%= item.isInsufficientStock %>"
              >
 
           <div class="item-img">
@@ -33,16 +34,29 @@
 
             <% if(item.isUnavailable){ %>
               <p class="warning-text">⚠ This product is currently unavailable.</p>
+            
             <% } else if(item.isOutOfStock){ %>
               <p class="warning-text">⚠ Out of stock.</p>
+            
+            <% } else if(item.isInsufficientStock){ %>
+              <p class="warning-text">
+                ⚠ Only <strong><%= item.stockAvailable %></strong> left in stock.
+                Please reduce quantity
+              </p>
             <% } %>
           </div>
 
 
           <div class="item-qty">
-            <button class="qty-btn minus">-</button>
+            <button 
+            class="qty-btn minus"
+            <% if(item.isUnavailable || item.isOutOfStock) { %> disabled <% } %>
+            >-</button>
             <span class="qty-display"><%= item.quantity %></span>
-            <button class="qty-btn plus">+</button>
+            <button 
+            class="qty-btn plus"
+            <% if(item.isUnavailable || item.isOutOfStock || item.isInsufficientStock) { %> disabled <%} %>
+            >+</button>
           </div>
 
           <div class="item-subtotal">
@@ -78,7 +92,14 @@
         <span id="total">₹<%= total %></span>
       </div>
 
-      <button class="checkout-btn" onclick="window.location.href='/cart/checkout'">
+      <%
+        const hasStockIssue = cartItems.some(item =>
+        item.isUnavailable || item.isOutOfStock || item.isInsufficientStock
+        ); 
+      %>
+      <button class="checkout-btn" 
+        <% if(hasStockIssue) {%> disabled <%} %>
+        onclick="window.location.href='/cart/checkout'">
         Proceed to Checkout
       </button>
 

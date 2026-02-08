@@ -131,7 +131,15 @@ const updateQuantity = async (req, res, next) => {
     const variant = findVariant(item.product, size);
     if (!variant) return res.json({ success: false, message: "Invalid size" });
 
-    if (quantity > variant.stock) {
+    if(item.product.isBlocked || item.product.category?.isListed === false){
+      return res.json({success:false, message:"Product unavailable"});
+    }
+
+    if(variant.stock <= 0){
+      return res.json({success:false,message:"Out of stock"});
+    }
+
+    if (quantity > variant.stock && quantity > item.quantity) {
       return res.json({ success: false, message: "Not enough stock" });
     }
 
@@ -379,7 +387,11 @@ const getCartPage = async (req, res, next) => {
           (item.product.category?.isListed === false);
 
         const variant = item.product.variants.find(v => v.size === item.size);
-        const isOutOfStock = variant?.stock <= 0;
+        //const isOutOfStock = variant?.stock <= 0;
+        const stockAvailable = variant?.stock ?? 0;
+
+        const isOutOfStock =stockAvailable <= 0;
+        const isInsufficientStock = stockAvailable > 0 && stockAvailable < item.quantity;
 
         const offer = await calculateBestOffer(item.product, variant.price);
         const finalPrice = offer.finalPrice;
@@ -393,7 +405,9 @@ const getCartPage = async (req, res, next) => {
           quantity: item.quantity,
           subtotal: finalPrice * item.quantity,
           isUnavailable,
-          isOutOfStock
+          isOutOfStock,
+          isInsufficientStock,
+          stockAvailable
         };
       })
     );

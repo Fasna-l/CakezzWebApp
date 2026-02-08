@@ -8,11 +8,44 @@ const Coupon = require("../../models/couponSchema");
 const calculateBestOffer = require("../../helpers/offerCalculator");
 const crypto = require("crypto");
 
+const validateCheckoutItems = async (req)=>{
+  if(!req.session.checkoutItems || req.session.checkoutItems.length === 0) {
+    return {error:"Your cart is empty."}
+  }
+
+  for(let item of req.session.checkoutItems){
+    const product = await Product.findById(item.productId).populate("category");
+
+    if(!product){
+      return {error:"A product in your cart no longer exists"};
+    }
+
+    //if Product Blocked or category is disabled
+    if(product.isBlocked || product.category?.isListed === false){
+      return {error: `${product.productName} is no longer available. Please remove it from cart.`};
+    }
+
+    //varient check(size,stock)
+    const variant = product.variants.find(v=>v.size === item.size);
+    if(!variant || variant.stock < item.quantity){
+      return {error:`${product.productName} is out of stock, please update your cart.`};
+    }
+  }
+  return {success:true}
+};
+
 /* ------------------------------------
    GET CHECKOUT PAGE
 -------------------------------------- */
 const getCheckout = async (req, res, next) => {
   try {
+
+    //validation check(like cart page)
+    const validation = await validateCheckoutItems(req);
+    if(validation.error){
+      req.session.checkoutError = validation.error;
+      return res.redirect("/cart")
+    }
     const userId = req.session.user;
     const user = userId ? await User.findById(userId).lean() : null;
 
@@ -125,17 +158,29 @@ const saveDeliveryDate = async (req, res, next) => {
 
     const selected = new Date(selectedDate);
     const now = new Date();
-    const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+    //const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
 
+    //MIN = now + 1 hour
+    const minAllowed = new Date(now.getTime() + 60 * 60* 1000);
+
+    //MAX = today + 3 days
+    const maxAllowed = new Date();
+    maxAllowed.setDate(maxAllowed.getDate()+3);
+    maxAllowed.setHours(23, 59, 0, 0);
     // If earlier than 1 hour from now
-    if (selected < oneHourLater) {
+    if (selected < minAllowed) {
       req.session.deliveryError = "Delivery must be at least 1 hour from now.";
       return res.redirect("/personalize?from=save");
     }
 
+    if(selected >maxAllowed){
+      req.session.deliveryError = "Delivery date cannot be more than 3 days from today.";
+      return res.redirect("/personalize?from=save");
+    }
     // VALID → Save in session and clear any previous error
     req.session.deliveryDate = selectedDate;
     delete req.session.deliveryError;
+    
     return res.redirect("/checkout/payment");
 
   } catch (error) {
@@ -154,6 +199,12 @@ const saveDeliveryDate = async (req, res, next) => {
 -------------------------------------- */
 const getPaymentPage = async (req, res, next) => {
   try {
+    const validation = await validateCheckoutItems(req);
+    if(validation.error){
+      req.session.checkoutError = validation.error;
+      return res.redirect("/cart")
+    }
+
     const userId = req.session.user;
     const user = userId ? await User.findById(userId).lean() : null;
 
@@ -357,252 +408,6 @@ const placeOrder = async (req, res, next) => {
   }
 };
 
-
-
-// const placeOrder = async (req, res, next) => {
-//   try {
-//     if (
-//       !req.session.checkoutTotals ||
-//       !req.session.checkoutTotals.grandTotal ||
-//       !req.session.checkoutItems ||
-//       req.session.checkoutItems.length === 0
-//       ) {
-//         req.session.checkoutError = "Your checkout session expired. Please try again.";
-//         return res.redirect("/cart");
-//     }
-
-//     const userId = req.session.user;
-//     const paymentMethod = req.body.selectedPayment;
-
-//     let walletUsed = 0;
-//     let remainingAmount = req.session.checkoutTotals.grandTotal;
-//     let wallet = null;
-
-//     if (paymentMethod === "WALLET") {
-//       wallet = await Wallet.findOne({ userId });
-
-//       if (!wallet || wallet.balance <= 0) {
-//         req.session.checkoutError = "Insufficient wallet balance";
-//         return res.redirect("/checkout/payment");
-//       }
-
-//       walletUsed = Math.min(wallet.balance, remainingAmount);
-//       remainingAmount = remainingAmount - walletUsed;
-//     }
-
-
-//     const user = await User.findById(userId);
-//     if (!user) return res.redirect("/login");
-//     const addressDoc = await Address.findOne({ user: userId });
-//     const selectedAddress = addressDoc.addresses.find(a => a.isDefault);
-//     if (!selectedAddress) return res.redirect("/address");
-
-//     const items = [];
-//     // SAFETY VALIDATION BEFORE STOCK REDUCTION
-//     for (let cartItem of req.session.checkoutItems) {
-
-//       const product = await Product.findById(cartItem.productId).populate("category");
-//       const variant = product.variants.find(v => v.size === cartItem.size);
-
-//       //  BLOCKED PRODUCT
-//       if (product.isBlocked) {
-//         req.session.checkoutError = `${product.productName} is unavailable.`;
-//         return res.redirect("/cart");
-//       }
-
-//       //  DISABLED CATEGORY
-//       if (product.category?.isListed === false) {
-//         req.session.checkoutError = `${product.productName} belongs to a disabled category.`;
-//         return res.redirect("/cart");
-//       }
-
-//       //  STOCK CHECK
-//       if (!variant || variant.stock < cartItem.quantity) {
-//         req.session.checkoutError = `${product.productName} is out of stock.`;
-//         return res.redirect("/cart");
-//       }
-//     }
-
-//     // NOW SAFE: Apply stock reduction & build order items
-//     for (let cartItem of req.session.checkoutItems) {
-
-//       //const product = await Product.findById(cartItem.productId);
-//       const product = await Product.findById(cartItem.productId)
-//         .populate("category");
-
-//       const variant = product.variants.find(v => v.size === cartItem.size);
-
-//       variant.stock -= cartItem.quantity;
-//       await product.save();
-
-//       const offer = await calculateBestOffer(product, variant.price);
-
-//       items.push({
-//         productId: product._id,
-//         productName: product.productName,
-//         productImage: product.productImage[0],
-//         size: cartItem.size,
-//         price: offer.finalPrice,
-//         quantity: cartItem.quantity,
-//         status: "Pending"
-//       });
-
-
-//     }
-
-
-//       /* ======================================================
-//        3. SET ORDER & PAYMENT STATUS (IMPORTANT FIX)
-//     ====================================================== */
-//     let orderStatus;
-//     let paymentStatus;
-
-//     if (paymentMethod === "COD") {
-//       orderStatus = "Processing";
-//       paymentStatus = "Pending";
-//     }
-
-//     if (paymentMethod === "RAZORPAY") {
-//       orderStatus = "Payment Pending";
-//       paymentStatus = "Pending";
-//     }
-
-//     if (paymentMethod === "WALLET") {
-//       if (remainingAmount === 0) {
-//         orderStatus = "Processing";
-//         paymentStatus = "Paid";
-//       } else {
-//         orderStatus = "Payment Pending";
-//         paymentStatus = "Pending";
-//       }
-//     }
-
-//     const couponSession = req.session.appliedCoupon;
-
-//     const couponDiscount = couponSession ? couponSession.discount : 0;
-
-//     //  CREATE ORDER
-//     const order = new Order({
-//      // orderId: "ORD-" + crypto.randomBytes(3).toString("hex").toUpperCase(),
-//       userId,
-//       items,
-//       shippingAddress: {
-//         name: user.name,
-//         addressType: selectedAddress.addressType,
-//         streetAddress: selectedAddress.streetAddress,
-//         city: selectedAddress.city,
-//         district: selectedAddress.district,
-//         state: selectedAddress.state,
-//         landmark: selectedAddress.landmark,
-//         pinCode: selectedAddress.pincode,
-//         phoneNumber: selectedAddress.phone
-//       },
-//       subTotal: req.session.checkoutTotals.subTotal,
-//       offerDiscount: req.session.checkoutTotals.offerDiscount || 0,
-//       taxAmount: req.session.checkoutTotals.tax,
-//       shippingCharge: req.session.checkoutTotals.shipping,
-//       couponDiscount,
-//       totalAmount: req.session.checkoutTotals.grandTotal,
-//       walletUsed: walletUsed,                              
-//       payableAmount: remainingAmount,//razorpay part in wallet
-//       paymentMethod,
-//       orderStatus,
-//       paymentStatus,
-//       //paymentStatus: paymentMethod === "COD" ? "Pending" : "Processing",
-
-//       deliveryDate: req.session.deliveryDate
-//     });
-
-//     await order.save();
-
-//     /* ------------------------------------
-//    UPDATE COUPON USAGE (AFTER ORDER)
-// ------------------------------------ */
-// if (req.session.appliedCoupon) {
-//   const coupon = await Coupon.findById(
-//     req.session.appliedCoupon.couponId
-//   );
-
-//   if (coupon) {
-//     // global usage
-//     coupon.usedCount += 1;
-
-//     // per-user usage
-//     const userUsage = coupon.usersUsed.find(
-//       u => u.user.toString() === req.session.user.toString()
-//     );
-
-//     if (userUsage) {
-//       userUsage.count += 1;
-//     } else {
-//       coupon.usersUsed.push({
-//         user: req.session.user,
-//         count: 1,
-//       });
-//     }
-
-//     await coupon.save();
-//   }
-
-//   // VERY IMPORTANT: clear session
-//   delete req.session.appliedCoupon;
-// }
-
-
-//     //  WALLET DEDUCTION
-//     if (paymentMethod === "WALLET" && walletUsed > 0) {
-//       await wallet.addTransaction({
-//         type: "purchase",
-//         amount: walletUsed,
-//         orderId: order._id,
-//         description: remainingAmount === 0
-//           ? "Full wallet payment"
-//           : "Partial wallet payment"
-//       });
-//     }
-
-
-//     //  CLEAR USER CART FROM DATABASE
-//     await Cart.findOneAndUpdate(
-//       { user: userId },
-//       { $set: { items: [] } }
-//     );
-
-//     //  CLEAR SESSION CART
-//     // req.session.checkoutItems = [];
-//     // req.session.checkoutTotals = null;
-//     if (paymentMethod === "COD") {
-//       req.session.checkoutItems = [];
-//       req.session.checkoutTotals = null;
-//     }
-
-//     //  REDIRECT
-//     if(paymentMethod === "COD"){
-//       return res.redirect(`/checkout/success/${order._id}`);
-//     }
-//     //return res.redirect(`/checkout/success/${order._id}`);
-//     if (paymentMethod === "WALLET" && remainingAmount === 0) {
-//       req.session.checkoutItems = [];
-//       req.session.checkoutTotals = null;
-//       return res.redirect(`/checkout/success/${order._id}`);
-//     }
-
-//     if (paymentMethod === "RAZORPAY" || (paymentMethod === "WALLET" && remainingAmount > 0)) {
-//       return res.json({
-//         online: true,
-//         orderId: order._id
-//       });
-//     }
-
-//     return res.redirect("/checkout");
-
-//   } catch (error) {
-//     next(error);
-//     // console.log(err);
-//     // return res.redirect("/pageerror");
-//   }
-// };
-
 /* ------------------------------------
    SUCCESS PAGE
 -------------------------------------- */
@@ -638,6 +443,11 @@ const getSuccessPage = async (req, res, next) => {
 
 const getPersonalizePage = async (req, res, next) => {
   try {
+    const validation = await validateCheckoutItems(req);
+    if(validation.error){
+      req.session.checkoutError = validation.error;
+      return res.redirect("/cart")
+    }
     const userId = req.session.user;
     const user = userId ? await User.findById(userId).lean() : null;
 

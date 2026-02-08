@@ -312,7 +312,9 @@ const approveReturnItem = async (req, res, next) => {
     item.returnedAt = new Date();
 
     // Refund amount = price * qty
-    item.refundAmount = item.price * item.quantity;
+    const refundAmount =calculateRefundWithCoupon(order,item);
+    //item.refundAmount = item.price * item.quantity;
+    item.refundAmount = refundAmount;
     item.refundStatus = "Processed";
 
     // Increase stock back for that variant
@@ -553,10 +555,12 @@ const approveWholeReturn = async (req, res ,next) => {
         item.returnedAt = new Date();
 
         // Refund calculation
-        item.refundAmount = item.price * item.quantity;
+        //item.refundAmount = item.price * item.quantity;
+        const refundAmount = calculateRefundWithCoupon(order,item);
+        item.refundAmount = refundAmount
         item.refundStatus = "Processed";
 
-        totalRefund += item.refundAmount;
+        totalRefund += refundAmount;
 
         // Restore product stock
         const product = await Product.findById(item.productId);
@@ -638,6 +642,32 @@ function recalculateOrderTotals(order) {
   order.taxAmount = taxAmount;
   order.shippingCharge = shippingCharge;
   order.totalAmount = subTotal + taxAmount + shippingCharge - offerDiscount;
+}
+
+function calculateRefundWithCoupon(order,item){
+  //No coupon => Full refund (When there is no coupon applied)
+  if(!order.couponCode || order.couponDiscount <= 0) {
+    return item.price * item.quantity;
+  }
+
+  //Total order sum (before returning any item(eg: product1:500,product2:600,total=1100 this total is original subtotal before returning product1 or 2 ))
+  const originalSubTotal = order.items.reduce((sum,i)=>{
+    return sum+ i.price * i.quantity
+  },0);
+
+  //avoid division by 0(avoid problematic situations)
+  if(originalSubTotal <=0){
+    return item.price * item.quantity;
+  }
+
+  //single item total(eg: product price=500 ,quantity:1 => 500*1 =500)
+  const itemTotal = item.price*item.quantity;
+
+  //Propotional coupon share
+  const couponShare = (itemTotal / originalSubTotal) * order.couponDiscount;
+
+  const refundAmount = itemTotal - couponShare;
+  return Math.round(refundAmount)
 }
 
 module.exports = {

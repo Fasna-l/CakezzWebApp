@@ -30,14 +30,31 @@ const getSalesReport = async (req, res) => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    let filter = {};
+    let filter = {
+      $or:[
+        {paymentMethod: "COD" , orderStatus: "Delivered"},
+        {paymentMethod:{$ne:"COD"}, paymentStatus:"Paid"}
+      ]
+    };
 
+    //filter.totalAmount ={$gte:1000}
     if (status) filter.orderStatus = status;
     if (search) filter.orderId = { $regex: search, $options: "i" };
-    if (range || (startDate && endDate)) {
-      const { from, to } = getDateRange(range, startDate, endDate);
+    // if (range || (startDate && endDate)) {
+    //   const { from, to } = getDateRange(range, startDate, endDate);
+    //   filter.orderDate = { $gte: from, $lte: to };
+    // }
+    if (startDate && endDate) {
+      const from = new Date(startDate);
+      from.setHours(0,0,0,0);
+      const to = new Date(endDate);
+      to.setHours(23,59,59,999);
+      filter.orderDate = { $gte: from, $lte: to };
+    } else if (range) {
+      const { from, to } = getDateRange(range);
       filter.orderDate = { $gte: from, $lte: to };
     }
+
 
     const totalOrders = await Order.countDocuments(filter);
     const orders = await Order.find(filter).sort({ orderDate: -1 }).skip(skip).limit(limit).lean();
@@ -65,14 +82,30 @@ const getSalesReport = async (req, res) => {
 ================================ */
 const exportSalesReportExcel = async (req, res) => {
   const { search, range, startDate, endDate, status } = req.query;
-  let filter = {};
+  let filter = {
+    $or: [
+      { paymentMethod: "COD", orderStatus: "Delivered" },
+      { paymentMethod: { $ne: "COD" }, paymentStatus: "Paid" }
+    ]
+  };
 
   if (status) filter.orderStatus = status;
   if (search) filter.orderId = { $regex: search, $options: "i" };
-  if (range || (startDate && endDate)) {
-    const { from, to } = getDateRange(range, startDate, endDate);
+  // if (range || (startDate && endDate)) {
+  //   const { from, to } = getDateRange(range, startDate, endDate);
+  //   filter.orderDate = { $gte: from, $lte: to };
+  // }
+  if (startDate && endDate) {
+    const from = new Date(startDate);
+    from.setHours(0,0,0,0);
+    const to = new Date(endDate);
+    to.setHours(23,59,59,999);
+    filter.orderDate = { $gte: from, $lte: to };
+  } else if (range) {
+    const { from, to } = getDateRange(range);
     filter.orderDate = { $gte: from, $lte: to };
   }
+
 
   const orders = await Order.find(filter).sort({ orderDate: -1 }).lean();
   const workbook = new ExcelJS.Workbook();
@@ -104,16 +137,32 @@ const exportSalesReportExcel = async (req, res) => {
 ================================ */
 const exportSalesReportPDF = async (req, res) => {
   const { search, range, startDate, endDate, status } = req.query;
-  let filter = {};
+  let filter = {
+    $or: [
+      { paymentMethod: "COD", orderStatus: "Delivered" },
+      { paymentMethod: { $ne: "COD" }, paymentStatus: "Paid" }
+    ]
+  };
 
   if (status) filter.orderStatus = status;
   if (search) filter.orderId = { $regex: search, $options: "i" };
-  if (range || (startDate && endDate)) {
-    const { from, to } = getDateRange(range, startDate, endDate);
+  // if (range || (startDate && endDate)) {
+  //   const { from, to } = getDateRange(range, startDate, endDate);
+  //   filter.orderDate = { $gte: from, $lte: to };
+  // }
+  if (startDate && endDate) {
+    const from = new Date(startDate);
+    from.setHours(0,0,0,0);
+    const to = new Date(endDate);
+    to.setHours(23,59,59,999);
+    filter.orderDate = { $gte: from, $lte: to };
+  } else if (range) {
+    const { from, to } = getDateRange(range);
     filter.orderDate = { $gte: from, $lte: to };
   }
 
-  const orders = await Order.find(filter).sort({ orderDate: 1 }).lean();
+
+  const orders = await Order.find(filter).sort({ orderDate: -1 }).lean();  // pdf shows latest data first
 
   const doc = new PDFDocument({ size: "A4", margin: 40 });
   res.setHeader("Content-Type", "application/pdf");
@@ -242,61 +291,6 @@ function formatDate(date) {
   const year = d.getFullYear();
   return `${day}/${month}/${year}`;
 }
-
-// const exportSalesReportPDF = async (req, res) => {
-//   const { search, range, startDate, endDate, status } = req.query;
-//   let filter = {};
-
-//   if (status) filter.orderStatus = status;
-//   if (search) filter.orderId = { $regex: search, $options: "i" };
-//   if (range || (startDate && endDate)) {
-//     const { from, to } = getDateRange(range, startDate, endDate);
-//     filter.orderDate = { $gte: from, $lte: to };
-//   }
-
-//   const orders = await Order.find(filter).sort({ orderDate: 1 }).lean();
-//   const doc = new PDFDocument({ size: "A4", margin: 40 });
-
-//   res.setHeader("Content-Type","application/pdf");
-//   res.setHeader("Content-Disposition","attachment; filename=sales-report.pdf");
-
-//   doc.pipe(res);
-
-//   doc.fontSize(18).text("Sales Report", { align: "center" });
-//   doc.moveDown(1);
-//   doc.fontSize(10).text(`Period: ${startDate || "Start"} - ${endDate || new Date().toLocaleDateString()}`, { align: "center" });
-//   doc.moveDown(1);
-
-//   const tableTop = doc.y;
-//   const rowHeight = 20;
-//   doc.fontSize(11).font("Helvetica-Bold");
-
-//   doc.text("Order ID", 40, tableTop);
-//   doc.text("Date", 120, tableTop);
-//   doc.text("Payment", 200, tableTop);
-//   doc.text("Paid", 280, tableTop);
-//   doc.text("Status", 350, tableTop);
-
-//   doc.moveTo(40, tableTop + 15).lineTo(500, tableTop + 15).stroke();
-//   doc.font("Helvetica");
-
-//   let y = tableTop + rowHeight;
-//   orders.forEach(o => {
-//     const paid = o.paymentMethod === "COD" ? o.totalAmount || 0 : o.payableAmount || o.totalAmount || 0;
-
-//     if (y > 750) { doc.addPage(); y = 40; }
-
-//     doc.text(o.orderId, 40, y);
-//     doc.text(new Date(o.orderDate).toLocaleDateString(), 120, y);
-//     doc.text(o.paymentMethod, 200, y);
-//     doc.text(`₹${paid}`, 280, y);
-//     doc.text(o.orderStatus, 350, y);
-
-//     y += rowHeight;
-//   });
-
-//   doc.end();
-// };
 
 module.exports = {
   getSalesReport,

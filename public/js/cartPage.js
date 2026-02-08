@@ -55,25 +55,35 @@ document.addEventListener("click", async (e) => {
     if (!data.success) {
       showToast(data.message, "error");
       return;
-    }
+  }
 
-    // Update quantity visually
-    // Update quantity
-qtyEl.textContent = qty;
+  // ✅ OPTION A: reload cart to re-evaluate stock correctly
+  window.location.reload();
 
-// Find updated item from backend response
-const updatedItem = data.cartItems.find(
-  i => i.productId === productId && i.size === size
-);
 
-// Update price & subtotal
-item.querySelector(".price").textContent = "₹" + updatedItem.price;
-item.querySelector(".item-subtotal").textContent = "₹" + updatedItem.subtotal;
+//     if (!data.success) {
+//       showToast(data.message, "error");
+//       return;
+//     }
 
-// Update summary using backend values
-updateSummaryFromBackend(data.summary);
-    showToast("Quantity updated");
-    evaluateCheckoutButton();
+//     // Update quantity visually
+//     // Update quantity
+// qtyEl.textContent = qty;
+
+// // Find updated item from backend response
+// const updatedItem = data.cartItems.find(
+//   i => i.productId === productId && i.size === size
+// );
+
+// // Update price & subtotal
+// item.querySelector(".price").textContent = "₹" + updatedItem.price;
+// item.querySelector(".item-subtotal").textContent = "₹" + updatedItem.subtotal;
+
+// // Update summary using backend values
+// updateSummaryFromBackend(data.summary);
+//     showToast("Quantity updated");
+//     evaluateCheckoutButton();
+
   }
 });
 
@@ -147,13 +157,29 @@ function evaluateCheckoutButton() {
 
   if (!checkoutBtn) return;
 
-  let hasError = false;
+  let hasUnavailable = false;
+  let hasStockIssue = false;
 
-  items.forEach(i => {
-    if (i.dataset.unavailable === "true" || i.dataset.outofstock === "true") {
-      hasError = true;
+  items.forEach(i=>{
+    if(i.dataset.unavailable === "true"){
+      hasUnavailable = true;
     }
-  });
+    
+    if(i.dataset.outofstock === "true" || i.dataset.insufficientstock === "true"){
+      hasStockIssue = true;
+    }
+  })
+
+  //let hasError = false;
+
+  // items.forEach(i => {
+  //   if (i.dataset.unavailable === "true" ||
+  //      i.dataset.outofstock === "true" ||
+  //      i.dataset.insufficientstock === "true"
+  //     ) {
+  //     hasError = true;
+  //   }
+  // });
 
   // If no items
   if (items.length === 0) {
@@ -163,15 +189,23 @@ function evaluateCheckoutButton() {
     return;
   }
 
-  if (hasError) {
+  if(hasUnavailable || hasStockIssue){
     checkoutBtn.disabled = true;
     checkoutBtn.classList.add("disabled-btn");
+  // if (hasError) {
+  //   checkoutBtn.disabled = true;
+  //   checkoutBtn.classList.add("disabled-btn");
 
     // If warning doesn't exist, add it
     if (!warning) {
       const msg = document.createElement("p");
       msg.className = "warning-text cart-warning";
-      msg.textContent = "⚠ Please remove unavailable items before checkout.";
+      if (hasUnavailable){
+        msg.textContent = "⚠ Please remove unavailable items before checkout.";
+      } else {
+        msg.textContent = "⚠ Please fix stock issue before checkout."
+      }
+      //msg.textContent = "⚠ Please remove unavailable items before checkout.";
       checkoutBtn.parentNode.insertBefore(msg, checkoutBtn);
     }
 

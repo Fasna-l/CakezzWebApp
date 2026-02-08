@@ -78,19 +78,44 @@ const deliveryInput = document.getElementById("deliveryDate");
 const deliveryError = document.getElementById("deliveryError");
 const deliveryForm = document.getElementById("deliveryForm");
 
-// --- SET MIN DATE = NOW + 1 HOUR ---
 (function () {
-    const now = new Date();
-    const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+  const now = new Date();
 
-    const year = oneHourLater.getFullYear();
-    const month = String(oneHourLater.getMonth() + 1).padStart(2, "0");
-    const day = String(oneHourLater.getDate()).padStart(2, "0");
-    const hours = String(oneHourLater.getHours()).padStart(2, "0");
-    const minutes = String(oneHourLater.getMinutes()).padStart(2, "0");
+  //Set minimum delivery date time(time now +1hr : only select a time with minimum 1 hr from the current time on a particular date)
+  //MIN =now + 1 hour
+  const minDate = new Date(now.getTime() + 60 * 60 * 1000);
 
-    deliveryInput.min = `${year}-${month}-${day}T${hours}:${minutes}`;
+  //MAX = today + 3Days(cake expiry)(I choose 3 days because i set 3 day expiry for my cake)
+  const maxDate = new Date();
+  maxDate.setDate(maxDate.getDate() + 3);
+  maxDate.setHours(23, 59, 0, 0);
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2,"0");
+    const day = String(date.getDate()).padStart(2,"0");
+    const hour = String(date.getHours()).padStart(2,"0");
+    const min = String(date.getMinutes()).padStart(2,"0");
+    return `${year}-${month}-${day}T${hour}:${min}`;
+  };
+
+  deliveryInput.min = formatDate(minDate);
+  deliveryInput.max = formatDate(maxDate);
 })();
+
+// --- SET MIN DATE = NOW + 1 HOUR ---
+// (function () {
+//     const now = new Date();
+//     const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+
+//     const year = oneHourLater.getFullYear();
+//     const month = String(oneHourLater.getMonth() + 1).padStart(2, "0");
+//     const day = String(oneHourLater.getDate()).padStart(2, "0");
+//     const hours = String(oneHourLater.getHours()).padStart(2, "0");
+//     const minutes = String(oneHourLater.getMinutes()).padStart(2, "0");
+
+//     deliveryInput.min = `${year}-${month}-${day}T${hours}:${minutes}`;
+// })();
 
 // --- VALIDATION ---
 deliveryForm.addEventListener("submit", function (e) {
@@ -106,6 +131,7 @@ deliveryForm.addEventListener("submit", function (e) {
 
     const selected = new Date(value);
     const minAllowed = new Date(deliveryInput.min);
+    const maxAllowed = new Date(deliveryInput.max);
 
     // If selected time < minimum allowed
     if (selected < minAllowed) {
@@ -116,6 +142,12 @@ deliveryForm.addEventListener("submit", function (e) {
         return;
     }
 
+    if(selected > maxAllowed) {
+      e.preventDefault();
+      deliveryError.textContent = "Delivery date cannot be more than 3 days from today.";
+      deliveryError.style.display = "block";
+      return;
+    }
     // Hide error if valid
     deliveryError.style.display = "none";
 });
@@ -135,12 +167,20 @@ document.getElementById("goPaymentForm").addEventListener("submit", function(e) 
 
     const selected = new Date(value);
     const minAllowed = new Date(deliveryInput.min);
+    const maxAllowed = new Date(deliveryInput.max);
 
     if (selected < minAllowed) {
         e.preventDefault();
         deliveryError.textContent = "Delivery must be at least 1 hour from now.";
         deliveryError.style.display = "block";
         return;
+    }
+
+    if(selected > maxAllowed){
+      e.preventDefault();
+      deliveryError.textContent = "Delivery date cannot be more than 3 days from today.";
+      deliveryError.style.display = "block";
+      return;
     }
 });
 
