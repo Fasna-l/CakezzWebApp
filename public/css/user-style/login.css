@@ -158,6 +158,28 @@
   font-size: 0.75rem;
   display: none;
 }
+/* Password Toggle Styling */
+.password-container {
+  position: relative;
+}
+
+.password-container .form-control {
+  padding-right: 45px; /* space for eye icon */
+}
+
+.password-container i {
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #aaa;
+  font-size: 1rem;
+}
+
+.password-container i:hover {
+  color: #e91e63; /* match your theme pink */
+}
 
 /* Responsive */
 @media (max-width: 768px) {

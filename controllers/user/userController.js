@@ -171,7 +171,7 @@ const loadLogin = async (req,res,next)=>{
             return res.render("login",{message:req.query.message || ""});
         }else{
             res.redirect("/")
-        }
+        }  
     } catch (error) {
         next(error);
         //res.redirect("pageNotFound")

@@ -33,7 +33,18 @@
 
                   <div class="form-group">
                     <label class="form-label" for="password">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required />
+                    <div class="password-container">
+                      <input 
+                        type="password" 
+                        class="form-control" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter password" 
+                        required 
+                      />
+                      <i class="fa-solid fa-eye" id="eye"></i>
+                    </div>
+                    <!-- <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required /> -->
                     <div class="error-message" id="error2"></div>
                   </div>
 
@@ -80,6 +91,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const passwordid = document.getElementById("password");
   const error1 = document.getElementById("error1");
   const error2 = document.getElementById("error2");
+  const eye = document.getElementById("eye");
 
   // Email validation
   function emailValidateChecking() {
@@ -145,6 +157,16 @@ passwordid.addEventListener("input", () => {
       e.preventDefault();
     }
   });
+
+  //Password Visibility toggle
+  eye.addEventListener("click",function(){
+    //toggle icon
+    this.classList.toggle("fa-eye-slash");
+    //toggle input type
+    const type = passwordid.getAttribute("type") === "password" ? "text" : "password" ;
+    passwordid.setAttribute("type",type)
+  })
+
 });
 </script>
 
