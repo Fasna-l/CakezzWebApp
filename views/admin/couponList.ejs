@@ -66,28 +66,28 @@
                   <td><%= coupon.minPurchaseAmount %></td>
                   <td><%= coupon.expiryDate.toISOString().split("T")[0] %></td>
                   <!-- STATUS -->
-<td>
-  <% if (coupon.isActive && new Date(coupon.expiryDate) > new Date()) { %>
-    <span class="status-badge active">Active</span>
-  <% } else { %>
-    <span class="status-badge inactive">Inactive</span>
-  <% } %>
-</td>
+                  <td>
+                    <% if (coupon.isActive && new Date(coupon.expiryDate) > new Date()) { %>
+                      <span class="status-badge active">Active</span>
+                    <% } else { %>
+                      <span class="status-badge inactive">Inactive</span>
+                    <% } %>
+                  </td>
 
-<!-- TOGGLE BUTTON -->
-<td>
-  <button
-    class="btn-toggle <%= coupon.isActive ? 'btn-disable' : 'btn-enable' %>"
-    onclick="toggleCoupon('<%= coupon._id %>')"
-  >
-    <%= coupon.isActive ? 'Disable' : 'Enable' %>
-  </button>
-</td>
+                  <!-- TOGGLE BUTTON -->
+                  <td>
+                    <button
+                      class="btn-toggle <%= coupon.isActive ? 'btn-disable' : 'btn-enable' %>"
+                      onclick="toggleCoupon('<%= coupon._id %>')"
+                    >
+                      <%= coupon.isActive ? 'Disable' : 'Enable' %>
+                    </button>
+                  </td>
 
-<!-- EDIT -->
-<td>
-  <a href="/admin/coupons/edit/<%= coupon._id %>" class="btn-edit">✏️</a>
-</td>
+                  <!-- EDIT -->
+                  <td>
+                    <a href="/admin/coupons/edit/<%= coupon._id %>" class="btn-edit">✏️</a>
+                  </td>
 
                 </tr>
               <% }) %>
@@ -101,28 +101,48 @@
       </div>
 
       <!-- Pagination -->
-      <div class="pagination-container" style="display:flex;justify-content:center;gap:10px;margin-top:25px;">
+      <div class="pagination-container">
+
         <% if (currentPage > 1) { %>
-          <a href="/admin/coupons?page=<%= currentPage - 1 %>" class="pagination-link prev">« Prev</a>
+          <a href="/admin/coupons?page=<%= currentPage - 1 %>&search=<%= search || '' %>" class="pagination-link prev">« Prev</a>
         <% } else { %>
           <span class="pagination-link disabled">« Prev</span>
         <% } %>
 
-        <% for (let i = 1; i <= totalPages; i++) { %>
-          <% if (i === currentPage) { %>
-            <span class="pagination-link current"><%= i %></span>
-          <% } else { %>
-            <a href="/admin/coupons?page=<%= i %>" class="pagination-link"><%= i %></a>
+        <% 
+          const startPage = Math.max(1, currentPage - 2);
+          const endPage = Math.min(totalPages, currentPage + 2);
+        %>
+
+        <% if (startPage > 1) { %>
+          <a href="/admin/coupons?page=1&search=<%= search || '' %>" class="pagination-link">1</a>
+          <% if (startPage > 2) { %>
+            <span class="pagination-link disabled">...</span>
           <% } %>
         <% } %>
 
+        <% for (let i = startPage; i <= endPage; i++) { %>
+          <% if (i === currentPage) { %>
+            <span class="pagination-link current"><%= i %></span>
+          <% } else { %>
+            <a href="/admin/coupons?page=<%= i %>&search=<%= search || '' %>" class="pagination-link"><%= i %></a>
+          <% } %>
+        <% } %>
+
+        <% if (endPage < totalPages) { %>
+          <% if (endPage < totalPages - 1) { %>
+            <span class="pagination-link disabled">...</span>
+          <% } %>
+          <a href="/admin/coupons?page=<%= totalPages %>&search=<%= search || '' %>" class="pagination-link"><%= totalPages %></a>
+        <% } %>
+
         <% if (currentPage < totalPages) { %>
-          <a href="/admin/coupons?page=<%= currentPage + 1 %>" class="pagination-link next">Next »</a>
+          <a href="/admin/coupons?page=<%= currentPage + 1 %>&search=<%= search || '' %>" class="pagination-link next">Next »</a>
         <% } else { %>
           <span class="pagination-link disabled">Next »</span>
         <% } %>
-      </div>
 
+      </div>
       <p style="text-align:center;color:#aaa;font-size:13px;margin-top:8px;">
         Page <%= currentPage %> of <%= totalPages %>
       </p>

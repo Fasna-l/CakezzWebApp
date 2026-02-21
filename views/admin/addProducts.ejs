@@ -94,17 +94,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
-/* ✅ Global arrays */
+/*  Global arrays */
 let originalFiles = [];
 let croppedFiles = [];
 let currentIndex = -1;
 let cropper = null;
 
-/* ✅ Make validation & submit functions global */
+/*  Make validation & submit functions global */
 window.submitProductForm = submitProductForm;
 window.validateProductForm = validateProductForm;
 
-/* ✅ Validation Function (GLOBAL) */
+/*  Validation Function (GLOBAL) */
 function validateProductForm() {
   clearErrors();
   let isValid = true;
@@ -151,7 +151,7 @@ function validateProductForm() {
   return isValid;
 }
 
-/* ✅ Error Handling */
+/*  Error Handling */
 function showError(id, message) {
   document.getElementById(id).innerText = message;
   document.getElementById(id).style.display = 'block';
@@ -164,7 +164,7 @@ function clearErrors() {
   });
 }
 
-/* ✅ DOM Loaded Functions */
+/*  DOM Loaded Functions */
 document.addEventListener("DOMContentLoaded", function () {
   const fileInput = document.getElementById('productImageInput');
   const previewWrap = document.getElementById('preview-container');
@@ -237,7 +237,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-/* ✅ Submit Function */
+/*  Submit Function */
 async function submitProductForm(event) {
   event.preventDefault();
   if (!validateProductForm()) return;

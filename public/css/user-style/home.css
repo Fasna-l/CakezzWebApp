@@ -657,10 +657,6 @@ body {
   font-weight: bold;
 }
 
-/* ===============================
-   WISHLIST HEART COLOR
-================================ */
-
 .wishlist-icon i {
   color: #999;          /* white/grey heart */
   transition: 0.2s;

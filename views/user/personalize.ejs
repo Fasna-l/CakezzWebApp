@@ -103,20 +103,6 @@ const deliveryForm = document.getElementById("deliveryForm");
   deliveryInput.max = formatDate(maxDate);
 })();
 
-// --- SET MIN DATE = NOW + 1 HOUR ---
-// (function () {
-//     const now = new Date();
-//     const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
-
-//     const year = oneHourLater.getFullYear();
-//     const month = String(oneHourLater.getMonth() + 1).padStart(2, "0");
-//     const day = String(oneHourLater.getDate()).padStart(2, "0");
-//     const hours = String(oneHourLater.getHours()).padStart(2, "0");
-//     const minutes = String(oneHourLater.getMinutes()).padStart(2, "0");
-
-//     deliveryInput.min = `${year}-${month}-${day}T${hours}:${minutes}`;
-// })();
-
 // --- VALIDATION ---
 deliveryForm.addEventListener("submit", function (e) {
     const value = deliveryInput.value.trim();

@@ -32,25 +32,42 @@
             <div class="filter-section">
 
     <!-- Date Filter -->
-    <select class="filter-select" name="date" onchange="window.location.href='?date=' + this.value">
-        <option value="">Filter by Date</option>
-        <option value="today">Today</option>
-        <option value="week">This Week</option>
-        <option value="month">This Month</option>
+    <select class="filter-select"
+        onchange="
+            if(this.value === ''){
+                window.location.href='/admin/orders';
+            } else {
+                window.location.href=`/admin/orders?date=${this.value}&status=<%= status || '' %>&search=<%= search || '' %>`;
+            }
+    ">
+
+    <!-- Default label (not selectable as filter logic) -->
+        <option value="" <%= !date ? 'selected' : '' %>>Date Range</option>
+        <option value="today" <%= date === 'today' ? 'selected' : '' %>>Today</option>
+        <option value="week" <%= date === 'week' ? 'selected' : '' %>>This Week</option>
+        <option value="month" <%= date === 'month' ? 'selected' : '' %>>This Month</option>
+
     </select>
 
     <!-- Order Status Filter -->
-    <select class="filter-select" name="status" onchange="window.location.href='?status=' + this.value">
-        <option value="">Order Status</option>
-        <option value="Pending">Pending</option>
-        <option value="Processing">Processing</option>
-        <option value="Shipped">Shipped</option>
-        <option value="Delivered">Delivered</option>
-        <option value="Cancelled">Cancelled</option>
+    <select class="filter-select"
+        onchange="
+            if(this.value === ''){
+                window.location.href='/admin/orders';
+            } else {
+                window.location.href=`/admin/orders?status=${this.value}&date=<%= date || '' %>&search=<%= search || '' %>`;
+            }
+    ">
+
+        <option value="" <%= !status ? 'selected' : '' %>>Order Status</option>
+        <option value="Pending" <%= status === 'Pending' ? 'selected' : '' %>>Pending</option>
+        <option value="Processing" <%= status === 'Processing' ? 'selected' : '' %>>Processing</option>
+        <option value="Shipped" <%= status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+        <option value="Delivered" <%= status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+        <option value="Cancelled" <%= status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+
     </select>
-
 </div>
-
 
             <!-- Orders Table -->
             <div class="table-wrapper">
@@ -83,10 +100,6 @@
                                     </td>
                                     <td>
                                         <a href="/admin/order-details/<%= order._id %>" class="btn-edit">
-                                            <!-- <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                            </svg> -->
                                             View
                                         </a>
                                     </td>
@@ -101,29 +114,54 @@
                 </table>
             </div>
 
-            <!-- Pagination -->
+             <!-- Pagination -->
             <div class="pagination-container">
+
+                <!-- Prev -->
                 <% if (currentPage > 1) { %>
-                    <a href="/admin/orders?page=<%= currentPage - 1 %>" class="pagination-link prev">« Prev</a>
+                    <a href="/admin/orders?page=<%= currentPage - 1 %>&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>" class="pagination-link prev">« Prev</a>
                 <% } else { %>
                     <span class="pagination-link disabled">« Prev</span>
                 <% } %>
 
-                <% for (let i = 1; i <= totalPages; i++) { %>
-                    <% if (i === currentPage) { %>
-                        <span class="pagination-link current"><%= i %></span>
-                    <% } else { %>
-                        <a href="/admin/orders?page=<%= i %>" class="pagination-link"><%= i %></a>
+                <% 
+                    const startPage = Math.max(1, currentPage - 2);
+                    const endPage = Math.min(totalPages, currentPage + 2);
+                %>
+
+                <!-- First Page -->
+                <% if (startPage > 1) { %>
+                    <a href="/admin/orders?page=1&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>" class="pagination-link">1</a>
+                    <% if (startPage > 2) { %>
+                        <span class="pagination-link disabled">...</span>
                     <% } %>
                 <% } %>
 
+                <!-- Middle Pages -->
+                <% for (let i = startPage; i <= endPage; i++) { %>
+                    <% if (i === currentPage) { %>
+                        <span class="pagination-link current"><%= i %></span>
+                    <% } else { %>
+                        <a href="/admin/orders?page=<%= i %>&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>" class="pagination-link"><%= i %></a>
+                    <% } %>
+                <% } %>
+
+                <!-- Last Page -->
+                <% if (endPage < totalPages) { %>
+                    <% if (endPage < totalPages - 1) { %>
+                        <span class="pagination-link disabled">...</span>
+                    <% } %>
+                    <a href="/admin/orders?page=<%= totalPages %>&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>" class="pagination-link"><%= totalPages %></a>
+                <% } %>
+
+                <!-- Next -->
                 <% if (currentPage < totalPages) { %>
-                    <a href="/admin/orders?page=<%= currentPage + 1 %>" class="pagination-link next">Next »</a>
+                    <a href="/admin/orders?page=<%= currentPage + 1 %>&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>" class="pagination-link next">Next »</a>
                 <% } else { %>
                     <span class="pagination-link disabled">Next »</span>
                 <% } %>
-            </div>
 
+            </div>
             <p style="text-align: center; color: #aaa; font-size: 13px; margin-top: 8px;">
                 Page <%= currentPage %> of <%= totalPages %>
             </p>

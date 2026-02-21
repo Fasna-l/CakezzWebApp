@@ -1,6 +1,4 @@
 <%- include('../partials/admin/header') %>
-
-
 <div class="admin-login-container">
     
     <div class="admin-login-card">
@@ -28,14 +26,17 @@
             
             <div class="form-group">
                 <label for="password" class="form-label">Password</label>
-                <input 
+                <div class="admin-password-wrapper">
+                  <input 
                     type="password" 
                     class="form-control admin-input" 
                     id="password" 
                     name="password" 
                     placeholder="Password" 
                     required
-                >
+                  >
+                  <i class="fa-solid fa-eye admin-eye" id="adminEye"></i>
+                </div>
                 <div id="error2" class="error-message"></div>
             </div>
             
@@ -48,6 +49,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const adminLoginForm = document.getElementById("adminLoginForm");
   const email = document.getElementById("email");
   const password = document.getElementById("password");
+  const adminEye = document.getElementById("adminEye");
   const error1 = document.getElementById("error1");
   const error2 = document.getElementById("error2");
 
@@ -82,23 +84,17 @@ document.addEventListener("DOMContentLoaded", function() {
       error2.textContent = "";
     }
   }
+  // Clear errors while typing
+  email.addEventListener("input", function () {
+    error1.style.display = "none";
+    error1.textContent = "";
+  });
 
-//   email.addEventListener("input", validateEmail);
-//   password.addEventListener("input", validatePassword);
-
-//Real - time input validation
-   email.addEventListener("input", function () {
-          if (emailPattern.test(email.value.trim())) {
-            error1.textContent = "";
-          }
-        });
-
-   password.addEventListener("input", function () {
-          if (passwordPattern.test(password.value.trim())) {
-            error2.textContent = "";
-          }
-        });     
-
+  password.addEventListener("input", function () {
+    error2.style.display = "none";
+    error2.textContent = "";
+  });
+  
   adminLoginForm.addEventListener("submit", function(e) {
     validateEmail();
     validatePassword();
@@ -106,6 +102,15 @@ document.addEventListener("DOMContentLoaded", function() {
     if (error1.textContent || error2.textContent) {
       e.preventDefault();
     }
+  });
+  // Password visibility toggle
+  adminEye.addEventListener("click", function () {
+    this.classList.toggle("fa-eye-slash");
+
+    const type =
+      password.getAttribute("type") === "password" ? "text" : "password";
+
+    password.setAttribute("type", type);
   });
 });
 </script>

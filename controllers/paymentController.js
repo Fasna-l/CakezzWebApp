@@ -17,17 +17,14 @@ const createRazorpayOrder = async (req, res, next) => {
 
     const options = {
       amount: order.payableAmount * 100,
-      //amount: order.totalAmount * 100, // paise
       currency: "INR",
       receipt: order.orderId,
     };
 
     const razorpayOrder = await razorpay.orders.create(options);
-
     // store razorpay order id
     order.paymentDetails.razorpayOrderId = razorpayOrder.id;
     await order.save();
-
     res.json({
       success: true,
       key: process.env.RAZORPAY_KEY_ID,
@@ -35,8 +32,6 @@ const createRazorpayOrder = async (req, res, next) => {
     });
   } catch (error) {
     next(error)
-    // console.error(error);
-    // res.status(500).json({ success: false });
   }
 };
 
@@ -56,7 +51,6 @@ const verifyPayment = async (req, res, next) => {
       .digest("hex");
 
     const order = await Order.findById(orderId);
-
     if (!order) return res.json({ success: false });
 
     if (expectedSign !== razorpay_signature) {
@@ -66,7 +60,7 @@ const verifyPayment = async (req, res, next) => {
       return res.json({ success: false });
     }
 
-    // ============= STOCK DEDUCTION AFTER SUCCESS ============
+    //STOCK DEDUCTION AFTER SUCCESS
     for (let item of order.items) {
       const product = await Product.findById(item.productId);
       const variant = product.variants.find(v => v.size === item.size);
@@ -80,14 +74,11 @@ const verifyPayment = async (req, res, next) => {
     // UPDATE ORDER STATUS
     order.paymentStatus = "Paid";
     order.orderStatus = "Pending";
-    //order.orderStatus = "Processing";
     order.paymentDetails.razorpayPaymentId = razorpay_payment_id;
     order.paymentDetails.razorpaySignature = razorpay_signature;
 
-    //order.items.forEach(it => { it.status = "Processing" });
     order.items.forEach(it => { it.status = "Pending" });
     await order.save();
-
     // CLEAR CART ONLY AFTER SUCCESS
     await Cart.findOneAndUpdate(
       { user: order.userId },
@@ -103,52 +94,6 @@ const verifyPayment = async (req, res, next) => {
     next(error);
   }
 };
-
-
-// const verifyPayment = async (req, res, next) => {
-//   try {
-//     const {
-//       razorpay_order_id,
-//       razorpay_payment_id,
-//       razorpay_signature,
-//       orderId,
-//     } = req.body;
-
-//     const sign = razorpay_order_id + "|" + razorpay_payment_id;
-
-//     const expectedSign = crypto
-//       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-//       .update(sign)
-//       .digest("hex");
-
-//     if (expectedSign !== razorpay_signature) {
-//       await Order.findByIdAndUpdate(orderId, {
-//         paymentStatus: "Failed",
-//         orderStatus: "Payment Failed"
-//       });
-//       return res.json({ success: false });
-//     }
-
-//     await Order.findByIdAndUpdate(orderId, {
-//       paymentStatus: "Paid",
-//       orderStatus: "Processing",
-//       "paymentDetails.razorpayPaymentId": razorpay_payment_id,
-//       "paymentDetails.razorpaySignature": razorpay_signature,
-//       $set: {
-//       "items.$[].status": "Processing" //  update all items
-//     }
-//     });
-
-//     req.session.checkoutItems = [];
-//     req.session.checkoutTotals = null;
-
-//     res.json({ success: true });
-//   } catch (error) {
-//     next(error)
-//     // console.error(error);
-//     // res.status(500).json({ success: false });
-//   }
-// };
 
 const markPaymentFailed = async (req, res, next) => {
   try {
@@ -172,12 +117,10 @@ const retryPayment = async (req, res, next) => {
     if (!order || order.paymentStatus === "Paid") {
       return res.redirect("/order");
     }
-
     // If there is still payable amount → Razorpay retry
     if (order.payableAmount > 0) {
       return retryRazorpay(order, res);
     }
-
     // If nothing pending (edge case)
     return res.redirect(`/checkout/success/${order._id}`);
   } catch (error) {
@@ -187,7 +130,7 @@ const retryPayment = async (req, res, next) => {
 
 const retryRazorpay = async (order, res) => {
   const razorpayOrder = await razorpay.orders.create({
-    amount: order.payableAmount * 100, // ✅ ONLY pending amount
+    amount: order.payableAmount * 100, // ONLY pending amount
     currency: "INR",
     receipt: `retry_${order.orderId}`
   });
@@ -201,7 +144,6 @@ const retryRazorpay = async (order, res) => {
     key: process.env.RAZORPAY_KEY_ID
   });
 };
-
 
 module.exports = {
   createRazorpayOrder,

@@ -46,15 +46,7 @@
             <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
               data-product-id="<%= product._id %>">
               <i class="fa-heart"></i>
-              <!-- <i class="far fa-heart"></i> -->
             </div>
-
-            <!-- <div class="wishlist-icon"><i class="far fa-heart"></i></div> -->
-            <!-- <div class="wishlist-icon" data-product-id="<%= product._id %>">
-              <i class="far fa-heart"></i>
-            </div> -->
-
-
             <a href="/product/<%= product._id %>">
               <img src="/uploads/product/<%= product.productImage[0] %>" alt="<%= product.productName %>" />
             </a>
@@ -81,12 +73,6 @@
     <span class="rating-badgelatestprdct rating-inline">★ <%= avg %></span>
   <% } %>
 </div>
-
-              
-              <!-- <p class="cake-card-subtitle">
-                Starting from ₹ <%= oneKgVariant?.price || 'N/A' %>
-
-              </p> -->
 
               <% if (!oneKgVariant || oneKgVariant.stock <= 0) { %>
                 <p style="color:red; font-weight:600;">Sold Out (1 kg)</p>
@@ -135,16 +121,10 @@
                   <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
                 </span>
               <% } %>
-
-
-              
-              <!-- <div class="wishlist-icon" data-product-id="<%= product._id %>"> -->
               <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
                 data-product-id="<%= product._id %>">
                 <i class="fa-heart"></i>
-                <!-- <i class="far fa-heart"></i> -->
               </div>
-
 
               <a href="/product/<%= product._id %>">
                 <img src="/uploads/product/<%= product.productImage[0] %>" alt="<%= product.productName %>">
@@ -165,7 +145,6 @@
     : product.maxPrice || "N/A"
 %>
 
-                <!-- ₹<%= threeKgVariant?.price || product.maxPrice || 'N/A' %> -->
               </div>
 
               <% if (!threeKgVariant || threeKgVariant.stock <= 0) { %>

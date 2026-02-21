@@ -1,8 +1,5 @@
 const Coupon = require("../../models/couponSchema");
 
-/* =================================
-   LIST COUPONS
-================================= */
 const listCoupons = async (req, res, next) => {
   try {
     const search = req.query.search || "";
@@ -35,16 +32,10 @@ const listCoupons = async (req, res, next) => {
   }
 };
 
-/* =================================
-   LOAD ADD COUPON PAGE
-================================= */
 const loadAddCoupon = async (req, res) => {
   res.render("addCoupon");
 };
 
-/* =================================
-   CREATE COUPON
-================================= */
 const createCoupon = async (req, res, next) => {
   try {
     let {
@@ -55,8 +46,7 @@ const createCoupon = async (req, res, next) => {
       minPurchaseAmount,
       maxDiscountAmount,
       expiryDate,
-      usageLimit,
-      //perUserLimit
+      usageLimit
     } = req.body;
 
     if (!code || !name || !description || !discountValue || !expiryDate) {
@@ -72,26 +62,11 @@ const createCoupon = async (req, res, next) => {
       return res.status(400).json({ message: "Discount must be 1–100%" });
     }
 
-    // 🚀 Convert empty fields to null
-    // usageLimit
-if (usageLimit === "" || usageLimit === undefined) {
-  usageLimit = null;
-} else {
-  usageLimit = Number(usageLimit);
-}
-
-// perUserLimit
-// if (perUserLimit === "" || perUserLimit === undefined) {
-//   perUserLimit = 1;
-// } else {
-//   perUserLimit = Number(perUserLimit);
-// }
-    // usageLimit = usageLimit === "" || usageLimit === undefined ? null : Number(usageLimit);
-    // perUserLimit = perUserLimit === "" || perUserLimit === undefined ? null : Number(perUserLimit);
-
-    // usageLimit = usageLimit?.trim() === "" ? null : Number(usageLimit);
-    // perUserLimit = perUserLimit?.trim() === "" ? null : Number(perUserLimit);
-
+    if (usageLimit === "" || usageLimit === undefined) {
+      usageLimit = null;
+    } else {
+      usageLimit = Number(usageLimit);
+    }
     await Coupon.create({
       code: code.toUpperCase(),
       name,
@@ -110,53 +85,6 @@ if (usageLimit === "" || usageLimit === undefined) {
   }
 };
 
-
-// const createCoupon = async (req, res, next) => {
-//   try {
-//     const {
-//       code,
-//       name,
-//       description,
-//       discountValue,
-//       minPurchaseAmount,
-//       maxDiscountAmount,
-//       expiryDate,
-//       usageLimit
-//     } = req.body;
-
-//     if (!code || !name || !description || !discountValue || !expiryDate) {
-//       return res.status(400).json({ message: "Missing required fields" });
-//     }
-
-//     const exists = await Coupon.findOne({ code: code.toUpperCase() });
-//     if (exists) {
-//       return res.status(400).json({ message: "Coupon code already exists" });
-//     }
-
-//     if (discountValue < 1 || discountValue > 100) {
-//       return res.status(400).json({ message: "Discount must be 1–100%" });
-//     }
-
-//     await Coupon.create({
-//       code: code.toUpperCase(),
-//       name,
-//       description,
-//       discountValue,
-//       minPurchaseAmount: minPurchaseAmount || 0,
-//       maxDiscountAmount: maxDiscountAmount || null,
-//       expiryDate,
-//       usageLimit: usageLimit || null
-//     });
-
-//     res.status(201).json({ success: true });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
-/* =================================
-   LOAD EDIT COUPON PAGE
-================================= */
 const loadEditCoupon = async (req, res, next) => {
   try {
     const coupon = await Coupon.findById(req.params.id);
@@ -168,9 +96,6 @@ const loadEditCoupon = async (req, res, next) => {
   }
 };
 
-/* =================================
-   UPDATE COUPON
-================================= */
 const updateCoupon = async (req, res, next) => {
   try {
     let {
@@ -180,37 +105,17 @@ const updateCoupon = async (req, res, next) => {
       maxDiscountAmount,
       description,
       expiryDate,
-      usageLimit,
-      //perUserLimit
+      usageLimit
     } = req.body;
 
     if (discountValue < 1 || discountValue > 100) {
       return res.status(400).json({ message: "Invalid discount" });
     }
-
-    // 🚀 Convert blanks to null
-    
-    // usageLimit
-if (usageLimit === "" || usageLimit === undefined) {
-  usageLimit = null;
-} else {
-  usageLimit = Number(usageLimit);
-}
-
-// perUserLimit
-// if (perUserLimit === "" || perUserLimit === undefined) {
-//   perUserLimit = 1;
-// } else {
-//   perUserLimit = Number(perUserLimit);
-// }
-    
-    //usageLimit = usageLimit === "" || usageLimit === undefined ? null : Number(usageLimit);
-    //perUserLimit = perUserLimit === "" || perUserLimit === undefined ? null : Number(perUserLimit);
-
-    
-    //usageLimit = usageLimit?.trim() === "" ? null : Number(usageLimit);
-    //perUserLimit = perUserLimit?.trim() === "" ? null : Number(perUserLimit);
-
+    if (usageLimit === "" || usageLimit === undefined) {
+      usageLimit = null;
+    } else {
+      usageLimit = Number(usageLimit);
+    }
     await Coupon.findByIdAndUpdate(req.params.id, {
       name,
       discountValue,
@@ -228,42 +133,6 @@ if (usageLimit === "" || usageLimit === undefined) {
   }
 };
 
-
-// const updateCoupon = async (req, res, next) => {
-//   try {
-//     const {
-//       name,  
-//       discountValue,
-//       minPurchaseAmount,
-//       maxDiscountAmount,
-//       description,
-//       expiryDate,
-//       usageLimit
-//     } = req.body;
-
-//     if (discountValue < 1 || discountValue > 100) {
-//       return res.status(400).json({ message: "Invalid discount" });
-//     }
-
-//     await Coupon.findByIdAndUpdate(req.params.id, {
-//       name,
-//       discountValue,
-//       minPurchaseAmount,
-//       maxDiscountAmount: maxDiscountAmount || null,
-//       description,
-//       expiryDate,
-//       usageLimit: usageLimit || null
-//     });
-
-//     res.status(200).json({ success: true });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
-/* =================================
-   ENABLE / DISABLE COUPON
-================================= */
 const toggleCoupon = async (req, res, next) => {
   try {
     const coupon = await Coupon.findById(req.params.id);
@@ -278,9 +147,6 @@ const toggleCoupon = async (req, res, next) => {
   }
 };
 
-/* =================================
-   DELETE COUPON
-================================= */
 const deleteCoupon = async (req, res, next) => {
   try {
     await Coupon.findByIdAndDelete(req.params.id);

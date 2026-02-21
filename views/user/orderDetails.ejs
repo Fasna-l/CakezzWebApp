@@ -37,6 +37,12 @@
   const stage3 = ['Shipped','Out for Delivery','Delivered'].includes(order.orderStatus);
   const stage4 = ['Delivered'].includes(order.orderStatus);
 %>
+<%
+  const now = new Date();
+  const deliveryTime = order.deliveryDate ? new Date(order.deliveryDate) : null;
+  const diffInHours = deliveryTime ? (now - deliveryTime) / (1000 * 60 * 60) : 999;
+  const isReturnWindowOpen = diffInHours <= 2;
+%>
 
 <%
   const isPaymentFailed = order.paymentStatus === "Failed";
@@ -137,16 +143,6 @@
             <strong><%= order.orderStatus %></strong>
           </li>
         </ul>
-        <!-- REFUND INFO FOR CANCELLED ORDERS -->
-         <!-- <% if (order.orderStatus === 'Cancelled') { %>
-  <div class="refund-info">
-    <strong>Refund:</strong> ₹<%= order.refundAmount || 0 %><br>
-    <span>Status: <%= order.refundStatus || 'Processed' %></span>
-  </div>
-<% } %> -->
-
-        
-       
 
         <!-- Delivery Address -->
         <div class="address-block">
@@ -164,17 +160,22 @@
             <a href="/order/cancel/<%= order._id %>" class="btn btn-danger">Cancel Order</a>
           <% } %>
 
-          <!-- <% if (!['Cancelled', 'Delivered', 'Return Requested', 'Return Rejected', 'Returned'].includes(order.orderStatus)) { %>
-            <a href="/order/cancel/<%= order._id %>" class="btn btn-danger">Cancel Order</a>
-          <% } %> -->
-
-
           <% if (order.orderStatus === 'Delivered') { %>
-            <a href="/order/return/<%= order._id %>" class="btn btn-secondary">Request Return</a>
+
+            <% if (isReturnWindowOpen) { %>
+              <a href="/order/return/<%= order._id %>" class="btn btn-secondary">
+                Request Return
+              </a>
+            <% } else { %>
+              <button class="btn btn-secondary" disabled>
+                Return Period Expired
+              </button>
+            <% } %>
+
           <% } %>
 
+
           <% if (order.paymentStatus === "Failed") { %>
-            <!-- <p class="error-text">Payment Failed</p> -->
             <a href="/payment/retry/<%= order._id %>" class="btn retry-btn">
             🔁 Retry Payment
             </a>
@@ -218,34 +219,29 @@
 
       <!-- Right side button -->
       <div class="item-right">
-        <!-- <% if (item.status !== 'Cancelled' && item.status !== 'Delivered' && order.orderStatus !== 'Delivered' && order.orderStatus !== 'Cancelled') { %>
-          <a href="/order/cancel/<%= order._id %>?item=<%= item._id %>" 
-            class="cancel-item-btn">
-              Cancel Item
-          </a>
-
-        <% } %> -->
         <% if (order.orderStatus === "Pending" && item.status === "Pending") { %>
           <a href="/order/cancel/<%= order._id %>?item=<%= item._id %>" class="cancel-item-btn">
             Cancel Item
           </a>
         <% } %>
 
-        <!-- <% if (!['Cancelled', 'Delivered', 'Return Requested', 'Returned'].includes(item.status)) { %>
-          <a href="/order/cancel/<%= order._id %>?item=<%= item._id %>" 
-            class="cancel-item-btn">
-            Cancel Item
-          </a>
-        <% } %> -->
+        <% if (order.orderStatus === 'Delivered' && 
+                item.status === 'Delivered' && 
+                item.returnStatus !== 'Rejected' &&
+                item.status !== 'Returned') { %>
 
-        <% if (order.orderStatus === 'Delivered' && item.status === 'Delivered' && item.returnStatus !== 'Rejected' &&
-                item.status !== 'Returned' ) { %>
-          <!-- href="/order/return-item/<%= order._id %>?item=<%= item._id %>" -->
-          <a href="/order/<%= order._id %>/item/<%= item._id %>/return"                   
-            class="return-item-btn"
-            style="background:#99267c; padding:8px 15px; border-radius:6px; color:#f1eeee; text-decoration:none;">
-            Return Item
-          </a>
+          <% if (isReturnWindowOpen) { %>
+            <a href="/order/<%= order._id %>/item/<%= item._id %>/return"                   
+              class="return-item-btn"
+              style="background:#99267c; padding:8px 15px; border-radius:6px; color:#f1eeee; text-decoration:none;">
+              Return Item
+            </a>
+          <% } else { %>
+            <span style="color:red; font-size:0.9rem;">
+              Return period expired
+            </span>
+          <% } %>
+
         <% } %>
       </div>
 

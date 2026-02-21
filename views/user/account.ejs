@@ -9,7 +9,6 @@
       <li><a href="/order" class="sidebar-link"><i class="fas fa-shopping-bag"></i> Order</a></li>
       <li><a href="/wishlist" class="sidebar-link"><i class="fas fa-heart"></i> Wishlist</a></li>
       <li><a href="/address" class="sidebar-link"><i class="fas fa-map-marker-alt"></i> Address</a></li>
-      <!-- <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li> -->
       <% if (!user.isGoogleUser) { %>
         <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li>
       <% } %>
@@ -52,9 +51,7 @@
       <div class="form-group">
         <label for="email">Email</label>
         <input type="email" id="email" name="email" value="<%= user.email %>" readonly>
-      </div>
-
-      <!-- <button type="submit" class="save-btn">Save Changes</button>  -->    
+      </div>   
        <a href="/edit-profile" class="edit-btn">Edit Profile</a>
 
     </form>

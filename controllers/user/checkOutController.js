@@ -34,12 +34,8 @@ const validateCheckoutItems = async (req)=>{
   return {success:true}
 };
 
-/* ------------------------------------
-   GET CHECKOUT PAGE
--------------------------------------- */
 const getCheckout = async (req, res, next) => {
   try {
-
     //validation check(like cart page)
     const validation = await validateCheckoutItems(req);
     if(validation.error){
@@ -61,14 +57,10 @@ const getCheckout = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.log(err);
-    // res.redirect("/pageerror");
   }
 };
 
-/* ------------------------------------
-   ADD ADDRESS (CHECKOUT)
--------------------------------------- */
+// ADD ADDRESS (CHECKOUT)
 const postAddAddress = async (req, res, next) => {
   try {
     const userId = req.session.user;
@@ -92,14 +84,9 @@ const postAddAddress = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.log(err);
-    // res.json({ success: false });
   }
 };
 
-/* ------------------------------------
-   EDIT ADDRESS
--------------------------------------- */
 const getEditAddress = async (req, res, next) => {
   try {
     const userId = req.session.user;
@@ -118,8 +105,6 @@ const getEditAddress = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.log(err);
-    // res.redirect("/pageerror");
   }
 };
 
@@ -137,32 +122,22 @@ const postEditAddress = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.log(err);
-    // res.json({ success: false });
   }
 };
-
-/* ------------------------------------
-   SAVE DELIVERY DATE (with validation)
--------------------------------------- */
 
 const saveDeliveryDate = async (req, res, next) => {
   try {
     const selectedDate = req.body.deliveryDate;
     // If empty
     if (!selectedDate || selectedDate.trim() === "") {
-      // store friendly error in session and redirect back to personalize page
       req.session.deliveryError = "Please select a delivery date & time.";
       return res.redirect("/personalize?from=save");
     }
 
     const selected = new Date(selectedDate);
     const now = new Date();
-    //const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
-
     //MIN = now + 1 hour
     const minAllowed = new Date(now.getTime() + 60 * 60* 1000);
-
     //MAX = today + 3 days
     const maxAllowed = new Date();
     maxAllowed.setDate(maxAllowed.getDate()+3);
@@ -185,18 +160,9 @@ const saveDeliveryDate = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.log("saveDeliveryDate error:", err);
-    // // set generic error
-    // req.session.deliveryError = "Something went wrong. Please try again.";
-    // return res.redirect("/personalize?from=save");
   }
 };
 
-
-
-/* ------------------------------------
-   GET PAYMENT PAGE
--------------------------------------- */
 const getPaymentPage = async (req, res, next) => {
   try {
     const validation = await validateCheckoutItems(req);
@@ -233,9 +199,6 @@ const getPaymentPage = async (req, res, next) => {
   }
 };
 
-/* ------------------------------------
-   PLACE ORDER
--------------------------------------- */
 const placeOrder = async (req, res, next) => {
   try {
     if (
@@ -309,24 +272,20 @@ const placeOrder = async (req, res, next) => {
 
     if (paymentMethod === "COD") {
       orderStatus = "Pending";
-      //orderStatus = "Processing";
       paymentStatus = "Pending";
     }
 
     if (paymentMethod === "RAZORPAY") {
       orderStatus = "Pending";
-      //orderStatus = "Payment Pending";
       paymentStatus = "Pending";
     }
 
     if (paymentMethod === "WALLET") {
       if (remainingAmount === 0) {
         orderStatus = "Pending";
-        //orderStatus = "Processing";
         paymentStatus = "Paid";
       } else {
         orderStatus = "Pending";
-        //orderStatus = "Payment Pending";
         paymentStatus = "Pending";
       }
     }
@@ -408,9 +367,6 @@ const placeOrder = async (req, res, next) => {
   }
 };
 
-/* ------------------------------------
-   SUCCESS PAGE
--------------------------------------- */
 const getSuccessPage = async (req, res, next) => {
   try {
     const userId = req.session.user;
@@ -428,18 +384,14 @@ const getSuccessPage = async (req, res, next) => {
 
     res.render("payment-success", {
       user,
-      order,                     // IMPORTANT: send full order
-      deliveryDateFormatted      // OK to keep this
+      order,                     // send full order
+      deliveryDateFormatted      
     });
 
   } catch (error) {
     next(error);
-    // console.log("getSuccessPage error:", err);
-    // res.redirect("/pageNotFound");
   }
 };
-
-
 
 const getPersonalizePage = async (req, res, next) => {
   try {
@@ -473,11 +425,8 @@ const getPersonalizePage = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.log("Personalize Page Error:", err);
-    // res.redirect("/pageNotFound");
   }
 };
-
 
 const loadPaymentFailurePage = async (req, res, next) => {
   try {
@@ -485,8 +434,7 @@ const loadPaymentFailurePage = async (req, res, next) => {
     const user = await User.findById(userId).lean();
 
     const orderId = req.params.orderId;
-
-    // Optional: verify order belongs to user
+    //verify order belongs to user
     const order = await Order.findOne({ _id: orderId, userId });
 
     if (!order) {

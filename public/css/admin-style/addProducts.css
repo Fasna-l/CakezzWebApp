@@ -6,19 +6,7 @@ body {
   background-color: #2a2a2a;
   color: #fff;
 }
-
-/* Dashboard Layout */
-/* .dashboard-container {
-  display: flex;
-  height: calc(100vh - 0px);
-}
-
-.dashboard-wrapper {
-  display: flex;
-  width: 100%;
-} */
-
-/* ✅ Dashboard layout */
+/* Dashboard layout */
 .dashboard-container {
   display: flex;
   height: calc(100vh - 60px);
@@ -32,7 +20,7 @@ body {
   height: 100%;
 }
 
-/* ✅ Sidebar (same as users.css) */
+/* Sidebar (same as users.css) */
 .dashboard-sidebar {
   width: 250px;
   background-color: #1a1a1a;

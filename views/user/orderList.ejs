@@ -55,8 +55,6 @@
                   <div class="no-thumb">No Image</div>
                 <% } %>
               </div>
-
-              <!-- Order Info -->
               <!-- Order Info -->
 <div class="order-info">
   <div class="order-title">
@@ -164,29 +162,6 @@
 
   <% } %>
 </div>
-
-
-        <!-- <div class="pagination">
-          <% if (pagination.totalPages > 1) { %>
-
-            <a href="?page=<%= Math.max(1, pagination.currentPage - 1) %>" class="page-btn">Prev</a>
-
-            <% for (let i = 1; i <= pagination.totalPages; i++) { %>
-              <a 
-                href="?page=<%= i %>" 
-                class="page-number <%= pagination.currentPage === i ? 'active' : '' %>"
-              ><%= i %></a>
-            <% } %>
-
-            <a href="?page=<%= Math.min(pagination.totalPages, pagination.currentPage + 1) %>" class="page-btn">Next</a>
-
-          <% } %>
-        </div>
-
-      <% } else { %>
-        <p class="no-orders">You have no orders yet.</p>
-      <% } %> -->
-
     </div>
   </div>
 

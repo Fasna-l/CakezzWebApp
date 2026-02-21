@@ -150,6 +150,31 @@ body {
   display: none;
 }
 
+/* Password Visibility Toggle */
+.admin-password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.admin-password-wrapper .admin-input {
+  padding-right: 40px !important;
+}
+
+.admin-eye {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888888;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.admin-eye:hover {
+  color: #ffffff;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .admin-header {

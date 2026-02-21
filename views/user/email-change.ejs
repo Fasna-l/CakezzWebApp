@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const errorOld = document.getElementById("errorOld");
   const errorNew = document.getElementById("errorNew");
 
-  // ✅ Function to validate email and display message
+  //  Function to validate email and display message
   function validateEmail(emailInput, errorDiv) {
     const val = emailInput.value.trim();
     const pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -80,11 +80,11 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
-  // ✅ Live validation while typing
+  //  Live validation while typing
   oldEmail.addEventListener("input", () => validateEmail(oldEmail, errorOld));
   newEmail.addEventListener("input", () => validateEmail(newEmail, errorNew));
 
-  // ✅ Final validation before submission
+  //  Final validation before submission
   form.addEventListener("submit", (e) => {
     validateEmail(oldEmail, errorOld);
     validateEmail(newEmail, errorNew);

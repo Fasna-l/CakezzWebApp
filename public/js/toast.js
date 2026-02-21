@@ -9,13 +9,9 @@ function showToast(message, type = "success") {
 
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
-
-//   let icon = "✔️";
-//   if (type === "error") icon = "❌";
-//   if (type === "warning") icon = "⚠️";
-let icon = '<i class="fas fa-check"></i>';
-if (type === "error") icon = '<i class="fas fa-times"></i>';
-if (type === "warning") icon = '<i class="fas fa-exclamation-triangle"></i>';
+  let icon = '<i class="fas fa-check"></i>';
+  if (type === "error") icon = '<i class="fas fa-times"></i>';
+  if (type === "warning") icon = '<i class="fas fa-exclamation-triangle"></i>';
 
 
   toast.innerHTML = `

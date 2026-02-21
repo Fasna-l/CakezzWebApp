@@ -1,6 +1,3 @@
-/* === SALES REPORT PAGE ONLY === */
-
-/* Fix date picker icon visibility for dark background */
 input.sales-date::-webkit-calendar-picker-indicator {
   filter: invert(1);
 }

@@ -59,9 +59,7 @@ showToast("Added to cart");
     return;
   }
 
-  /* ===============================
-     REMOVE FROM WISHLIST PAGE
-  ================================ */
+  //REMOVE FROM WISHLIST PAGE
   const removeBtn = e.target.closest(".remove-from-wishlist");
 
   if (removeBtn && window.location.pathname.includes("/wishlist")) {
@@ -100,9 +98,7 @@ showToast("Added to cart");
     return;
   }
 
-  /* ===============================
-     HEART TOGGLE (OTHER PAGES)
-  ================================ */
+  //HEART TOGGLE (OTHER PAGES)
   const heart = e.target.closest(".wishlist-icon");
 
   if (heart && !window.location.pathname.includes("/wishlist")) {
@@ -132,9 +128,7 @@ showToast("Added to cart");
   }
 });
 
-/* ===============================
-   UPDATE HEADER COUNT
-================================ */
+//UPDATE HEADER COUNT
 async function updateWishlistCount() {
   try {
     const res = await fetch("/wishlist-count");

@@ -32,7 +32,6 @@ const sendVerificationEmail = async (email,otp, subject)=>{
         console.error("Error sending email",error);
         return false;
     }
-
 }
 
 module.exports = { sendVerificationEmail };

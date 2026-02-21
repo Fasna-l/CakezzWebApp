@@ -66,28 +66,21 @@
             </tbody>
         </table>
         <div class="pagination">
-  <% if (currentPage > 1) { %>
-    <a href="/wallet/history?page=<%= currentPage - 1 %>" class="pagination-link">Previous</a>
-  <% } %>
+            <% if (currentPage > 1) { %>
+                <a href="/wallet/history?page=<%= currentPage - 1 %>" class="pagination-link">Previous</a>
+            <% } %>
 
-  <% for (let i = 1; i <= totalPages; i++) { %>
-    <a href="/wallet/history?page=<%= i %>"
-       class="pagination-link <%= i === currentPage ? 'active' : '' %>">
-      <%= i %>
-    </a>
-  <% } %>
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <a href="/wallet/history?page=<%= i %>"
+                class="pagination-link <%= i === currentPage ? 'active' : '' %>">
+                <%= i %>
+                </a>
+            <% } %>
 
-  <% if (currentPage < totalPages) { %>
-    <a href="/wallet/history?page=<%= currentPage + 1 %>" class="pagination-link">Next</a>
-  <% } %>
-</div>
+            <% if (currentPage < totalPages) { %>
+                <a href="/wallet/history?page=<%= currentPage + 1 %>" class="pagination-link">Next</a>
+            <% } %>
+            </div>
     </div>
-  
-
-    
 </div>
-
-
-
-
 <%- include('../partials/user/footer') %>

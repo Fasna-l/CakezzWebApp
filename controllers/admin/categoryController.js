@@ -1,10 +1,7 @@
 const Category = require("../../models/categorySchema");
 
-
 const categoryInfo = async (req,res,next)=>{
     try {
-
-        //search button
         let search="";
         if(req.query.search){
             search=req.query.search;
@@ -34,19 +31,14 @@ const categoryInfo = async (req,res,next)=>{
         });
     } catch (error) {
         next(error);
-        // console.error(error);
-        // res.redirect("/pageerror")
     }
 }
 
-//Load Category Page
 const loadAddCategoryPage = async (req, res, next) => {
     try {
         res.render("addCategory"); 
     } catch (error) {
         next(error);
-        // console.error("Error loading Add Category page:", error);
-        // res.status(500).send("Server Error");
     }
 };
 
@@ -66,35 +58,9 @@ const addCategory = async (req,res,next)=>{
         return res.json({message:"Category added successfully"})
     } catch (error) {
         next(error);
-        // return res.status(500).json({error:"Internal Server Error"})
     }
 }
-
-//list/unlist in category 
-
-// const getListCategory = async (req,res)=>{
-//     try {
-//         let id = req.query.id;
-//         await Category.updateOne({_id:id},{$set:{isListed:false}});
-//         res.json({ success: true, message: "Category unlisted", isListed: false, id });
-//     } catch (error) {
-//         console.error("Error unlisting category:", error);
-//         res.status(500).json({ success: false, message: "Server Error" });
-//     }
-// }
-
-// const getUnlistCategory = async (req,res)=>{
-//     try {
-//         let id = req.query.id;
-//         await Category.updateOne({_id:id},{$set:{isListed:true}});
-//         res.json({ success: true, message: "Category listed", isListed: true, id });
-//     } catch (error) {
-//         console.error("Error listing category:", error);
-//         res.status(500).json({ success: false, message: "Server Error" });
-//     }
-// }
-
-// ✅ PATCH /admin/categories/:id/list
+// PATCH /admin/categories/:id/list
 const listCategory = async (req, res,next) => {
     try {
         const { id } = req.params;
@@ -107,12 +73,10 @@ const listCategory = async (req, res,next) => {
         return res.status(200).json({ success: true });
     } catch (error) {
         next(error);
-        // console.error(error);
-        // return res.status(500).json({ success: false });
     }
 };
 
-// ✅ PATCH /admin/categories/:id/unlist
+//PATCH /admin/categories/:id/unlist
 const unlistCategory = async (req, re, next) => {
     try {
         const { id } = req.params;
@@ -125,11 +89,8 @@ const unlistCategory = async (req, re, next) => {
         return res.status(200).json({ success: true });
     } catch (error) {
         next(error);
-        // console.error(error);
-        // return res.status(500).json({ success: false });
     }
 };
-
 
 const getEditCategory = async (req,res,next)=>{
     try {
@@ -138,7 +99,6 @@ const getEditCategory = async (req,res,next)=>{
         res.render("editCategory",{category:category});
     } catch (error) {
         next(error);
-        // res.redirect("/pageerror")
     }
 }
 
@@ -164,14 +124,12 @@ const editCategory = async (req,res,next)=>{
             success: true,
             message: "Category updated successfully!"
         });
-            //res.redirect("/admin/category")
         }else {
             res.status(404).json({success:false,error:"Category not found"})
         }
 
     } catch (error) {
         next(error);
-        //res.status(500).json({success:false,error:"Internal server error"})
     }
 }
 

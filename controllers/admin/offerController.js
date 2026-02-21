@@ -1,27 +1,19 @@
 const Offer = require("../../models/offerSchema");
 const Product = require("../../models/productSchema");
 
-/* ===============================
-   LOAD ADD OFFER PAGE
-   (Opened from Product page)
-================================ */
 const loadAddOffer = async (req, res, next) => {
   try {
     const { productId } = req.query;
-
     if (!productId) {
       return res.redirect("/admin/products");
     }
-
     res.render("addOffer", { productId });
   } catch (error) {
     next(error);
   }
 };
 
-/* ===============================
-   ADD PRODUCT OFFER
-================================ */
+//ADD PRODUCT OFFER
 const addOffer = async (req, res, next) => {
   try {
     const { offerName, discount, expiryDate, description, productId } = req.body;
@@ -32,8 +24,7 @@ const addOffer = async (req, res, next) => {
         message: "Required fields are missing",
       });
     }
-
-    // 1️⃣ Create offer
+    // 1.Create offer
     const offer = await Offer.create({
       offerName,
       discount,
@@ -41,8 +32,7 @@ const addOffer = async (req, res, next) => {
       description,
       isActive: true,
     });
-
-    // 2️⃣ Attach offer to product
+    // 2.Attach offer to product
     await Product.findByIdAndUpdate(productId, {
       productOffer: offer._id,
     });
@@ -56,20 +46,14 @@ const addOffer = async (req, res, next) => {
   }
 };
 
-/* ===============================
-   LOAD EDIT OFFER PAGE
-================================ */
 const loadEditOffer = async (req, res, next) => {
   try {
     const offerId = req.params.id;
-
     const product = await Product.findOne({ productOffer: offerId });
     const offer = await Offer.findById(offerId);
-
     if (!offer || !product) {
       return res.redirect("/admin/products");
     }
-
     res.render("editOffer", {
       offer,
       productId: product._id,
@@ -79,9 +63,6 @@ const loadEditOffer = async (req, res, next) => {
   }
 };
 
-/* ===============================
-   UPDATE OFFER
-================================ */
 const updateOffer = async (req, res, next) => {
   try {
     const { offerId, offerName, discount, expiryDate, description } = req.body;
@@ -108,19 +89,14 @@ const updateOffer = async (req, res, next) => {
   }
 };
 
-/* ===============================
-   DELETE OFFER
-================================ */
 const deleteOffer = async (req, res, next) => {
   try {
     const offerId = req.params.id;
-
     // Remove offer
     const offer = await Offer.findByIdAndDelete(offerId);
     if (!offer) {
       return res.status(404).json({ success: false });
     }
-
     // Remove offer reference from products
     await Product.updateMany(
       { productOffer: offerId },

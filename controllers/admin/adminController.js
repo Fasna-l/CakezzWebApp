@@ -2,7 +2,6 @@ const User = require("../../models/userSchema")
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-
 const pageerror = async (req,res)=>{
     res.render("admin-error")
 }
@@ -21,21 +20,16 @@ const login = async (req,res,next)=>{
         if(admin){
             const passwordMatch = await bcrypt.compare(password,admin.password);
             if(passwordMatch){
-                // req.session.admin = true;
-                req.session.admin = admin._id; //Pending :admin session management
+                req.session.admin = admin._id;
                 return res.redirect("/admin")
             }else{
-                // return res.redirect("/login")
                 res.render("admin-login", { message: "Invalid email or password" });
             }
         }else{
-            // return res.redirect("/login")
             res.render("admin-login", { message: "Invalid email or password" });
         }
     } catch (error) {
         next(error);
-        // console.log("login error",error);
-        // return res.redirect("/pageerror")
     }
 }
 
@@ -45,19 +39,16 @@ const loadDashboard = async (req,res,next)=>{
             res.render("dashboard")
         } catch (error) {
             next(error);
-            // res.redirect("/pageerror")
         }
     }
 }
 
 const logout = async (req,res,next)=>{
     try {
-        req.session.admin = null;   // ❗ONLY CLEAR ADMIN
+        req.session.admin = null;   
         return res.redirect("/admin/login");
     } catch (error) {
         next(error);
-        // console.log("Logout error",error);
-        // res.redirect("/admin/pageerror");
     }
 }
 

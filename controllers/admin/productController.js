@@ -4,7 +4,7 @@ const sharp = require("sharp");
 const fs = require("fs");
 const path = require("path");
 
-/* ✅ Get Product Listing Page */
+/* Get Product Listing Page */
 const productinfo = async (req, res, next) => {
   try {
     let search = req.query.search || "";
@@ -33,8 +33,6 @@ const productinfo = async (req, res, next) => {
     });
   } catch (error) {
       next(error);
-    // console.error(error);
-    // res.redirect("/pageerror");
   }
 };
 
@@ -45,7 +43,6 @@ const getProductAddPage = async (req, res, next) => {
     res.render("addProducts", { cat: category });
   } catch (error) {
     next(error);
-    //res.redirect("/pageerror");
   }
 };
 
@@ -133,38 +130,26 @@ const addProduct = async (req, res, next) => {
 
   } catch (error) {
       next(error);
-    // console.log("Error in addProduct:", error);
-    // return res.status(500).json({ success: false, message: "Server Error" });
   }
 };
 
 const productBlocked = async (req,res,next)=>{
     try {
-        //let id = req.query.id;
         let id = req.params.id;
         await Product.updateOne({_id:id},{$set:{isBlocked:true}});
-        //res.redirect("/admin/products")
         return res.status(200).json({ success: true });
     } catch (error) {
         next(error);
-        // console.error(error);
-        // return res.status(500).json({ success: false });  
-      //res.redirect("/pageerror")
     }
 }  
 
 const productUnBlocked = async (req,res,next)=>{
     try {
-        //let id = req.query.id;
         const id = req.params.id;
         await Product.updateOne({_id:id},{$set:{isBlocked:false}});
         return res.status(200).json({ success: true });
-        //res.redirect("/admin/products")
     } catch (error) {
         next(error);
-        // console.error(error);
-        // return res.status(500).json({ success: false });
-      //res.redirect("/pageerror")
     }
 }
 
@@ -181,7 +166,6 @@ const getEditProduct = async (req,res, next)=>{
         })
     } catch (error) {
       next(error);  
-      //res.redirect("/pageerror")
     }
 }
 
@@ -196,21 +180,20 @@ const editProduct = async (req, res, next) => {
       return res.json({ success: false, message: "Product not found" });
     }
 
-    // ✅ Remove deleted images
+    // Remove deleted images
     if (removedImages) {
       JSON.parse(removedImages).forEach((imgPath) => {
         const fullPath = path.join(__dirname, "../../public", imgPath);
         if (fs.existsSync(fullPath)) {
           fs.unlinkSync(fullPath);
         }
-       //product.productImage = product.productImage.filter(img => img !== imgPath);
         const imageName = imgPath.split("/uploads/product/")[1]; // get only filename
         product.productImage = product.productImage.filter(img => img !== imageName);
 
     });
     }
 
-    // ✅ Add new uploaded or cropped images
+    // Add new uploaded or cropped images
     if (req.files && req.files.length > 0) {
       for (let file of req.files) {
         const filename = `${Date.now()}-${file.originalname}`;
@@ -220,13 +203,11 @@ const editProduct = async (req, res, next) => {
           .resize(800, 800, { fit: "cover" })
           .jpeg({ quality: 80 })
           .toFile(savePath);
-        
-        //product.productImage.push(`/uploads/product/${filename}`);
         product.productImage.push(filename);
       }
     }
 
-    // ✅ Update other fields
+    //  Update other fields
     product.productName = productName;
     product.description = description;
     product.category = category;
@@ -246,8 +227,6 @@ const editProduct = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.error(" Error in editProduct:", error);
-    // res.json({ success: false, message: "Server Error" });
   }
 };
 

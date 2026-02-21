@@ -7,7 +7,7 @@ const calculateBestOffer = async (product, basePrice) => {
 
   const now = new Date();
 
-  // 🔹 Product Offer
+  // Product Offer
   if (product.productOffer) {
     const offer = await Offer.findOne({
       _id: product.productOffer,
@@ -21,7 +21,7 @@ const calculateBestOffer = async (product, basePrice) => {
     }
   }
 
-  // 🔹 Category Offer
+  // Category Offer
   if (product.category?.categoryOffer) {
     const catOffer = await CategoryOffer.findOne({
       _id: product.category.categoryOffer,

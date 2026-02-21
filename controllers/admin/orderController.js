@@ -3,15 +3,13 @@ const Product = require("../../models/productSchema");
 const User = require("../../models/userSchema");
 const Wallet = require("../../models/walletSchema");
 
-/* ================================================================
-   1. LOAD ORDER LIST (Search + Filter + Pagination)
-================================================================ */
 const loadOrderList = async (req, res, next) => {
   try {
     let {
       page = 1,
       search = "",
       status = "",
+      date= ""
     } = req.query;
 
     page = parseInt(page) || 1;
@@ -33,6 +31,29 @@ const loadOrderList = async (req, res, next) => {
       query.orderStatus = status;
     }
 
+    // Date Filter
+    if (date) {
+      const now = new Date();
+      let startDate;
+
+      if (date === "today") {
+        startDate = new Date();
+        startDate.setHours(0, 0, 0, 0);
+        query.orderDate = { $gte: startDate };
+      }
+
+      if (date === "week") {
+        startDate = new Date();
+        startDate.setDate(now.getDate() - 7);
+        query.orderDate = { $gte: startDate };
+      }
+
+      if (date === "month") {
+        startDate = new Date();
+        startDate.setMonth(now.getMonth() - 1);
+        query.orderDate = { $gte: startDate };
+      }
+    }
     const totalOrders = await Order.countDocuments(query);
 
     const orders = await Order.find(query)
@@ -54,47 +75,23 @@ const loadOrderList = async (req, res, next) => {
       status: order.orderStatus,
     }));
 
-
-    // 🔥 Correct render path (NO admin/)
     res.render("adminOrderList", {
       orders: formattedOrders,
       search,
+      status,
+      date,
       currentPage: page,
-      totalPages,
+      totalPages
     });
 
   } catch (error) {
       next(error);
-    // console.log("admin loadOrderList error:", err);
-    // res.redirect("/admin/pageerror");
   }
 };
-
-
-/* ================================================================
-   2. LOAD ORDER DETAILS PAGE
-================================================================ */
-// const loadOrderDetails = async (req, res) => {
-//   try {
-//     const orderId = req.params.id;
-
-//     const order = await Order.findById(orderId).populate("userId").lean();
-
-//     if (!order) return res.redirect("/admin/orders");
-
-//     //  Correct render path (NO admin/)
-//     res.render("adminOrderDetails", { order });
-
-//   } catch (err) {
-//     console.log("loadOrderDetails error:", err);
-//     res.redirect("/admin/pageerror");
-//   }
-// };
 
 const loadOrderDetails = async (req, res, next) => {
   try {
     const orderId = req.params.id;
-
     const order = await Order.findById(orderId).populate("userId").lean();
 
     if (!order) {
@@ -105,7 +102,7 @@ const loadOrderDetails = async (req, res, next) => {
       });
     }
 
-    // Always send defaults to avoid undefined errors
+    // Always send defaults to avoid undefined errors( in toast message)
     res.render("adminOrderDetails", {
       order,
       toastMessage: "",
@@ -114,27 +111,16 @@ const loadOrderDetails = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.log("loadOrderDetails error:", error);
-
-    // res.render("adminOrderDetails", {
-    //   order: {},
-    //   toastMessage: "Something went wrong!",
-    //   toastType: "error"
-    // });
   }
 };
 
-
-/* ================================================================
-   3. UPDATE ORDER STATUS (admin)
-================================================================ */
 const updateOrderStatus = async (req, res, next) => {
   try {
     const orderId = req.params.id;
     const { status } = req.body;
 
     let order = await Order.findById(orderId).populate("userId").lean();
-    // 🔒 BLOCK admin updates for unpaid Razorpay orders
+    // BLOCK admin updates for unpaid Razorpay orders
     if (
       order.paymentMethod === "RAZORPAY" &&
       order.paymentStatus !== "Paid"
@@ -155,7 +141,6 @@ const updateOrderStatus = async (req, res, next) => {
     }
 
     const oldStatus = order.orderStatus;
-
     const STATUS_FLOW = [
       "Pending",
       "Processing",
@@ -167,7 +152,7 @@ const updateOrderStatus = async (req, res, next) => {
     const oldIndex = STATUS_FLOW.indexOf(oldStatus);
     const newIndex = STATUS_FLOW.indexOf(status);
 
-    // ❌ Rule: If any item is returned or return rejected → block all updates
+    // Rule: If any item is returned or return rejected → block all updates
     if (order.items.some(i => i.status === "Returned" || i.returnStatus === "Rejected")) {
         return res.render("adminOrderDetails", {
             order,
@@ -176,8 +161,7 @@ const updateOrderStatus = async (req, res, next) => {
         });
     }
 
-
-    // ❌ Rule 1: Block backward movement (except Cancelled)
+    // Rule 1: Block backward movement (except Cancelled)
     if (newIndex < oldIndex && status !== "Cancelled") {
       return res.render("adminOrderDetails", {
         order,
@@ -186,7 +170,7 @@ const updateOrderStatus = async (req, res, next) => {
       });
     }
 
-    // ❌ Rule 2: After Delivered → no changes allowed
+    // Rule 2: After Delivered → no changes allowed
     if (oldStatus === "Delivered" && status !== "Delivered") {
       return res.render("adminOrderDetails", {
         order,
@@ -195,7 +179,7 @@ const updateOrderStatus = async (req, res, next) => {
       });
     }
 
-    // ❌ Rule 3: After Cancelled → no changes allowed
+    // Rule 3: After Cancelled → no changes allowed
     if (oldStatus === "Cancelled" && status !== "Cancelled") {
       return res.render("adminOrderDetails", {
         order,
@@ -209,6 +193,11 @@ const updateOrderStatus = async (req, res, next) => {
 
     // Apply status
     orderToUpdate.orderStatus = status;
+
+    // when the status set as delivered => set delivery date (because return item is only possible upto 2 hr from the  time of delivered item)
+    if(status === "Delivered"){
+      orderToUpdate.deliveryDate = new Date()
+    }
 
     orderToUpdate.items.forEach(item => {
       if (item.status !== "Returned" && item.status !== "Cancelled") {
@@ -235,28 +224,13 @@ const updateOrderStatus = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.error("updateOrderStatus error:", error);
-    
-    // return res.render("adminOrderDetails", {
-    //   toastMessage: "An error occurred while updating status.",
-    //   toastType: "error",
-    //   order: {}
-    // });
-    
   }
 };
 
-
-
-/* ================================================================
-   4. CANCEL ORDER (Admin Side)
-================================================================ */
 const cancelOrder = async (req, res, next) => {
   try {
     const orderId = req.params.id;
-
     const order = await Order.findById(orderId);
-
     if (!order) return res.redirect("/admin/orders");
 
     // Return stock
@@ -284,8 +258,6 @@ const cancelOrder = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.log("admin cancelOrder error:", err);
-    // res.redirect("/admin/pageerror");
   }
 };
 
@@ -293,7 +265,6 @@ const cancelOrder = async (req, res, next) => {
 const approveReturnItem = async (req, res, next) => {
   try {
     const { orderId, itemId } = req.params;
-
     const order = await Order.findById(orderId);
     if (!order) return res.redirect("/admin/orders");
 
@@ -356,8 +327,6 @@ const approveReturnItem = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.error("approveReturnItem error:", err);
-    // return res.redirect("/pageNotFound");
   }
 };
 
@@ -391,20 +360,16 @@ const rejectReturnItem = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.error("rejectReturnItem error:", err);
-    // return res.redirect("/pageNotFound");
   }
 };
 
 const loadReturnRequests = async (req, res, next) => {
   try {
     let page = parseInt(req.query.page) || 1;
-    const ORDERS_PER_PAGE = 2; // Show 2 orders per page
+    const ORDERS_PER_PAGE = 1; 
     const search = req.query.search ? req.query.search.trim() : "";
-
     const searchRegex = search ? new RegExp(search, "i") : null;
-
-    // 1️⃣ Fetch all return request items
+    // 1. Fetch all return request items
     const requests = await Order.aggregate([
       {
         $addFields: {
@@ -462,7 +427,7 @@ const loadReturnRequests = async (req, res, next) => {
       { $sort: { orderDate: -1 } }
     ]);
 
-    // 2️⃣ Group items by orderId in Node.js
+    // 2.Group items by orderId in Node.js
     let grouped = {};
 
     requests.forEach(r => {
@@ -481,14 +446,14 @@ const loadReturnRequests = async (req, res, next) => {
       };
     });
 
-    // 3️⃣ Apply pagination (AFTER grouping)
+    // 3. Apply pagination (AFTER grouping)
     const totalOrders = groupedOrders.length;
     const totalPages = Math.ceil(totalOrders / ORDERS_PER_PAGE);
 
     const start = (page - 1) * ORDERS_PER_PAGE;
     const paginatedOrders = groupedOrders.slice(start, start + ORDERS_PER_PAGE);
 
-    // 4️⃣ Render
+    // 4. Render
     res.render("returnRequests", {
       groupedOrders: paginatedOrders,
       currentPage: page,
@@ -498,15 +463,12 @@ const loadReturnRequests = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.error("loadReturnRequests error:", err);
-    // res.redirect("/admin/pageerror");
   }
 };
 
 const rejectWholeReturn = async (req, res, next) => {
   try {
     const orderId = req.params.id;
-
     const order = await Order.findById(orderId);
     if (!order) return res.redirect("/admin/orders");
 
@@ -532,15 +494,12 @@ const rejectWholeReturn = async (req, res, next) => {
     res.redirect(`/admin/order-details/${orderId}`);
   } catch (error) {
     next(error);
-    // console.error("rejectWholeReturn error:", error);
-    // res.redirect("/admin/pageerror");
   }
 };
 
 const approveWholeReturn = async (req, res ,next) => {
   try {
     const orderId = req.params.id;
-
     const order = await Order.findById(orderId);
     if (!order) return res.redirect("/admin/orders");
 
@@ -574,7 +533,6 @@ const approveWholeReturn = async (req, res ,next) => {
         }
       }
     }
-
     order.orderStatus = "Returned";
 
     // WALLET REFUND (ONCE FOR FULL ORDER)
@@ -606,14 +564,10 @@ const approveWholeReturn = async (req, res ,next) => {
 
   } catch (error) {
     next(error);
-    // console.error("approveWholeReturn error:", error);
-    // res.redirect("/admin/pageerror");
   }
 };
 
-/* ================================================================
-   HELPER: RECALCULATE ORDER TOTALS (ADMIN SIDE)
-================================================================ */
+// HELPER: RECALCULATE ORDER TOTALS (ADMIN SIDE)
 function recalculateOrderTotals(order) {
 
   const validItems = order.items.filter(item => {

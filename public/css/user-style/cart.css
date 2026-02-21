@@ -1,7 +1,3 @@
-/* ================================
-   CART PAGE — MODERN UI
-================================ */
-
 .cart-container {
   max-width: 1200px;
   margin: 40px auto;
@@ -23,9 +19,6 @@
   gap: 25px;
 }
 
-/* ================================
-   LEFT SIDE — CART ITEMS
-================================ */
 .cart-items {
   flex: 3;
 }
@@ -78,9 +71,6 @@
   margin-top: 6px;
 }
 
-/* ================================
-   QUANTITY BUTTONS
-================================ */
 .item-qty {
   display: flex;
   align-items: center;
@@ -130,9 +120,6 @@
   background: #e23a59;
 }
 
-/* ================================
-   RIGHT SIDE — ORDER SUMMARY
-================================ */
 .cart-summary {
   flex: 1;
   padding: 22px;

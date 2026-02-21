@@ -2,29 +2,25 @@ const path = require("path");
 const fs = require("fs");
 const sharp = require("sharp");
 const User = require("../../models/userSchema");
-const Otp = require("../../models/otpSchema");  // import OTP Model
+const Otp = require("../../models/otpSchema"); 
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const env = require("dotenv").config();
 const { generateOtp } = require("../../helpers/otpHelper");
 const { sendVerificationEmail } = require("../../helpers/emailHelper");
 const { securePassword } = require("../../helpers/passwordHelper");
-//const session = require("express-session"); already using express-session in app.js so no need to import here  
 
 //Load Account page(Profile Page)
 const loadAccountPage = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const user = await User.findById(userId).lean();
-
     // Fetch addresses or orders later
     res.render("account", {
       user
     });
   } catch (error) {
     next(error);
-    // console.error("Account Page Error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
 
@@ -37,12 +33,10 @@ const loadEditProfile = async (req, res, next) => {
     res.render("edit-profile", { user });
   } catch (error) {
     next(error);
-    // console.error("Error loading edit profile page:", error);
-    // res.redirect("/pageNotFound");
   }
 };
 
-// ✅ Update Profile - POST
+// Update Profile - POST
 const updateProfile = async (req, res, next) => {
   try {
     const userId = req.session.user;
@@ -94,7 +88,7 @@ const updateProfile = async (req, res, next) => {
       console.warn(" No image file received from frontend.");
     }
 
-    // ✉️ Handle email change (OTP later)
+    // Handle email change (OTP later)
     if(!user.isGoogleUser){
       if (email !== user.email) {
         req.session.tempProfileData = {
@@ -118,13 +112,10 @@ const updateProfile = async (req, res, next) => {
     res.redirect("/account");
   } catch (error) {
     next(error);
-    // console.error("Profile update error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
   
 // ================= EMAIL CHANGE FLOW =================
-
 // Load Email Change Page
 const loadEmailChangePage = async (req, res, next) => {
   try {
@@ -136,8 +127,6 @@ const loadEmailChangePage = async (req, res, next) => {
     res.render("email-change", {user, message: "" });
   } catch (error) {
     next(error);
-    // console.error("Load Email Change Error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
 
@@ -153,7 +142,6 @@ const sendEmailChangeOtp = async (req, res, next) => {
     }
 
     if (!user) return res.render("email-change", { user:null, message: "User not found" });
-
     if (user.email !== oldEmail) {
       return res.render("email-change", { user, message: "Old email does not match your current email" });
     }
@@ -174,12 +162,9 @@ const sendEmailChangeOtp = async (req, res, next) => {
 
     req.session.newEmail = newEmail;
     console.log("Email Change OTP:", otp);
-
     res.render("emailChange-otp",{user});
   } catch (error) {
     next(error);
-    // console.error("Send Email Change OTP Error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
 
@@ -204,8 +189,6 @@ const verifyEmailChangeOtp = async (req, res, next) => {
     return res.json({ success: true, message: "Email updated successfully!" });
   } catch (error) {
     next(error);
-    // console.error("Verify Email Change OTP Error:", error);
-    // res.json({ success: false, message: "Server error" });
   }
 };
 
@@ -226,8 +209,6 @@ const resendEmailChangeOtp = async (req, res, next) => {
     res.json({ success: true, message: "OTP resent successfully" });
   } catch (error) {
     next(error);
-    // console.error("Resend Email Change OTP Error:", error);
-    // res.json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -236,7 +217,6 @@ const getForgotPassPage = async (req,res,next)=>{
         res.render("forgot-password")
     } catch (error) {
       next(error);
-        //res.redirect("/pageNotFound")
     }
 }
 
@@ -248,9 +228,6 @@ const forgotEmailValid = async (req,res,next)=>{
             const otp = generateOtp();
             const emailSent = await sendVerificationEmail(email,otp,"Your OTP for Password Reset");
             if(emailSent){
-                // req.session.userOtp = otp;
-                // req.session.email = email;
-                
                 // OTP in Database
                 await Otp.deleteOne({email});
                 await Otp.create({email,otp});
@@ -269,8 +246,6 @@ const forgotEmailValid = async (req,res,next)=>{
         }
     } catch (error) {
       next(error);
-        // console.error("Forgot Password error:", error);
-        // res.redirect("/pageNotFound");
     }
 }
 
@@ -300,18 +275,14 @@ const verifyForgotPassOtp = async (req, res,next) => {
 
   } catch (error) {
     next(error);
-    // console.error("Verify Forgot OTP Error:", error);
-    // res.status(500).json({ success: false, message: "Server Error" });
   }
 };
-
 
 const getResetPassPage = async (req,res,next)=>{
     try {
         res.render("reset-password");
     } catch (error) {
       next(error);
-        //res.redirect("/pageNotFound")
     }
 }
 
@@ -324,8 +295,6 @@ const resendOtp = async (req,res,next)=>{
             return res.status(400).json({success: false,message: "Session expired. Please go back and enter your email again."});
         }
         const otp = generateOtp();
-        // req.session.userOtp = otp;
-
         // OTP in DB
         await Otp.deleteOne({email});
         await Otp.create({email,otp})
@@ -338,8 +307,6 @@ const resendOtp = async (req,res,next)=>{
         }
     } catch (error) {
       next(error);
-        // console.error("Error in Resend otp",error);
-        // res.status(500).json({success:false,message:"Internal Server Error"});
     }
 }
 
@@ -359,36 +326,24 @@ const postNewPassword = async (req,res,next)=>{
         } 
     } catch (error) {
       next(error);
-        // console.error("Reset Password Error:", error);
-        // res.redirect("/pageNotFound")
     }
 }
 
-
-
 //change Password
-// GET change password page
 const getChangePasswordPage = async (req, res,next) => {
   try {
     const userId = req.session.user; // currently an ID
     const user = await User.findById(userId);
-    // ❌ Block Google users completely
+    //  Block Google users completely
     if (!user || user.isGoogleUser) {
       return res.redirect("/account");
     }
-    // if (user.isGoogleUser) {
-    //   return res.redirect("/account");
-    // }
-
     res.render("password",{user});
   } catch (error) {
     next(error);
-    // console.error("Change Password Page Error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
 
-// POST change password logic
 const postChangePassword = async (req, res, next) => {
   try { 
     const { oldpassword, newpassword, Confirmpassword } = req.body;
@@ -403,9 +358,7 @@ const postChangePassword = async (req, res, next) => {
     if (user.isGoogleUser) {
       return res.redirect("/account");
     }
-
     const isMatch = await bcrypt.compare(oldpassword, user.password);
-
     if (!isMatch) {
       return res.render("password", {
         user,
@@ -430,12 +383,8 @@ const postChangePassword = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
-    // console.error("Change Password Error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
-
-
 
 module.exports ={
   loadAccountPage,

@@ -24,7 +24,7 @@
   <div class="orders-main-content">
     <div class="cancel-card">
 
-      <!-- ⭐ Dynamic Title -->
+      <!--  Dynamic Title -->
       <h2>
         <%= itemId ? "Cancel Item" : "Cancel Order" %>
       </h2>
@@ -32,13 +32,13 @@
         <%= itemId ? "Please tell us why you want to cancel this item." : "Please tell us why you want to cancel your order (optional)." %>
       </p>
 
-      <!-- ⭐ IMPORTANT: Dynamic form action -->
+      <!--  IMPORTANT: Dynamic form action -->
       <form 
         action="/order/cancel/<%= order._id %><%= itemId ? ('?itemId=' + itemId) : '' %>" 
         method="POST" 
         class="cancel-form">
 
-        <!-- ⭐ Hidden input for itemId -->
+        <!--  Hidden input for itemId -->
         <% if (itemId) { %>
           <input type="hidden" name="itemId" value="<%= itemId %>">
         <% } %>

@@ -15,22 +15,17 @@ const loadShoppage = async (req, res, next) => {
     const cart = user ? await Cart.findOne({ user }).lean() : null;
     const cartCount = cart ? cart.items.length : 0;
 
-
-    // ✅ Pagination
     let page = parseInt(req.query.page) || 1;
     let limit = 8;
     let skip = (page - 1) * limit;
 
-    // ✅ Filters
     let search = req.query.search || "";
     let categoryFilter = req.query.category || "";
     let sort = req.query.sort || "";
     let priceRange = req.query.priceRange || ""; 
-    // let minPrice = parseInt(req.query.minPrice) || 0;
-    // let maxPrice = parseInt(req.query.maxPrice) || 100000;
     let minPrice = 0, maxPrice = 100000;
 
-    // ✅ Basic Filter
+    // Basic Filter
     let filter = {
       isBlocked: false,
       productName: { $regex: search, $options: "i" },
@@ -46,10 +41,10 @@ const loadShoppage = async (req, res, next) => {
         maxPrice = max;
     }
 
-    // ✅ Total product count BEFORE pagination
+    //  Total product count BEFORE pagination
     const totalProducts = await Product.countDocuments(filter);
 
-    // ✅ Aggregation Pipeline
+    // Aggregation Pipeline
     const pipeline = [
       { $match: filter },
 
@@ -62,21 +57,21 @@ const loadShoppage = async (req, res, next) => {
         }
       },
 
-      // ✅ Filter products by chosen price range
+      // Filter products by chosen price range
       { $match: { minPrice: { $gte: minPrice, $lte: maxPrice } } }
     ];
 
-    // ✅ Sorting Logic
+    //  Sorting Logic
     if (sort === "priceAsc") pipeline.push({ $sort: { minPrice: 1 } });
     else if (sort === "priceDesc") pipeline.push({ $sort: { minPrice: -1 } });
     else if (sort === "az") pipeline.push({ $sort: { productName: 1 } });
     else if (sort === "za") pipeline.push({ $sort: { productName: -1 } });
     else pipeline.push({ $sort: { createdAt: -1 } });
 
-    // ✅ Pagination
+    //  Pagination
     pipeline.push({ $skip: skip }, { $limit: limit });
 
-    // ✅ Lookup Category
+    //  Lookup Category
     pipeline.push({
       $lookup: {
         from: "categories",
@@ -92,27 +87,24 @@ const loadShoppage = async (req, res, next) => {
 
     const products = await Product.aggregate(pipeline);
     
-    // ✅ APPLY BEST OFFER (Product vs Category)
+    //  APPLY BEST OFFER (Product vs Category)
 for (let product of products) {
   const basePrice = product.minPrice;
   const offer = await calculateBestOffer(product, basePrice);
 
   product.offerPercentage = offer.discountPercentage;
   product.appliedOfferType = offer.appliedOfferType;
-  //product.finalPrice = offer.finalPrice;
 }
 
     const totalPages = Math.ceil(totalProducts / limit);
 
     let wishlistProductIds = [];
-
     if (req.session.user) {
       const wishlist = await Wishlist.findOne({ user: req.session.user }).lean();
       wishlistProductIds = wishlist
         ? wishlist.items.map(i => i.product.toString())
         : [];
     }
-    // ✅ Render
     return res.render("shop", {
       user: user ? await User.findById(user) : null,
       products,
@@ -132,8 +124,6 @@ for (let product of products) {
 
   } catch (error) {
     next(error);
-    // console.log("Shopping page error:", error);
-    // res.status(500).send("Server Error");
   }
 };
 
@@ -153,42 +143,32 @@ const loadProductDetails = async (req, res, next) => {
       return res.redirect("/shop");
     }
 
-          // ✅ APPLY BEST OFFER
-const basePrice = product.variants[0].price;
-const offer = await calculateBestOffer(product, basePrice);
+          //  APPLY BEST OFFER
+    const basePrice = product.variants[0].price;
+    const offer = await calculateBestOffer(product, basePrice);
 
-product.offerPercentage = offer.discountPercentage;
-product.appliedOfferType = offer.appliedOfferType;
-//product.finalPrice = offer.finalPrice;
-
-
-    // const relatedProducts = await Product.find({
-    //   category: product.category._id,
-    //   _id: { $ne: productId },
-    //   isBlocked: false
-    // }).limit(4).lean();
+    product.offerPercentage = offer.discountPercentage;
+    product.appliedOfferType = offer.appliedOfferType;
 
     const relatedProducts = await Product.find({
-  category: product.category._id,
-  _id: { $ne: productId },
-  isBlocked: false
-})
-.populate("category")
-.limit(4)
-.lean();
+      category: product.category._id,
+      _id: { $ne: productId },
+      isBlocked: false
+    })
+    .populate("category")
+    .limit(4)
+    .lean();
 
 
     for (let p of relatedProducts) {
-  const basePrice = p.variants[0]?.price || 0;
-  const offer = await calculateBestOffer(p, basePrice);
+      const basePrice = p.variants[0]?.price || 0;
+      const offer = await calculateBestOffer(p, basePrice);
 
-  p.offerPercentage = offer.discountPercentage;
-  p.appliedOfferType = offer.appliedOfferType
-  //p.finalPrice = offer.finalPrice;
-}
+      p.offerPercentage = offer.discountPercentage;
+      p.appliedOfferType = offer.appliedOfferType
+    }
 
-
-    const user = userId ? await User.findById(userId).lean() : null; // ✅ added
+    const user = userId ? await User.findById(userId).lean() : null; 
 
     let wishlistProductIds = [];
 
@@ -202,14 +182,12 @@ product.appliedOfferType = offer.appliedOfferType;
       product,
       relatedProducts,
       user,
-      cartCount,       // ✅ Now available in EJS for header
+      cartCount,       
       wishlistProductIds
     });
 
   } catch (error) {
     next(error);
-    // console.log("Product details error:", err);
-    // res.redirect("/shop");
   }
 };
 
@@ -222,16 +200,11 @@ const loadReviewPage = async (req, res, next) => {
 
     if (!product) return res.status(404).send("Product Not Found");
 
-    res.render("reviewPage", { product, user }); // ✅ correct folder path
-
+    res.render("reviewPage", { product, user }); 
   } catch (error) {
     next(error);
-    // console.log(error);
-    // res.redirect("/pageNotFound");
   }
 };
-
-
 
 // Submit Review
 const submitReview = async (req, res, next) => {
@@ -239,14 +212,14 @@ const submitReview = async (req, res, next) => {
     const { rating, review } = req.body;
     const productId = req.params.id;
 
-    // ✅ Get logged-in user details
+    //  Get logged-in user details
     const userData = await User.findById(req.session.user);
 
     await Product.findByIdAndUpdate(productId, {
       $push: {
         reviews: {
           user: userData._id,         // Save user ID
-          name: userData.name,        // ✅ Save user name
+          name: userData.name,        // Save user name
           rating,
           review,
           date: new Date()
@@ -257,8 +230,6 @@ const submitReview = async (req, res, next) => {
     res.redirect("/product/" + productId);
   } catch (error) {
     next(error);
-    // console.log(err);
-    // res.redirect("/pageNotFound");
   }
 };
 

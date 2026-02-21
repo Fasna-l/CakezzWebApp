@@ -25,7 +25,6 @@
       <h2>Edit Profile</h2>
     </div>
 
-    <!-- ✅ FORM STARTS HERE -->
     <form id="editProfileForm" action="/edit-profile" method="POST" enctype="multipart/form-data" novalidate>
       
       <!-- Profile Picture Section -->
@@ -73,10 +72,7 @@
           <%= user.isGoogleUser ? "readonly" : "" %>
           required
         />
-        <!-- <small>
-          Want to change your email? 
-          <a href="/change-email" class="link-pink">Click here to verify a new email address.</a>
-        </small> -->
+
         <% if (!user.isGoogleUser) { %>
           <small>
             Want to change your email? 
@@ -93,7 +89,6 @@
   </div>
 </div>
 
-<!-- ✅ SCRIPT SECTION -->
 <script>
   const form = document.getElementById("editProfileForm");
   const nameid = document.getElementById("name");

@@ -10,9 +10,6 @@ function findVariant(product, size) {
   return product.variants.find(v => v.size === size);
 }
 
-/* --------------------------------------------------------
-   ADD TO CART 
--------------------------------------------------------- */
 const addToCart = async (req, res, next) => {
   try {   
 
@@ -31,33 +28,26 @@ const addToCart = async (req, res, next) => {
     }
 
     const qty = Number(quantity) || 1;
-
     const product = await Product.findById(productId).populate("category");
-
     if (!product) {
       return res.json({ success: false, message: "Product not found" });
     }
-
     if (product.isBlocked || product.category?.isListed === false) {
       return res.json({ success: false, message: "Product unavailable" });
     }
-
     const variant = findVariant(product, size);
     if (!variant) {
       return res.json({ success: false, message: "Invalid size" });
     }
-
     if (variant.stock <= 0) {
       return res.json({ success: false, message: "Out of stock" });
     }
 
     // Fetch user cart
     let cart = await Cart.findOne({ user: userId });
-
     if (!cart) {
       cart = new Cart({ user: userId, items: [] });
     }
-
     // Check if item already exists
     const existing = cart.items.find(
       (i) => i.product.toString() === productId && i.size === size
@@ -100,20 +90,13 @@ const addToCart = async (req, res, next) => {
     return res.json({ success: true, message: "Added to cart" });
   } catch (error) {
     next(error);
-    // console.error("addToCart error:", error);
-    // return res.json({ success: false, message: "Server error" });
   }
 };
 
-/* --------------------------------------------------------
-   UPDATE QUANTITY
--------------------------------------------------------- */
 const updateQuantity = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const { productId, size, quantity } = req.body;
-
-    //let cart = await Cart.findOne({ user: userId }).populate("items.product");
     let cart = await Cart.findOne({ user: userId })
       .populate({
         path: "items.product",
@@ -146,51 +129,46 @@ const updateQuantity = async (req, res, next) => {
     item.quantity = quantity;
     await cart.save();
 
-    // STEP 6: AUTO REMOVE COUPON IF CART CHANGES
-if (req.session.appliedCoupon) {
-  delete req.session.appliedCoupon;
+    //AUTO REMOVE COUPON IF CART CHANGES
+    if (req.session.appliedCoupon) {
+      delete req.session.appliedCoupon;
 
-  if (req.session.checkoutTotals) {
-    delete req.session.checkoutTotals.discount;
-    req.session.checkoutTotals.grandTotal =
-      req.session.checkoutTotals.subTotal +
-      req.session.checkoutTotals.shipping +
-      req.session.checkoutTotals.tax;
-  }
-}
+      if (req.session.checkoutTotals) {
+        delete req.session.checkoutTotals.discount;
+        req.session.checkoutTotals.grandTotal =
+          req.session.checkoutTotals.subTotal +
+          req.session.checkoutTotals.shipping +
+          req.session.checkoutTotals.tax;
+      }
+    }
 
     const cartItems = await Promise.all(
-  cart.items.map(async (item) => {
-    const variant = item.product.variants.find(v => v.size === item.size);
-    const offer = await calculateBestOffer(item.product, variant.price);
+      cart.items.map(async (item) => {
+        const variant = item.product.variants.find(v => v.size === item.size);
+        const offer = await calculateBestOffer(item.product, variant.price);
 
-    return {
-      productId: item.product._id.toString(),
-      size: item.size,
-      price: offer.finalPrice,
-      quantity: item.quantity,
-      subtotal: offer.finalPrice * item.quantity
-    };
-  })
-);
+        return {
+          productId: item.product._id.toString(),
+          size: item.size,
+          price: offer.finalPrice,
+          quantity: item.quantity,
+          subtotal: offer.finalPrice * item.quantity
+        };
+      })
+    );
 
-const subtotal = cartItems.reduce((a, b) => a + b.subtotal, 0);
-const tax = Math.round(subtotal * 0.05);
-const shipping = 50;
-const total = subtotal + tax + shipping;
+    const subtotal = cartItems.reduce((a, b) => a + b.subtotal, 0);
+    const tax = Math.round(subtotal * 0.05);
+    const shipping = 50;
+    const total = subtotal + tax + shipping;
 
-res.json({
-  success: true,
-  cartItems,
-  summary: { subtotal, tax, shipping, total }
-});
-
-
-    // res.json({ success: true, cart });
+    res.json({
+      success: true,
+      cartItems,
+      summary: { subtotal, tax, shipping, total }
+    });
   } catch (error) {
     next(error);
-    // console.error("updateQuantity error:", error);
-    // res.json({ success: false, message: "Server error" });
   }
 };
 
@@ -208,20 +186,19 @@ const removeCartItem = async (req, res, next) => {
       return res.json({ success: false, message: "Item not found" });
     }
 
-    // STEP 6: AUTO REMOVE COUPON IF CART CHANGES
-if (req.session.appliedCoupon) {
-  delete req.session.appliedCoupon;
+    //AUTO REMOVE COUPON IF CART CHANGES
+    if (req.session.appliedCoupon) {
+      delete req.session.appliedCoupon;
 
-  if (req.session.checkoutTotals) {
-    delete req.session.checkoutTotals.discount;
-    req.session.checkoutTotals.grandTotal =
-      req.session.checkoutTotals.subTotal +
-      req.session.checkoutTotals.shipping +
-      req.session.checkoutTotals.tax;
-  }
-}
+      if (req.session.checkoutTotals) {
+        delete req.session.checkoutTotals.discount;
+        req.session.checkoutTotals.grandTotal =
+          req.session.checkoutTotals.subTotal +
+          req.session.checkoutTotals.shipping +
+          req.session.checkoutTotals.tax;
+      }
+    }
 
-// const cart = await Cart.findOne({ user: userId }).populate("items.product");
 const cart = await Cart.findOne({ user: userId })
   .populate({
     path: "items.product",
@@ -255,23 +232,14 @@ return res.json({
   summary: { subtotal, tax, shipping, total }
 });
 
-
-    // return res.json({ success: true, message: "Item removed" });
   } catch (error) {
     next(error);
-    // console.error("removeCartItem error:", error);
-    // return res.json({ success: false, message: "Server error" });
   }
 };
 
-/* --------------------------------------------------------
-   PROCEED TO CHECKOUT
--------------------------------------------------------- */
 const proceedToCheckout = async (req, res, next) => {
   try {
     const userId = req.session.user;
-
-    //const cart = await Cart.findOne({ user: userId }).populate("items.product");
     const cart = await Cart.findOne({ user: userId })
       .populate({
         path: "items.product",
@@ -306,26 +274,23 @@ const proceedToCheckout = async (req, res, next) => {
 
     const checkoutItems = [];
 
-for (let item of cart.items) {
-  const product = item.product;
-  const variant = product.variants.find(v => v.size === item.size);
+    for (let item of cart.items) {
+      const product = item.product;
+      const variant = product.variants.find(v => v.size === item.size);
 
-  const offer = await calculateBestOffer(product, variant.price);
+      const offer = await calculateBestOffer(product, variant.price);
 
-  checkoutItems.push({
-    productId: product._id,
-    product: {
-      name: product.productName,
-      image: product.productImage[0]
-    },
-    size: item.size,
-    quantity: item.quantity,
-    price: offer.finalPrice
-  });
-}
-
-    
-
+      checkoutItems.push({
+        productId: product._id,
+        product: {
+          name: product.productName,
+          image: product.productImage[0]
+        },
+        size: item.size,
+        quantity: item.quantity,
+        price: offer.finalPrice
+      });
+    }
     // Calculate totals
     let subTotal = 0;
     checkoutItems.forEach((ci) => {
@@ -350,18 +315,13 @@ for (let item of cart.items) {
 
   } catch (error) {
     next(error);
-    // console.error("proceedToCheckout error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
-
 
 const getCartPage = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const user = userId ? await User.findById(userId).lean() : null;
-
-    //const cart = await Cart.findOne({ user: userId }).populate("items.product");
     const cart = await Cart.findOne({ user: userId })
       .populate({
         path: "items.product",
@@ -387,9 +347,7 @@ const getCartPage = async (req, res, next) => {
           (item.product.category?.isListed === false);
 
         const variant = item.product.variants.find(v => v.size === item.size);
-        //const isOutOfStock = variant?.stock <= 0;
         const stockAvailable = variant?.stock ?? 0;
-
         const isOutOfStock =stockAvailable <= 0;
         const isInsufficientStock = stockAvailable > 0 && stockAvailable < item.quantity;
 
@@ -434,8 +392,6 @@ const getCartPage = async (req, res, next) => {
     req.session.checkoutError = null;
   } catch (error) {
     next(error);
-    // console.error("getCartPage error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
 

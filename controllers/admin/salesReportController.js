@@ -2,9 +2,7 @@ const Order = require("../../models/orderSchema");
 const PDFDocument = require("pdfkit");
 const ExcelJS = require("exceljs");
 
-/* ===============================
-   DATE RANGE HELPER
-================================ */
+//DATE RANGE HELPER
 const getDateRange = (range, startDate, endDate) => {
   const now = new Date();
   let from, to;
@@ -21,9 +19,6 @@ const getDateRange = (range, startDate, endDate) => {
   return { from, to };
 };
 
-/* ===============================
-   LOAD PAGE
-================================ */
 const getSalesReport = async (req, res) => {
   try {
     const { page = 1, search, range, startDate, endDate, status } = req.query;
@@ -36,14 +31,8 @@ const getSalesReport = async (req, res) => {
         {paymentMethod:{$ne:"COD"}, paymentStatus:"Paid"}
       ]
     };
-
-    //filter.totalAmount ={$gte:1000}
     if (status) filter.orderStatus = status;
     if (search) filter.orderId = { $regex: search, $options: "i" };
-    // if (range || (startDate && endDate)) {
-    //   const { from, to } = getDateRange(range, startDate, endDate);
-    //   filter.orderDate = { $gte: from, $lte: to };
-    // }
     if (startDate && endDate) {
       const from = new Date(startDate);
       from.setHours(0,0,0,0);
@@ -77,9 +66,6 @@ const getSalesReport = async (req, res) => {
   }
 };
 
-/* ===============================
-   EXPORT EXCEL
-================================ */
 const exportSalesReportExcel = async (req, res) => {
   const { search, range, startDate, endDate, status } = req.query;
   let filter = {
@@ -91,10 +77,6 @@ const exportSalesReportExcel = async (req, res) => {
 
   if (status) filter.orderStatus = status;
   if (search) filter.orderId = { $regex: search, $options: "i" };
-  // if (range || (startDate && endDate)) {
-  //   const { from, to } = getDateRange(range, startDate, endDate);
-  //   filter.orderDate = { $gte: from, $lte: to };
-  // }
   if (startDate && endDate) {
     const from = new Date(startDate);
     from.setHours(0,0,0,0);
@@ -105,7 +87,6 @@ const exportSalesReportExcel = async (req, res) => {
     const { from, to } = getDateRange(range);
     filter.orderDate = { $gte: from, $lte: to };
   }
-
 
   const orders = await Order.find(filter).sort({ orderDate: -1 }).lean();
   const workbook = new ExcelJS.Workbook();
@@ -132,9 +113,6 @@ const exportSalesReportExcel = async (req, res) => {
   res.end();
 };
 
-/* ===============================
-   EXPORT PDF
-================================ */
 const exportSalesReportPDF = async (req, res) => {
   const { search, range, startDate, endDate, status } = req.query;
   let filter = {
@@ -146,10 +124,6 @@ const exportSalesReportPDF = async (req, res) => {
 
   if (status) filter.orderStatus = status;
   if (search) filter.orderId = { $regex: search, $options: "i" };
-  // if (range || (startDate && endDate)) {
-  //   const { from, to } = getDateRange(range, startDate, endDate);
-  //   filter.orderDate = { $gte: from, $lte: to };
-  // }
   if (startDate && endDate) {
     const from = new Date(startDate);
     from.setHours(0,0,0,0);
@@ -168,10 +142,7 @@ const exportSalesReportPDF = async (req, res) => {
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", "attachment; filename=sales-report.pdf");
   doc.pipe(res);
-
-  // ===============================
   //  Title Section
-  // ===============================
   doc.fontSize(18).font("Helvetica-Bold").text("Sales Report", { align: "center" });
   doc.moveDown(0.5);
 
@@ -180,10 +151,7 @@ const exportSalesReportPDF = async (req, res) => {
   doc.fontSize(10).font("Helvetica")
     .text(`Period: ${periodFrom} - ${periodTo}`, { align: "center" });
   doc.moveDown(1);
-
-  // ===============================
   //  Summary Calculations
-  // ===============================
   const totalOrders = orders.length;
 
   let grossSales = 0;
@@ -209,10 +177,7 @@ const exportSalesReportPDF = async (req, res) => {
   });
 
   const avgOrderValue = totalOrders ? netRevenue / totalOrders : 0;
-
-  // ===============================
   //  Summary Section Output
-  // ===============================
   doc.font("Helvetica-Bold").fontSize(12).text("Summary");
   doc.moveDown(0.5);
 
@@ -230,10 +195,7 @@ const exportSalesReportPDF = async (req, res) => {
   });
 
   doc.moveDown(1.5);
-
-  // ===============================
   //  Detailed Table Header
-  // ===============================
   doc.font("Helvetica-Bold").fontSize(12).text("Detailed Sales Data");
   doc.moveDown(0.5);
 
@@ -251,10 +213,8 @@ const exportSalesReportPDF = async (req, res) => {
 
   doc.moveTo(40, tableTop + 15).lineTo(570, tableTop + 15).stroke();
   doc.font("Helvetica");
-  
-  // ===============================
+
   //  Detailed Table Rows
-  // ===============================
   let y = tableTop + rowHeight;
 
   orders.forEach(o => {
@@ -281,9 +241,7 @@ const exportSalesReportPDF = async (req, res) => {
   doc.end();
 };
 
-// ===============================
 // Helper: Format Date
-// ===============================
 function formatDate(date) {
   const d = new Date(date);
   const day = String(d.getDate()).padStart(2, "0");

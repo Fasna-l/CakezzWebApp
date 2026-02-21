@@ -67,8 +67,6 @@ router.patch("/coupons/toggle/:id", adminAuth, adminCouponController.toggleCoupo
 router.delete("/coupons/:id", adminAuth, adminCouponController.deleteCoupon);
 
 //offer management
-// router.get("/offers", adminAuth, offerController.listOffers);
-// Add offer page
 router.get("/offer/add", adminAuth, offerController.loadAddOffer);
 router.post("/offer/add", adminAuth, offerController.addOffer);
 // Edit offer
@@ -76,8 +74,6 @@ router.get("/offer/edit/:id", adminAuth, offerController.loadEditOffer);
 router.post("/offer/update", adminAuth, offerController.updateOffer);
 // Delete offer
 router.delete("/offer/delete/:id", adminAuth, offerController.deleteOffer);
-// Assign product offer
-// router.post("/offer/assign-product", adminAuth, offerController.assignProductOffer);
 
 //category offer
 router.get("/category-offer/add", adminAuth, categoryOfferController.loadAddCategoryOffer);

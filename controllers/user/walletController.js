@@ -11,7 +11,7 @@ const loadWallet = async (req, res, next) => {
       wallet = await Wallet.create({ userId, balance: 0 });
     }
 
-     const user = await User.findById(userId);
+    const user = await User.findById(userId);
 
     res.render("wallet", { wallet,user });
   } catch (error) {
@@ -28,16 +28,12 @@ const loadWalletHistory = async (req, res, next) => {
     }
 
     const user = await User.findById(userId);
-    
-    // wallet.transactions.sort(
-    //   (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-    // );
-    // ✅ Pagination settings
+    //Pagination
     const page = parseInt(req.query.page) || 1;
     const limit = 6;
     const skip = (page - 1) * limit;
 
-    // ✅ Sort transactions (latest first)
+    //Sort transactions (latest first)
     const sortedTransactions = wallet.transactions
       .slice()
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -45,7 +41,7 @@ const loadWalletHistory = async (req, res, next) => {
     const totalTransactions = sortedTransactions.length;
     const totalPages = Math.ceil(totalTransactions / limit);
 
-    // ✅ Paginated transactions
+    //Paginated transactions
     const paginatedTransactions = sortedTransactions.slice(
       skip,
       skip + limit

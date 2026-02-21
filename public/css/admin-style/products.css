@@ -1,4 +1,4 @@
-/* ✅ Reset */
+/*  Reset */
 * {
   margin: 0;
   padding: 0;
@@ -13,7 +13,7 @@ html, body {
   color: #ffffff;
 }
 
-/* ✅ Dashboard layout */
+/* Dashboard layout */
 .dashboard-container {
   display: flex;
   height: calc(100vh - 60px);
@@ -27,7 +27,7 @@ html, body {
   height: 100%;
 }
 
-/* ✅ Sidebar (same as users.css) */
+/* Sidebar (same as users.css) */
 .dashboard-sidebar {
   width: 250px;
   background-color: #1a1a1a;
@@ -47,7 +47,7 @@ html, body {
   font-weight: 600;
 }
 
-/* ✅ Remove bullet dots */
+/* Remove bullet dots */
 .nav-list {
   list-style: none !important;
   padding: 0;
@@ -93,7 +93,7 @@ html, body {
   margin: 15px 0;
 }
 
-/* ✅ Main content area (same padding as users page) */
+/*  Main content area (same padding as users page) */
 .products-container {
   flex: 1;
   padding: 30px;
@@ -101,7 +101,7 @@ html, body {
   overflow-y: auto;
 }
 
-/* ✅ Header Title + Search + Button */
+/*  Header Title + Search + Button */
 .products-header {
   display: flex;
   justify-content: space-between;
@@ -115,7 +115,7 @@ html, body {
   color: #fff;
 }
 
-/* ✅ Search bar (same as users page) */
+/*  Search bar (same as users page) */
 .search-form {
   display: flex;
   align-items: center;
@@ -172,7 +172,7 @@ html, body {
   background-color: #218838;
 }
 
-/* ✅ Product Table (styled like users table) */
+/*  Product Table (styled like users table) */
 .table-wrapper {
   background-color: #333;
   border-radius: 6px;
@@ -209,7 +209,7 @@ html, body {
   background-color: #3a3a3a;
 }
 
-/* ✅ Pagination (same as users page) */
+/*  Pagination (same as users page) */
 .pagination-container {
   display: flex;
   justify-content: center;
@@ -253,15 +253,7 @@ html, body {
     margin: 0;
 }
 
-/* Right side (Add button + Search bar) */
-/* .actions-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-} */
-
-
-/* ✅ Same header layout as Category page */
+/*  Same header layout as Category page */
 .page-title {
   display: flex;
   justify-content: space-between;
@@ -277,7 +269,7 @@ html, body {
   margin-right: auto;
 }
 
-/* ✅ Add Product button styled same as Add Category */
+/*  Add Product button styled same as Add Category */
 .btn-add-product {
   background: #1a1a1a;
   color: #fff;
@@ -297,7 +289,7 @@ html, body {
   transform: scale(1.02);
 }
 
-/* ✅ Search bar styling */
+/*  Search bar styling */
 .search-form {
   display: flex;
   align-items: center;

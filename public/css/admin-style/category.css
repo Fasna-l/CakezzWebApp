@@ -331,7 +331,6 @@ input:checked + .slider:before {
 }
 
 /*Pagination*/
-
 /*  Updated Pagination Styles (same as customer.css) */
 .pagination-container {
   display: flex;
@@ -469,7 +468,7 @@ input:checked + .slider:before {
     font-size: 10px;
   }
 }
-/* ✅ Make heading, add button, and search bar stay in one line */
+/* Make heading, add button, and search bar stay in one line */
 .page-title {
   display: flex;
   justify-content: space-between; /* Push content left & right */

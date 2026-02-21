@@ -4,9 +4,6 @@ const User = require("../../models/userSchema");
 const Wallet = require("../../models/walletSchema");
 const PDFDocument = require("pdfkit");
 
-/* --------------------------------------------------------
-   1. LOAD ORDER LIST PAGE (Search + Pagination)
----------------------------------------------------------*/
 const loadOrderList = async (req, res, next) => {
   try {
     const userId = req.session.user;
@@ -47,22 +44,15 @@ const loadOrderList = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.error("loadOrderList error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
 
-
-/* --------------------------------------------------------
-   2. LOAD ORDER DETAILS PAGE
----------------------------------------------------------*/
 const loadOrderDetails = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const orderId = req.params.id;
 
     const order = await Order.findById(orderId);
-
     if (!order || order.userId.toString() !== userId.toString()) {
       return res.redirect("/order");
     }
@@ -75,15 +65,9 @@ const loadOrderDetails = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.error("loadOrderDetails error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
 
-
-/* --------------------------------------------------------
-   3. SHOW CANCEL PAGE (Optional Reason)
----------------------------------------------------------*/
 const loadCancelPage = async (req, res, next) => {
   try {
     const userId = req.session.user;
@@ -91,21 +75,14 @@ const loadCancelPage = async (req, res, next) => {
     const itemId = req.query.item || null;
 
     const order = await Order.findById(orderId);
-
     if (!order || order.userId.toString() !== userId.toString()) {
       return res.redirect("/order");
     }
-
-    // If already cancelled/delivered → cannot cancel
-    // if (order.orderStatus === "Cancelled" || order.orderStatus === "Delivered") {
-    //   return res.redirect(`/order/${orderId}`);
-    // }
-
     if (order.orderStatus !== "Pending") {
       return res.redirect(`/order/${orderId}`);
     }
 
-    // 🟩 NEW CHECK: If single item cancel requested
+    // CHECK: If single item cancel requested
     if (itemId) {
       const item = order.items.id(itemId);
       if (!item) return res.redirect(`/order/${orderId}`);
@@ -115,24 +92,14 @@ const loadCancelPage = async (req, res, next) => {
         return res.redirect(`/order/${orderId}`);
       }
     }
-
-
     // Pass itemId to EJS
     const user = await User.findById(userId).lean();
     res.render("cancelOrder", {user, order, itemId });
 
   } catch (error) {
     next(error);
-    // console.error("loadCancelPage error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
-
-
-
-// /* --------------------------------------------------------
-//    4. CANCEL ENTIRE ORDER + INCREASE STOCK
-// ---------------------------------------------------------*/
 
 const cancelOrder = async (req, res, next) => {
   try {
@@ -141,7 +108,6 @@ const cancelOrder = async (req, res, next) => {
     const userId = req.session.user;
 
     const order = await Order.findById(orderId);
-
     if (!order || order.userId.toString() !== userId.toString()) {
       return res.redirect("/order");
     }
@@ -153,9 +119,7 @@ const cancelOrder = async (req, res, next) => {
 
     // Track refund amount
     let refundAmount = 0;
-    // -------------------------------
     // CANCEL SINGLE ITEM
-    // -------------------------------
     if (itemId) {
       const item = order.items.id(itemId);
       if (!item) return res.redirect(`/order/${orderId}`);
@@ -163,31 +127,24 @@ const cancelOrder = async (req, res, next) => {
       if (item.status !== "Pending") {
         return res.redirect(`/order/${orderId}`);
       }
-
-  //     if (itemId) {
-
-  // const item = order.items.id(itemId);
-  // if (!item) return res.redirect(`/order/${orderId}`);
-
-  // Compute current subtotal of non-cancelled items
+      // Compute current subtotal of non-cancelled items
       const currentSubtotal = order.items.reduce((sum, it) =>
-      it.status !== "Cancelled" ? sum + it.price * it.quantity : sum
-    , 0);
+        it.status !== "Cancelled" ? sum + it.price * it.quantity : sum
+      , 0);
 
       const itemValue = item.price * item.quantity;
       const newSubtotal = currentSubtotal - itemValue;
 
-  // If coupon applied & violation happens → block single cancel
+      // If coupon applied & violation happens → block single cancel
       if (order.couponCode && newSubtotal < order.couponMinPurchase) {
-    // Redirect back with an error message
+      // Redirect back with an error message
         req.session.cancelCouponError = 
           `Cannot cancel this item because it will break the coupon minimum purchase condition (₹${order.couponMinPurchase}). Cancel entire order instead.`;
 
         return res.redirect(`/order/${orderId}`);
       }
 
-  // If OK → continue to normal single item cancel logic...
-//}
+      // If OK → continue to normal single item cancel logic...
 
       // Calculate refund for this item
       refundAmount = item.price * item.quantity;
@@ -234,78 +191,43 @@ const cancelOrder = async (req, res, next) => {
         });
       }
     }
-
-    // -------------------------------
     // CANCEL FULL ORDER
-    // -------------------------------
-    // -------------------------------
-// CANCEL FULL ORDER (FIXED)
-// -------------------------------
-else {
-  refundAmount = 0;
+    else {
+      refundAmount = 0;
 
-  for (let it of order.items) {
+      for (let it of order.items) {
 
-    // only refund for non-cancelled items
-    if (it.status !== "Cancelled") {
-      refundAmount += it.price * it.quantity;
+       // only refund for non-cancelled items
+        if (it.status !== "Cancelled") {
+          refundAmount += it.price * it.quantity;
 
-      // restore stock
-      const product = await Product.findById(it.productId);
-      const variant = product.variants.find(v => v.size === it.size);
-      if (variant) {
-        variant.stock += it.quantity;
-        await product.save();
-      }
+        // restore stock
+          const product = await Product.findById(it.productId);
+          const variant = product.variants.find(v => v.size === it.size);
+          if (variant) {
+            variant.stock += it.quantity;
+            await product.save();
+          }
 
-      it.refundAmount = it.price * it.quantity;
-      it.refundStatus = "Processed";
-    }
+          it.refundAmount = it.price * it.quantity;
+          it.refundStatus = "Processed";
+        }
 
     // mark status cancelled for all items
-    it.status = "Cancelled";
-  }
+        it.status = "Cancelled";
+      }
 
-  order.orderStatus = "Cancelled";
-  order.cancellationReason = reason || "No reason provided";
-  order.cancelledAt = new Date();
+      order.orderStatus = "Cancelled";
+      order.cancellationReason = reason || "No reason provided";
+      order.cancelledAt = new Date();
 
-  order.statusHistory.push({
-    status: "Order Cancelled",
-    comment: reason,
-    date: new Date()
-  });
-}
-
-
-    // else {
-    //   refundAmount = order.totalAmount;
-    //   for (let it of order.items) {
-    //     const product = await Product.findById(it.productId);
-    //     const variant = product.variants.find(v => v.size === it.size);
-    //     if (variant) {
-    //       variant.stock += it.quantity;
-    //       await product.save();
-    //     }
-
-    //     it.status = "Cancelled";
-    //     it.refundAmount = it.price * it.quantity;
-    //     it.refundStatus = "Processed";
-    //   }
-
-    //   order.orderStatus = "Cancelled";
-    //   order.cancellationReason = reason || "No reason provided";
-    //   order.cancelledAt = new Date();
-
-    //   order.statusHistory.push({
-    //     status: "Order Cancelled",
-    //     comment: reason,
-    //     date: new Date()
-    //   });
-    // }
-
+      order.statusHistory.push({
+        status: "Order Cancelled",
+        comment: reason,
+        date: new Date()
+      });
+    }
     //  WALLET REFUND
-    
     if (refundAmount > 0 && order.paymentStatus === "Paid") {
       let wallet = await Wallet.findOne({ userId: order.userId });
 
@@ -324,23 +246,15 @@ else {
       order.refundAmount = refundAmount;
       order.refundStatus = "Processed";
     }
-
-    //recalculateOrderTotals(order);
     await order.save();
     return res.redirect(`/order/${orderId}`);
 
   } catch (error) {
     next(error);
-    // console.error("cancelOrder error:", error);
-    // return res.redirect("/pageNotFound");
   }
 };
 
-
-
-/* --------------------------------------------------------
-   6. RETURN ORDER (Delivered Only) + Mandatory Reason
----------------------------------------------------------*/
+//RETURN ORDER (Delivered Only) + Mandatory Reason
 const loadReturnPage = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -348,8 +262,6 @@ const loadReturnPage = async (req, res, next) => {
     res.render("returnOrder", { user,order });
   } catch (error) {
     next(error);
-    // console.error(error);
-    // res.redirect("/pageNotFound");
   }
 };
 
@@ -363,9 +275,21 @@ const submitReturnRequest = async (req, res, next) => {
     }
 
     const order = await Order.findById(orderId);
-
     if (!order) return res.redirect("/order");
 
+    //check return time limit(2hours)
+    if(!order.deliveryDate){
+      return res.redirect(`/order/${orderId}`);
+    }
+    const now = new Date();
+    const deliveryTime = new Date(order.deliveryDate);
+
+    const diffInMs = now - deliveryTime;
+    const diffInHours = diffInMs / (1000*60*60);
+
+    if(diffInHours >2){
+      return res.send("Return Period expired. Returns allowed only within 2 hours of delivery");
+    }
     // Update order status
     order.orderStatus = "Return Requested";
 
@@ -393,15 +317,10 @@ const submitReturnRequest = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.error("submitReturnRequest error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
 
-
-/* --------------------------------------------------------
-   7. DOWNLOAD INVOICE PDF
----------------------------------------------------------*/
+//DOWNLOAD INVOICE PDF
 const downloadInvoice = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id).lean();
@@ -415,18 +334,13 @@ const downloadInvoice = async (req, res, next) => {
     );
 
     doc.pipe(res);
-
-    /* ---------------------------------------------------------
-       HEADER
-    ---------------------------------------------------------*/
+    //HEADER
     doc.fontSize(26).text("Cakez.in", { align: "center" });
     doc.moveDown(0.3);
     doc.fontSize(16).text("Invoice", { align: "center" });
     doc.moveDown(1.2);
 
-    /* ---------------------------------------------------------
-       CUSTOMER DETAILS
-    ---------------------------------------------------------*/
+    //CUSTOMER DETAILS
     doc.fontSize(14).text("Customer Details", { underline: true });
     doc.moveDown(0.5);
 
@@ -434,9 +348,7 @@ const downloadInvoice = async (req, res, next) => {
     doc.text(`Email: ${user.email || "N/A"}`);
     doc.moveDown(1);
 
-    /* ---------------------------------------------------------
-       SHIPPING ADDRESS
-    ---------------------------------------------------------*/
+    //SHIPPING ADDRESS
     const s = order.shippingAddress;
 
     doc.fontSize(14).text("Shipping Address", { underline: true });
@@ -448,9 +360,7 @@ const downloadInvoice = async (req, res, next) => {
     doc.text(`Phone: ${s.phoneNumber}`);
     doc.moveDown(1);
 
-    /* ---------------------------------------------------------
-       INVOICE DETAILS
-    ---------------------------------------------------------*/
+    //INVOICE DETAILS
     doc.fontSize(14).text("Invoice Details", { underline: true });
     doc.moveDown(0.5);
 
@@ -459,9 +369,7 @@ const downloadInvoice = async (req, res, next) => {
     doc.text(`Payment Method: ${order.paymentMethod}`);
     doc.moveDown(1);
 
-    /* ---------------------------------------------------------
-       TABLE HEADER
-    ---------------------------------------------------------*/
+    //TABLE HEADER
     const tableTop = doc.y;
 
     doc.fontSize(13).text("Item Name", 50, tableTop);
@@ -473,9 +381,7 @@ const downloadInvoice = async (req, res, next) => {
     doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
     doc.moveDown();
 
-    /* ---------------------------------------------------------
-       TABLE ROWS
-    ---------------------------------------------------------*/
+    //TABLE ROWS
     let calculatedSubTotal = 0;
 
   order.items.forEach(item => {
@@ -504,36 +410,14 @@ const downloadInvoice = async (req, res, next) => {
 
 
     doc.moveDown(1);
-
-    /* ---------------------------------------------------------
-       PAYMENT SUMMARY RIGHT ALIGNED
-    ---------------------------------------------------------*/
-    // doc.fontSize(14).text("Payment Summary", 350, doc.y, { underline: true });
+    //PAYMENT SUMMARY RIGHT ALIGNED
     doc.moveDown(0.5);
-  //   doc.fontSize(14)
-  //  .text("Payment Summary", 420, doc.y, {
-  //    align: "left",
-  //    underline: true
-  //  });
   const rightX = doc.page.width - 180; // shift heading right
   doc.fontSize(14).text("Payment Summary", rightX, doc.y, {
   underline: true
   });
 
    doc.moveDown(0.5);
-
-
-    // doc.fontSize(12).text(`Subtotal: ₹${order.subTotal}`, { align: "right" });
-    // doc.text(`Tax: ₹${order.taxAmount}`, { align: "right" });
-    // doc.text(`Shipping Charge: ₹${order.shippingCharge}`, { align: "right" });
-    // doc.text(`Discount: ₹${order.offerDiscount}`, { align: "right" });
-
-    // doc.moveDown(0.7);
-
-    // doc.fontSize(14).text(`Grand Total: ₹${order.totalAmount}`, {
-    //   align: "right",
-    // });
-
       const tax = Math.round(calculatedSubTotal * 0.05);
       const shipping = calculatedSubTotal > 0 ? 50 : 0;
       const discount = order.offerDiscount || 0;
@@ -550,10 +434,7 @@ const downloadInvoice = async (req, res, next) => {
       align: "right",
     });
 
-
-    /* ---------------------------------------------------------
-       FOOTER (BOTTOM RIGHT)
-    ---------------------------------------------------------*/
+    //FOOTER (BOTTOM RIGHT)
     doc.moveDown(3);
 
     doc.fontSize(11).text(
@@ -573,8 +454,6 @@ const downloadInvoice = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.error("downloadInvoice error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
 
@@ -602,8 +481,6 @@ const loadSingleReturnPage = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.error("loadSingleReturnPage error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
 
@@ -621,6 +498,22 @@ const submitSingleReturn = async (req, res, next) => {
     if (!order || order.userId.toString() !== userId.toString()) {
       return res.redirect("/order");
     }
+
+    // Check return time limit (2 hours)
+    if (!order.deliveryDate) {
+      return res.redirect(`/order/${orderId}`);
+    }
+
+    const now = new Date();
+    const deliveryTime = new Date(order.deliveryDate);
+
+    const diffInMs = now - deliveryTime;
+    const diffInHours = diffInMs / (1000 * 60 * 60);
+
+    if (diffInHours > 2) {
+      return res.send("Return period expired. Returns allowed only within 2 hours of delivery.");
+    }
+
 
     const item = order.items.id(itemId);
     if (!item) return res.redirect(`/order/${orderId}`);
@@ -659,16 +552,11 @@ const submitSingleReturn = async (req, res, next) => {
 
   } catch (error) {
     next(error);
-    // console.error("submitSingleReturn error:", error);
-    // res.redirect("/pageNotFound");
   }
 };
-/* --------------------------------------------------------
-   HELPER: RECALCULATE ORDER TOTALS
----------------------------------------------------------*/
-function recalculateOrderTotals(order) {
 
-  //if (order.orderStatus === "Cancelled") return;
+//HELPER: RECALCULATE ORDER TOTALS
+function recalculateOrderTotals(order) {
 
   const validItems = order.items.filter(item => {
     if (item.status === "Cancelled") return false;
@@ -697,9 +585,6 @@ function recalculateOrderTotals(order) {
   order.totalAmount = subTotal + taxAmount + shippingCharge;
 }
 
-/* --------------------------------------------------------
-   EXPORT FUNCTIONS
----------------------------------------------------------*/
 module.exports = {
   loadOrderList,
   loadOrderDetails,

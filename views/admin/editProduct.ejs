@@ -67,40 +67,6 @@
 
         <!--  Image Preview -->
         <div id="preview-container" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
-
-        <!-- ✅ Load Existing Server Images into Preview (NO MORE RED ERROR) -->
-        <!-- <script>
-          document.addEventListener("DOMContentLoaded", function () {
-            const previewContainer = document.getElementById('preview-container');
-
-            // ✅ SAFELY PASS IMAGES FROM SERVER (fixed to avoid IDE red error)
-            const existingImages = JSON.parse('<%- JSON.stringify(product.images || []) %>'); // ✅ CHANGED
-
-            existingImages.forEach((imgUrl) => {
-              const div = document.createElement('div');
-              div.style.position = 'relative';
-
-              div.innerHTML = `
-                <img src="/uploads/<%= product._id %>/${imgUrl}"
-                     style="width:90px;height:90px;object-fit:cover;border-radius:6px;" />
-                <button type="button" class="deleteExisting" data-name="${imgUrl}"
-                  style="position:absolute;top:0;right:0;background:red;color:white;
-                  border:none;border-radius:50%;height:20px;width:20px;cursor:pointer;">
-                  ✖
-                </button>
-              `;
-
-              previewContainer.appendChild(div);
-
-              // ✅ Push to originalFiles so validation doesn't fail
-              if (!originalFiles.includes(imgUrl)) {
-                originalFiles.push(imgUrl);
-              }
-            });
-          });
-        </script> -->
-
-
         <!-- Cropper Modal -->
         <div id="cropperModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
                        background:rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000;">
@@ -131,18 +97,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
-/* ✅ Global arrays */
+/*  Global arrays */
 let originalFiles = [];
 let croppedFiles = [];
 let currentIndex = -1;
 let cropper = null;
 let removedImages = [];
 
-/* ✅ Make validation & submit functions global */
+/*  Make validation & submit functions global */
 window.submitProductForm = submitProductForm;
 window.validateProductForm = validateProductForm;
 
-/* ✅ Validation Function (GLOBAL) */
+/*  Validation Function (GLOBAL) */
 function validateProductForm() {
   clearErrors();
   let isValid = true;
@@ -189,7 +155,7 @@ function validateProductForm() {
   return isValid;
 }
 
-/* ✅ Error Handling */
+/*  Error Handling */
 function showError(id, message) {
   document.getElementById(id).innerText = message;
   document.getElementById(id).style.display = 'block';
@@ -202,7 +168,7 @@ function clearErrors() {
   });
 }
 
-/* ✅ DOM Loaded Functions */
+/*  DOM Loaded Functions */
 document.addEventListener("DOMContentLoaded", function () {
   const fileInput = document.getElementById('productImageInput');
   const previewWrap = document.getElementById('preview-container');
@@ -210,8 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const cropImg = document.getElementById('crop-image');
   const cropBtn = document.getElementById('cropBtn');
 
-  /* ✅ 1. Load existing images properly */
-  //const existingImages = JSON.parse('<%- JSON.stringify(product.images || []) %>');
+  /*  1. Load existing images properly */
   const existingImages = JSON.parse('<%- JSON.stringify(product.productImage || []) %>');
 
   existingImages.forEach(imgUrl => {
@@ -219,7 +184,7 @@ document.addEventListener("DOMContentLoaded", function () {
     originalFiles.push(imgUrl);
   });
 
-  /* ✅ 2. When user uploads new images */
+  /*  2. When user uploads new images */
   fileInput.addEventListener('change', (e) => {
     const newFiles = Array.from(e.target.files);
     newFiles.forEach(file => {
@@ -229,7 +194,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  /* ✅ Function to show image in preview */
+  /* Function to show image in preview */
   function addImageToPreview(file, isServerImage) {
     const imgSrc = isServerImage
       ? `/uploads/product/${file}`
@@ -255,13 +220,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const index = Array.from(previewWrap.children).indexOf(div);
       const imageToDelete = originalFiles[index];
 
-    // ✅ If image was from server (old), store it for removal
+    //  If image was from server (old), store it for removal
       if (typeof imageToDelete === "string") {
-      //removedImages.push(imageToDelete);
       removedImages.push(`/uploads/product/${imageToDelete}`);
       }
   
-  // ✅ Remove image from arrays & UI
+  //  Remove image from arrays & UI
       
       originalFiles.splice(index, 1);
       croppedFiles.splice(index, 1);
@@ -271,7 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
     previewWrap.appendChild(div);
   }
 
-  /* ✅ Open Cropper */
+  /*  Open Cropper */
   function openCropper(idx) {
     currentIndex = idx;
     modal.style.display = 'flex';
@@ -285,7 +249,7 @@ document.addEventListener("DOMContentLoaded", function () {
     cropper = new Cropper(cropImg, { aspectRatio: 1, viewMode: 1 });
   }
 
-  /* ✅ Save crop */
+  /*  Save crop */
   cropBtn.addEventListener('click', async () => {
     if (!cropper) return;
     const canvas = cropper.getCroppedCanvas({ width: 800, height: 800 });
@@ -301,7 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
     originalFiles.forEach((file, i) => addImageToPreview(file, typeof file === 'string'));
   });
 
-  // ✅ Close modal if clicked outside
+  //  Close modal if clicked outside
   modal.addEventListener('click', (e) => {
     if (e.target === modal) {
       if (cropper) cropper.destroy();
@@ -323,22 +287,20 @@ async function submitProductForm(event) {
   formData.append("page", document.querySelector("input[name='page']").value);
 
 
-  // ✅ Add variant data
+  //  Add variant data
   document.querySelectorAll(".variant-group").forEach((variant, index) => {
     formData.append(`variants[${index}][stock]`, variant.querySelector("input[name*='stock']").value);
     formData.append(`variants[${index}][price]`, variant.querySelector("input[name*='price']").value);
   });
 
-  // ✅ Add updated images (only File objects are sent to backend)
+  //  Add updated images (only File objects are sent to backend)
   originalFiles.forEach((file, idx) => {
     if (file instanceof File) {
       formData.append("productImage", file);
     }
   });
 
-  // ✅ Add deleted images if needed later
-  // formData.append("removedImages", JSON.stringify(removedImages)); // (optional if deleting from server)
-  // change route : fetch((`/admin/edit-product/<%= product._id %>)
+  //  Add deleted images if needed later
   try {
     const response = await fetch(`/admin/edit-product/<%= product._id %>`, {
       method: "POST",

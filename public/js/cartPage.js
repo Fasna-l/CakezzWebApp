@@ -57,39 +57,12 @@ document.addEventListener("click", async (e) => {
       return;
   }
 
-  // ✅ OPTION A: reload cart to re-evaluate stock correctly
+  //reload cart to re-evaluate stock correctly
   window.location.reload();
-
-
-//     if (!data.success) {
-//       showToast(data.message, "error");
-//       return;
-//     }
-
-//     // Update quantity visually
-//     // Update quantity
-// qtyEl.textContent = qty;
-
-// // Find updated item from backend response
-// const updatedItem = data.cartItems.find(
-//   i => i.productId === productId && i.size === size
-// );
-
-// // Update price & subtotal
-// item.querySelector(".price").textContent = "₹" + updatedItem.price;
-// item.querySelector(".item-subtotal").textContent = "₹" + updatedItem.subtotal;
-
-// // Update summary using backend values
-// updateSummaryFromBackend(data.summary);
-//     showToast("Quantity updated");
-//     evaluateCheckoutButton();
-
   }
 });
 
-/* ---------------------------------------------------------
-   UPDATE SUMMARY (REALTIME TOTALS)
---------------------------------------------------------- */
+//UPDATE SUMMARY (REALTIME TOTALS)
 function updateSummary() {
 
   // 1) Recalculate subtotal from individual item subtotals
@@ -136,7 +109,6 @@ window.addEventListener("DOMContentLoaded", () => {
     checkoutBtn.classList.add("disabled-btn");
 
     const msg = document.createElement("p");
-    //msg.className = "warning-text";
     msg.className = "warning-text cart-warning";
     msg.textContent = "⚠ Please remove unavailable items before checkout.";
     checkoutBtn.parentNode.insertBefore(msg, checkoutBtn);
@@ -147,9 +119,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 });
 
-// ===============================================
 // CHECKOUT BUTTON ENABLE/DISABLE LOGIC
-// ===============================================
 function evaluateCheckoutButton() {
   const checkoutBtn = document.querySelector(".checkout-btn");
   const items = document.querySelectorAll(".cart-item");
@@ -169,18 +139,6 @@ function evaluateCheckoutButton() {
       hasStockIssue = true;
     }
   })
-
-  //let hasError = false;
-
-  // items.forEach(i => {
-  //   if (i.dataset.unavailable === "true" ||
-  //      i.dataset.outofstock === "true" ||
-  //      i.dataset.insufficientstock === "true"
-  //     ) {
-  //     hasError = true;
-  //   }
-  // });
-
   // If no items
   if (items.length === 0) {
     checkoutBtn.disabled = true;
@@ -192,10 +150,6 @@ function evaluateCheckoutButton() {
   if(hasUnavailable || hasStockIssue){
     checkoutBtn.disabled = true;
     checkoutBtn.classList.add("disabled-btn");
-  // if (hasError) {
-  //   checkoutBtn.disabled = true;
-  //   checkoutBtn.classList.add("disabled-btn");
-
     // If warning doesn't exist, add it
     if (!warning) {
       const msg = document.createElement("p");
@@ -205,7 +159,6 @@ function evaluateCheckoutButton() {
       } else {
         msg.textContent = "⚠ Please fix stock issue before checkout."
       }
-      //msg.textContent = "⚠ Please remove unavailable items before checkout.";
       checkoutBtn.parentNode.insertBefore(msg, checkoutBtn);
     }
 

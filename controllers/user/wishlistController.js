@@ -2,10 +2,6 @@ const Wishlist = require("../../models/wishlistSchema");
 const Product = require("../../models/productSchema");
 const calculateBestOffer = require("../../helpers/offerCalculator");
 
-
-/* ===============================
-   LOAD WISHLIST PAGE
-================================ */
 const loadWishlist = async (req, res, next) => {
   try {
     const userId = req.session.user;
@@ -19,7 +15,6 @@ const loadWishlist = async (req, res, next) => {
         path: "items.product",
         populate: { path: "category" }
       });
-
 
     if (!wishlist || wishlist.items.length === 0) {
       return res.render("wishlist", {
@@ -37,41 +32,39 @@ const loadWishlist = async (req, res, next) => {
     const totalItems = validItems.length;
     const paginatedItems = validItems.slice(skip, skip + limit);
 
-const wishlistItemsWithOffer = await Promise.all(
-  paginatedItems.map(async (item) => {
-    const product = item.product;
-    const variant = product.variants[0]; // 1kg display
+    const wishlistItemsWithOffer = await Promise.all(
+      paginatedItems.map(async (item) => {
+        const product = item.product;
+        const variant = product.variants[0]; // 1kg display
 
-    const offer = await calculateBestOffer(product, variant.price);
+        const offer = await calculateBestOffer(product, variant.price);
 
-    return {
-      ...item.toObject(),
-      product: {
-        ...product.toObject(),
-        finalPrice: offer.finalPrice,
-        originalPrice: variant.price,
-        offerPercentage: offer.discountPercentage,
-        appliedOfferType: offer.appliedOfferType
-      }
-    };
-  })
-);
+        return {
+          ...item.toObject(),
+          product: {
+            ...product.toObject(),
+            finalPrice: offer.finalPrice,
+            originalPrice: variant.price,
+            offerPercentage: offer.discountPercentage,
+            appliedOfferType: offer.appliedOfferType
+          }
+        };
+      })
+    );
 
-res.render("wishlist", {
-  wishlist: { items: wishlistItemsWithOffer },
-  totalWishlistItems: totalItems,
-  wishlistCurrentPage: page,
-  wishlistTotalPages: Math.ceil(totalItems / limit)
-});
+    res.render("wishlist", {
+      wishlist: { items: wishlistItemsWithOffer },
+      totalWishlistItems: totalItems,
+      wishlistCurrentPage: page,
+      wishlistTotalPages: Math.ceil(totalItems / limit)
+    });
 
   } catch (error) {
     next(error);
   }
 };
 
-/* ===============================
-   ADD / REMOVE WISHLIST
-================================ */
+//ADD / REMOVE WISHLIST
 const toggleWishlist = async (req, res, next) => {
   try {
     if (!req.session.user) {
@@ -118,13 +111,10 @@ const toggleWishlist = async (req, res, next) => {
     }
   } catch (error) {
     next(error)
-    //res.json({ success: false, message: "Wishlist error" });
   }
 };
 
-/* ===============================
-   REMOVE FROM WISHLIST (PAGE)
-================================ */
+//REMOVE FROM WISHLIST (PAGE)
 const removeFromWishlist = async (req, res, next) => {
   try {
     const userId = req.session.user;
@@ -138,13 +128,10 @@ const removeFromWishlist = async (req, res, next) => {
     res.json({ success: true });
   } catch(error) {
     next(error)
-    //res.json({ success: false });
   }
 };
 
-/* ===============================
-   WISHLIST COUNT (LIKE CART)
-================================ */
+//WISHLIST COUNT (LIKE CART)
 const wishlistCount = async (req, res, next) => {
   try {
     if (!req.session.user) {
@@ -154,11 +141,9 @@ const wishlistCount = async (req, res, next) => {
     const wishlist = await Wishlist.findOne({ user: req.session.user });
     res.json({ count: wishlist ? wishlist.items.length : 0 });
   } catch (error) {
-    //res.json({ count: 0 }); // safe fallback
     next(error);
   }
 };
-
 
 module.exports = {
   loadWishlist,

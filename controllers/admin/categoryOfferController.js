@@ -1,15 +1,10 @@
 const CategoryOffer = require("../../models/categoryOfferSchema");
 const Category = require("../../models/categorySchema");
 
-/* ===============================
-   LOAD ADD CATEGORY OFFER PAGE
-================================ */
 const loadAddCategoryOffer = async (req, res, next) => {
   try {
     const { categoryId } = req.query;
-
     const categories = await Category.find({ isListed: true });
-
     res.render("addCategoryOffer", {
       categories,
       selectedCategoryId: categoryId || null
@@ -19,13 +14,9 @@ const loadAddCategoryOffer = async (req, res, next) => {
   }
 };
 
-/* ===============================
-   ADD CATEGORY OFFER
-================================ */
 const addCategoryOffer = async (req, res, next) => {
   try {
     const { categoryId, startDate, endDate, discount } = req.body;
-
     const existingOffer = await CategoryOffer.findOne({
       category: categoryId,
       isActive: true,
@@ -57,9 +48,6 @@ const addCategoryOffer = async (req, res, next) => {
   }
 };
 
-/* ===============================
-   LOAD EDIT CATEGORY OFFER PAGE
-================================ */
 const loadEditCategoryOffer = async (req, res, next) => {
   try {
     const offer = await CategoryOffer
@@ -71,7 +59,6 @@ const loadEditCategoryOffer = async (req, res, next) => {
     }
 
     const categories = await Category.find({ isListed: true });
-
     res.render("editCategoryOffer", {
       offer,
       categories
@@ -81,13 +68,9 @@ const loadEditCategoryOffer = async (req, res, next) => {
   }
 };
 
-/* ===============================
-   UPDATE CATEGORY OFFER
-================================ */
 const updateCategoryOffer = async (req, res, next) => {
   try {
     const { offerId, startDate, endDate, discount } = req.body;
-
     await CategoryOffer.findByIdAndUpdate(offerId, {
       startDate,
       endDate,
@@ -100,15 +83,10 @@ const updateCategoryOffer = async (req, res, next) => {
   }
 };
 
-/* ===============================
-   DELETE CATEGORY OFFER
-================================ */
 const deleteCategoryOffer = async (req, res, next) => {
   try {
     const offerId = req.params.id;
-
     await CategoryOffer.findByIdAndDelete(offerId);
-
     await Category.updateMany(
       { categoryOffer: offerId },
       { $set: { categoryOffer: null } }

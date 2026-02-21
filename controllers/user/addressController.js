@@ -1,7 +1,7 @@
 const Address = require("../../models/addressSchema");
 const User = require("../../models/userSchema");
 
-// ✅ Load Address Page
+// Load Address Page
 const loadAddressPage = async (req, res, next) => {
   try {
     const userId = req.session.user;
@@ -11,17 +11,13 @@ const loadAddressPage = async (req, res, next) => {
     res.render("address", { user, addresses });
   } catch (error) {
     next(error);
-    // console.error("Error loading address page:", err);
-    // res.redirect("/pageNotFound");
   }
 };
 
-// ✅ Add Address
 const addAddress = async (req, res, next) => {
   try {
     const userId = req.session.user;
     const {
-      //fullName,
       phone,
       streetAddress,
       city,
@@ -48,12 +44,9 @@ const addAddress = async (req, res, next) => {
     res.json({ success: true, message: "Address added", address: newAddress });
   } catch (error) {
     next(error);
-    // console.error("Error adding address:", err);
-    // res.json({ success: false, message: "Internal server error" });
   }
 };
 
-// ✅ Load Edit Page
 const loadEditAddress = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -65,12 +58,9 @@ const loadEditAddress = async (req, res, next) => {
     res.render("editAddress", { user,address });
   } catch (error) {
     next(error);
-    // console.error("Error loading edit page:", err);
-    // res.redirect("/address");
   }
 };
 
-// ✅ Update Address
 const updateAddress = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -84,7 +74,6 @@ const updateAddress = async (req, res, next) => {
       { "addresses._id": id },
       {
         $set: {
-          //"addresses.$.fullName": data.fullName,
           "addresses.$.phone": data.phone,
           "addresses.$.streetAddress": data.streetAddress,
           "addresses.$.city": data.city,
@@ -100,12 +89,9 @@ const updateAddress = async (req, res, next) => {
     res.json({ success: true, message: "Address updated successfully" });
   } catch (error) {
     next(error);
-    // console.error("Error updating address:", err);
-    // res.json({ success: false, message: "Internal error" });
   }
 };
 
-// ✅ Delete Address
 const deleteAddress = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -116,12 +102,9 @@ const deleteAddress = async (req, res, next) => {
     res.json({ success: true, message: "Address deleted" });
   } catch (error) {
     next(error);
-    // console.error("Error deleting address:", err);
-    // res.json({ success: false, message: "Internal error" });
   }
 };
 
-// ✅ Set Default Address
 const setDefaultAddress = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -132,8 +115,6 @@ const setDefaultAddress = async (req, res, next) => {
     res.json({ success: true, message: "Default address updated" });
   } catch (error) {
     next(error);
-    // console.error("Error setting default:", err);
-    // res.json({ success: false, message: "Internal error" });
   }
 };
 

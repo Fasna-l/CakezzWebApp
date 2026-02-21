@@ -65,34 +65,48 @@
   </div>
 
   <!-- Pagination -->
- 
-  <div class="pagination-container" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 25px;">
+    <div class="pagination-container">
 
-  <!-- Previous Button -->
-  <% if (currentPage > 1) { %>
-    <a href="/admin/users?page=<%= currentPage - 1 %>" class="pagination-link prev">« Prev</a>
-  <% } else { %>
-    <span class="pagination-link disabled">« Prev</span>
-  <% } %>
+      <% if (currentPage > 1) { %>
+        <a href="/admin/users?page=<%= currentPage - 1 %>&search=<%= search || '' %>" class="pagination-link prev">« Prev</a>
+      <% } else { %>
+        <span class="pagination-link disabled">« Prev</span>
+      <% } %>
 
-  <!-- Page Numbers -->
-  <% for (let i = 1; i <= totalPages; i++) { %>
-    <% if (i === currentPage) { %>
-      <span class="pagination-link current"><%= i %></span>
-    <% } else { %>
-      <a href="/admin/users?page=<%= i %>" class="pagination-link"><%= i %></a>
-    <% } %>
-  <% } %>
+      <% 
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+      %>
 
-  <!-- Next Button -->
-  <% if (currentPage < totalPages) { %>
-    <a href="/admin/users?page=<%= currentPage + 1 %>" class="pagination-link next">Next »</a>
-  <% } else { %>
-    <span class="pagination-link disabled">Next »</span>
-  <% } %>
+      <% if (startPage > 1) { %>
+        <a href="/admin/users?page=1&search=<%= search || '' %>" class="pagination-link">1</a>
+        <% if (startPage > 2) { %>
+          <span class="pagination-link disabled">...</span>
+        <% } %>
+      <% } %>
 
-</div>
+      <% for (let i = startPage; i <= endPage; i++) { %>
+        <% if (i === currentPage) { %>
+          <span class="pagination-link current"><%= i %></span>
+        <% } else { %>
+          <a href="/admin/users?page=<%= i %>&search=<%= search || '' %>" class="pagination-link"><%= i %></a>
+        <% } %>
+      <% } %>
 
+      <% if (endPage < totalPages) { %>
+        <% if (endPage < totalPages - 1) { %>
+          <span class="pagination-link disabled">...</span>
+        <% } %>
+        <a href="/admin/users?page=<%= totalPages %>&search=<%= search || '' %>" class="pagination-link"><%= totalPages %></a>
+      <% } %>
+
+      <% if (currentPage < totalPages) { %>
+        <a href="/admin/users?page=<%= currentPage + 1 %>&search=<%= search || '' %>" class="pagination-link next">Next »</a>
+      <% } else { %>
+        <span class="pagination-link disabled">Next »</span>
+      <% } %>
+
+    </div>
 <!-- Optional: Page indicator -->
 <p style="text-align: center; color: #aaa; font-size: 13px; margin-top: 8px;">
   Page <%= currentPage %> of <%= totalPages %>

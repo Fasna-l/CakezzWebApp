@@ -64,17 +64,13 @@ const walletSchema = new Schema(
   { timestamps: true }
 );
 
-/* ======================================================
-   🔄 Auto update updatedAt
-====================================================== */
+//Auto update updatedAt
 walletSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
-/* ======================================================
-   💰 Add Wallet Transaction Method
-====================================================== */
+//Add Wallet Transaction Method
 walletSchema.methods.addTransaction = async function (transactionData) {
   const debitTypes = ["withdrawal", "purchase"];
 

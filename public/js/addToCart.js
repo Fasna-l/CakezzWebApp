@@ -17,7 +17,7 @@ document.addEventListener("click", async function (e) {
     const quantity = document.getElementById("pd-qty").value || 1;
 
     addItemToCart(productId, size, quantity);
-    return; // 🔴 VERY IMPORTANT
+    return; 
   }
 
   /* HOME PAGE */
@@ -35,33 +35,6 @@ document.addEventListener("click", async function (e) {
   }
 
 });
-
-
-// document.addEventListener("click", async function (e) {
-
-//   /* PRODUCT DETAILS PAGE */
-//   if (e.target.id === "pd-add-to-cart") {
-//     const productId = e.target.dataset.productId;
-//     const size = document.querySelector(".weight-btn.active").dataset.size;
-//     const quantity = document.getElementById("pd-qty").value;
-
-//     addItemToCart(productId, size, quantity);
-//   }
-
-//   /* HOME PAGE — Latest Products / Best Sellers */
-//   if (e.target.closest(".cake-add-to-cart-btn")) {
-//     const btn = e.target.closest(".cake-add-to-cart-btn");
-//     addItemToCart(btn.dataset.productId, btn.dataset.size, btn.dataset.qty);
-//   }
-
-//   /* SHOP PAGE */
-//   if (e.target.closest(".add-to-cart-btn")) {
-//     const btn = e.target.closest(".add-to-cart-btn");
-//     addItemToCart(btn.dataset.productId, btn.dataset.size, btn.dataset.qty);
-//   }
-
-// });
-
 
 /* ------------------ ADD TO CART FUNCTION ------------------ */
 
@@ -91,7 +64,6 @@ async function addItemToCart(productId, size, quantity) {
 
   } catch (err) {
     showToast("Please login to continue.", "error");
-    //showToast("Something went wrong", "error");
   }
 }
 

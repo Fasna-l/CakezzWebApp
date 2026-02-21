@@ -54,7 +54,7 @@
 let timer = 60;
 let timerInterval;
 
-// ✅ Start the countdown timer
+//  Start the countdown timer
 function startTimer() {
   clearInterval(timerInterval);
   timer = 60;
@@ -74,7 +74,7 @@ function startTimer() {
   }, 1000);
 }
 
-// ✅ Start timer on page load
+//  Start timer on page load
 startTimer();
 
 function verifyOtp() {
@@ -121,7 +121,7 @@ function verifyOtp() {
 }
 
 
-// ✅ Resend OTP logic with working timer reset
+// Resend OTP logic with working timer reset
 function resendOTP() {
   $.ajax({
     type: "POST",
