@@ -570,33 +570,74 @@ const approveWholeReturn = async (req, res ,next) => {
 // HELPER: RECALCULATE ORDER TOTALS (ADMIN SIDE)
 function recalculateOrderTotals(order) {
 
+  // 1. Get valid items (not cancelled, not returned)
   const validItems = order.items.filter(item => {
     if (item.status === "Cancelled") return false;
     if (item.status === "Returned") return false;
-
-    if (
-      item.status === "Return Requested" &&
-      item.returnStatus === "Approved"
-    ) return false;
-
-    if (item.returnStatus === "Rejected") return false;
-
     return true;
   });
 
-  const subTotal = validItems.reduce((sum, item) => {
+  // 2. Calculate new subtotal
+  const newSubTotal = validItems.reduce((sum, item) => {
     return sum + item.price * item.quantity;
   }, 0);
 
-  const taxAmount = Math.round(subTotal * 0.05);
-  const shippingCharge = subTotal > 0 ? 50 : 0;
-  const offerDiscount = order.offerDiscount || 0;
+  // 3. Calculate original subtotal (before any return)
+  const originalSubTotal = order.items.reduce((sum, item) => {
+    return sum + item.price * item.quantity;
+  }, 0);
 
-  order.subTotal = subTotal;
+  // 4. Recalculate remaining coupon proportionally
+  let newCouponDiscount = 0;
+
+  if (order.originalCouponDiscount > 0 && originalSubTotal > 0) {
+    newCouponDiscount = Math.round(
+      (newSubTotal / originalSubTotal) * order.originalCouponDiscount 
+    );
+  }
+
+  // 5. Recalculate tax & shipping
+  const taxAmount = Math.round(newSubTotal * 0.05);
+  const shippingCharge = newSubTotal > 0 ? 50 : 0;
+
+  // 6. Update order fields
+  order.subTotal = newSubTotal;
+  order.couponDiscount = newCouponDiscount;
   order.taxAmount = taxAmount;
   order.shippingCharge = shippingCharge;
-  order.totalAmount = subTotal + taxAmount + shippingCharge - offerDiscount;
+
+  order.totalAmount =
+    newSubTotal + taxAmount + shippingCharge - newCouponDiscount;
 }
+// function recalculateOrderTotals(order) {
+
+//   const validItems = order.items.filter(item => {
+//     if (item.status === "Cancelled") return false;
+//     if (item.status === "Returned") return false;
+
+//     if (
+//       item.status === "Return Requested" &&
+//       item.returnStatus === "Approved"
+//     ) return false;
+
+//     //if (item.returnStatus === "Rejected") return false;
+
+//     return true;
+//   });
+
+//   const subTotal = validItems.reduce((sum, item) => {
+//     return sum + item.price * item.quantity;
+//   }, 0);
+
+//   const taxAmount = Math.round(subTotal * 0.05);
+//   const shippingCharge = subTotal > 0 ? 50 : 0;
+//   const offerDiscount = order.offerDiscount || 0;
+
+//   order.subTotal = subTotal;
+//   order.taxAmount = taxAmount;
+//   order.shippingCharge = shippingCharge;
+//   order.totalAmount = subTotal + taxAmount + shippingCharge - offerDiscount;
+// }
 
 function calculateRefundWithCoupon(order,item){
   //No coupon => Full refund (When there is no coupon applied)
@@ -618,7 +659,7 @@ function calculateRefundWithCoupon(order,item){
   const itemTotal = item.price*item.quantity;
 
   //Propotional coupon share
-  const couponShare = (itemTotal / originalSubTotal) * order.couponDiscount;
+  const couponShare = (itemTotal / originalSubTotal) * order.originalCouponDiscount;
 
   const refundAmount = itemTotal - couponShare;
   return Math.round(refundAmount)

@@ -39,133 +39,114 @@
         </form>
       </div>
 
-      <!-- Orders Found -->
       <% if (orders && orders.length > 0) { %>
         <div class="order-list">
 
-          <% orders.forEach(order => { %>
+          <% orders.forEach(function(order) { %>
             <div class="order-item">
 
               <!-- Thumbnail -->
               <div class="order-thumb">
-                <% if (order.items.length) { %>
-                  <!-- <img src="<%= order.items[0].productImage %>" /> -->
-                   <img src="/uploads/product/<%= order.items[0].productImage %>" class="cart-thumb">
+                <% if (order.items.length > 0) { %>
+                  <img src="/uploads/product/<%= order.items[0].productImage %>" class="cart-thumb">
                 <% } else { %>
                   <div class="no-thumb">No Image</div>
                 <% } %>
               </div>
+
               <!-- Order Info -->
-<div class="order-info">
-  <div class="order-title">
-  <%= order.items[0]?.productName || "Order" %>
-  <div class="order-id">Order ID: <%= order.orderId %></div>
-</div>
+              <div class="order-info">
+                <div class="order-title">
+                  <%= order.items && order.items.length > 0 ? order.items[0].productName : "Order" %>
+                  <div class="order-id">Order ID: <%= order.orderId %></div>
+                </div>
 
-  <div class="order-meta">
-    Ordered On:
-    <%= new Date(order.orderDate).toLocaleDateString("en-GB") %>
-  </div>
-  <div class="order-amount">₹ <%= order.totalAmount %></div>
-</div>
+                <div class="order-meta">
+                  Ordered On:
+                  <%= new Date(order.orderDate).toLocaleDateString("en-GB") %>
+                </div>
 
-<!-- Status -->
-<div class="order-status">
-  <span class="badge <%= order.orderStatus.toLowerCase() %>">
-    <%= order.orderStatus %>
-  </span>
-</div>
+                <div class="order-amount">₹ <%= order.totalAmount %></div>
+              </div>
 
-<!-- ⭐ Review Section (only for delivered orders) -->
-<% if (order.orderStatus === "Delivered") { %>
-  <div class="review-toggle" onclick="toggleReview('<%= order._id %>')">
-    ⭐ Write Review for Items
-  </div>
+              <!-- Status -->
+              <div class="order-status">
+                <span class="badge <%= order.orderStatus.toLowerCase() %>">
+                  <%= order.orderStatus %>
+                </span>
+              </div>
 
-  <div class="review-items" id="review-box-<%= order._id %>" style="display:none;">
-    
-    <% order.items.forEach(item => { %>
-      <div class="review-item-row">
+              <!-- Review Section -->
+              <% if (order.orderStatus === "Delivered") { %>
+                <div class="review-toggle" onclick="toggleReview('<%= order._id %>')">
+                  ⭐ Write Review for Items
+                </div>
 
-        <img src="/uploads/product/<%= item.productImage %>" class="review-thumb">
+                <div class="review-items" id="review-box-<%= order._id %>" style="display:none;">
+                  <% order.items.forEach(function(item) { %>
+                    <div class="review-item-row">
 
-        <div class="review-item-info">
-          <p><%= item.productName %></p>
-        </div>
+                      <img src="/uploads/product/<%= item.productImage %>" class="review-thumb">
 
-        <a href="/product/<%= item.productId %>/review" class="review-btn">
-          Write Review
-        </a>
+                      <div class="review-item-info">
+                        <p><%= item.productName %></p>
+                      </div>
 
-      </div>
-    <% }) %>
+                      <a href="/product/<%= item.productId %>/review" class="review-btn">
+                        Write Review
+                      </a>
 
-  </div>
-<% } %>
+                    </div>
+                  <% }); %>
+                </div>
+              <% } %>
 
-<!-- Actions -->
-<div class="order-actions">
-  <a href="/order/<%= order._id %>" class="btn">Details</a>
+              <!-- Actions -->
+              <div class="order-actions">
+                <a href="/order/<%= order._id %>" class="btn">Details</a>
 
-  <% if (order.orderStatus !== "Cancelled" && order.orderStatus !== "Delivered") { %>
-    <a href="/order/cancel/<%= order._id %>" class="btn btn-secondary">Cancel</a>
-  <% } %>
-</div>
+                <% if (order.orderStatus !== "Cancelled" && order.orderStatus !== "Delivered") { %>
+                  <a href="/order/cancel/<%= order._id %>" class="btn btn-secondary">Cancel</a>
+                <% } %>
+              </div>
 
             </div>
-          <% }) %>
+          <% }); %>
 
         </div>
 
         <!-- Pagination -->
-
         <div class="pagination">
-  <% if (pagination.totalPages > 1) { %>
+          <% if (pagination.totalPages > 1) { %>
 
-    <!-- Prev -->
-    <% if (pagination.currentPage > 1) { %>
-      <a href="?page=<%= pagination.currentPage - 1 %>" class="page-btn">Prev</a>
-    <% } %>
+            <% if (pagination.currentPage > 1) { %>
+              <a href="?page=<%= pagination.currentPage - 1 %>" class="page-btn">Prev</a>
+            <% } %>
 
-    <!-- First page + dots -->
-    <% if (pagination.currentPage > 3) { %>
-      <a href="?page=1" class="page-number">1</a>
-      <span class="dots">…</span>
-    <% } %>
+            <% for (let i = 1; i <= pagination.totalPages; i++) { %>
+              <a 
+                href="?page=<%= i %>" 
+                class="page-number <%= pagination.currentPage === i ? 'active' : '' %>">
+                <%= i %>
+              </a>
+            <% } %>
 
-    <!-- Middle pages -->
-    <% for (
-      let i = Math.max(1, pagination.currentPage - 2);
-      i <= Math.min(pagination.totalPages, pagination.currentPage + 2);
-      i++
-    ) { %>
-      <a 
-        href="?page=<%= i %>" 
-        class="page-number <%= pagination.currentPage === i ? 'active' : '' %>"
-      >
-        <%= i %>
-      </a>
-    <% } %>
+            <% if (pagination.currentPage < pagination.totalPages) { %>
+              <a href="?page=<%= pagination.currentPage + 1 %>" class="page-btn">Next</a>
+            <% } %>
 
-    <!-- Last page + dots -->
-    <% if (pagination.currentPage < pagination.totalPages - 2) { %>
-      <span class="dots">…</span>
-      <a href="?page=<%= pagination.totalPages %>" class="page-number">
-        <%= pagination.totalPages %>
-      </a>
-    <% } %>
+          <% } %>
+        </div>
 
-    <!-- Next -->
-    <% if (pagination.currentPage < pagination.totalPages) { %>
-      <a href="?page=<%= pagination.currentPage + 1 %>" class="page-btn">Next</a>
-    <% } %>
+      <% } else { %>
+        <p>No orders found</p>
+      <% } %>
 
-  <% } %>
-</div>
     </div>
   </div>
 
 </div>
+
 <script>
   function toggleReview(id) {
     const box = document.getElementById("review-box-" + id);

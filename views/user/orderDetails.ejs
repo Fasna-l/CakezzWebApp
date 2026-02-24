@@ -203,7 +203,8 @@
             <p>Price: <strong>₹<%= item.price %></strong></p>
             <p>Status: <strong><%= item.status %></strong></p>
             <!-- Refund Info -->
-            <% if (item.status === "Returned") { %>
+            
+            <% if (item.refundAmount && item.refundAmount > 0) { %> 
               <p style="color: green; font-weight: bold;">
                 Refund Processed: ₹<%= item.refundAmount %>
               </p>

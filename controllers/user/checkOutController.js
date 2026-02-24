@@ -314,6 +314,7 @@ const placeOrder = async (req, res, next) => {
       taxAmount: req.session.checkoutTotals.tax,
       shippingCharge: req.session.checkoutTotals.shipping,
       couponDiscount,
+      originalCouponDiscount: couponDiscount,
       couponCode,
       couponMinPurchase,
       totalAmount: req.session.checkoutTotals.grandTotal,

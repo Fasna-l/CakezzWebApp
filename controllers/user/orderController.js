@@ -147,7 +147,8 @@ const cancelOrder = async (req, res, next) => {
       // If OK → continue to normal single item cancel logic...
 
       // Calculate refund for this item
-      refundAmount = item.price * item.quantity;
+      //refundAmount = item.price * item.quantity;
+      refundAmount = calculateRefundWithCoupon(order, item);
       // Restore stock
       const product = await Product.findById(item.productId);
       const variant = product.variants.find(v => v.size === item.size);
@@ -163,8 +164,18 @@ const cancelOrder = async (req, res, next) => {
 
       item.refundAmount = refundAmount;
       item.refundStatus = "Processed";
-      // Required because items is nested
+
       order.markModified("items");
+      recalculateOrderTotals(order);
+
+      // item.status = "Cancelled";
+      // item.cancellationReason = reason || "No reason provided";
+      // item.cancelledAt = new Date();
+
+      // item.refundAmount = refundAmount;
+      // item.refundStatus = "Processed";
+      // // Required because items is nested
+      // order.markModified("items");
 
       // Check if ALL items are cancelled
       const allCancelled = order.items.every(it => it.status === "Cancelled");
@@ -199,7 +210,10 @@ const cancelOrder = async (req, res, next) => {
 
        // only refund for non-cancelled items
         if (it.status !== "Cancelled") {
-          refundAmount += it.price * it.quantity;
+          const itemRefund = calculateRefundWithCoupon(order, it);
+          refundAmount += itemRefund;
+
+          //refundAmount += it.price * it.quantity;
 
         // restore stock
           const product = await Product.findById(it.productId);
@@ -209,12 +223,15 @@ const cancelOrder = async (req, res, next) => {
             await product.save();
           }
 
-          it.refundAmount = it.price * it.quantity;
+          it.refundAmount = itemRefund;
+          //it.refundAmount = it.price * it.quantity;
           it.refundStatus = "Processed";
         }
 
     // mark status cancelled for all items
         it.status = "Cancelled";
+        it.cancellationReason = reason || "No reason provided";
+        it.cancelledAt = new Date();
       }
 
       order.orderStatus = "Cancelled";
@@ -226,6 +243,7 @@ const cancelOrder = async (req, res, next) => {
         comment: reason,
         date: new Date()
       });
+      recalculateOrderTotals(order);
     }
     //  WALLET REFUND
     if (refundAmount > 0 && order.paymentStatus === "Paid") {
@@ -334,13 +352,14 @@ const downloadInvoice = async (req, res, next) => {
     );
 
     doc.pipe(res);
-    //HEADER
+
+    // HEADER
     doc.fontSize(26).text("Cakez.in", { align: "center" });
     doc.moveDown(0.3);
     doc.fontSize(16).text("Invoice", { align: "center" });
     doc.moveDown(1.2);
 
-    //CUSTOMER DETAILS
+    // CUSTOMER DETAILS
     doc.fontSize(14).text("Customer Details", { underline: true });
     doc.moveDown(0.5);
 
@@ -348,7 +367,7 @@ const downloadInvoice = async (req, res, next) => {
     doc.text(`Email: ${user.email || "N/A"}`);
     doc.moveDown(1);
 
-    //SHIPPING ADDRESS
+    // SHIPPING ADDRESS
     const s = order.shippingAddress;
 
     doc.fontSize(14).text("Shipping Address", { underline: true });
@@ -360,7 +379,7 @@ const downloadInvoice = async (req, res, next) => {
     doc.text(`Phone: ${s.phoneNumber}`);
     doc.moveDown(1);
 
-    //INVOICE DETAILS
+    // INVOICE DETAILS
     doc.fontSize(14).text("Invoice Details", { underline: true });
     doc.moveDown(0.5);
 
@@ -369,7 +388,7 @@ const downloadInvoice = async (req, res, next) => {
     doc.text(`Payment Method: ${order.paymentMethod}`);
     doc.moveDown(1);
 
-    //TABLE HEADER
+    // TABLE HEADER
     const tableTop = doc.y;
 
     doc.fontSize(13).text("Item Name", 50, tableTop);
@@ -381,66 +400,84 @@ const downloadInvoice = async (req, res, next) => {
     doc.moveTo(50, tableTop + 15).lineTo(550, tableTop + 15).stroke();
     doc.moveDown();
 
-    //TABLE ROWS
+    // TABLE ROWS
     let calculatedSubTotal = 0;
 
-  order.items.forEach(item => {
-    const y = doc.y;
+    order.items.forEach(item => {
+      const y = doc.y;
+      let itemSubtotal = 0;
 
-    let itemSubtotal = 0;
+      if (
+        item.status !== "Cancelled" &&
+        item.status !== "Returned" &&
+        !(item.status === "Return Requested" && item.returnStatus === "Approved")
+      ) {
+        itemSubtotal = item.price * item.quantity;
+        calculatedSubTotal += itemSubtotal;
+      }
 
-  //  Do NOT charge for these statuses
-    if (
-      item.status !== "Cancelled" &&
-      item.status !== "Returned" &&
-      !(item.status === "Return Requested" && item.returnStatus === "Approved")
-    ) {
-      itemSubtotal = item.price * item.quantity;
-      calculatedSubTotal += itemSubtotal;
-    }
+      let displayStatus = item.status;
 
-    doc.fontSize(12).text(item.productName, 50, y);
-    doc.text(item.quantity.toString(), 260, y);
-    doc.text(item.status, 310, y);
-    doc.text(`₹${item.price}`, 400, y);
-    doc.text(`₹${itemSubtotal}`, 500, y);
+      if (item.returnStatus === "Approved") {
+        displayStatus = "Return Approved";
+      } else if (item.returnStatus === "Rejected") {
+        displayStatus = "Return Rejected";
+      } else if (item.status === "Return Requested") {
+        displayStatus = "Return Requested";
+      }
 
-    doc.moveDown(0.7);
-  });
-
-
-    doc.moveDown(1);
-    //PAYMENT SUMMARY RIGHT ALIGNED
-    doc.moveDown(0.5);
-  const rightX = doc.page.width - 180; // shift heading right
-  doc.fontSize(14).text("Payment Summary", rightX, doc.y, {
-  underline: true
-  });
-
-   doc.moveDown(0.5);
-      const tax = Math.round(calculatedSubTotal * 0.05);
-      const shipping = calculatedSubTotal > 0 ? 50 : 0;
-      const discount = order.offerDiscount || 0;
-      const grandTotal = calculatedSubTotal + tax + shipping - discount;
-
-      doc.fontSize(12).text(`Subtotal: ₹${calculatedSubTotal}`, { align: "right" });
-      doc.text(`Tax: ₹${tax}`, { align: "right" });
-      doc.text(`Shipping Charge: ₹${shipping}`, { align: "right" });
-      doc.text(`Discount: ₹${discount}`, { align: "right" });
+      doc.fontSize(12).text(item.productName, 50, y);
+      doc.text(item.quantity.toString(), 260, y);
+      doc.text(displayStatus, 310, y);
+      doc.text(`Rs. ${item.price}`, 400, y);
+      doc.text(`Rs. ${itemSubtotal}`, 500, y);
 
       doc.moveDown(0.7);
-
-      doc.fontSize(14).text(`Grand Total: ₹${grandTotal}`, {
-      align: "right",
     });
 
-    //FOOTER (BOTTOM RIGHT)
+    doc.moveDown(1);
+
+    // PAYMENT SUMMARY
+    doc.moveDown(0.5);
+    const rightX = doc.page.width - 180;
+
+    doc.fontSize(14).text("Payment Summary", rightX, doc.y, {
+      underline: true
+    });
+
+    doc.moveDown(0.5);
+
+    const tax = order.taxAmount || 0;
+    const shipping = order.shippingCharge || 0;
+    const offerDiscount = order.offerDiscount || 0;
+    const couponDiscount = order.couponDiscount || 0;
+    const grandTotal = order.totalAmount || 0;
+
+    doc.fontSize(12).text(`Subtotal: Rs. ${calculatedSubTotal}`, { align: "left" });
+    doc.text(`Tax: Rs. ${tax}`, { align: "left" });
+    doc.text(`Shipping Charge: Rs. ${shipping}`, { align: "left" });
+
+    if (offerDiscount > 0) {
+      doc.text(`Offer Discount: Rs. ${offerDiscount}`, { align: "left" });
+    }
+
+    if (couponDiscount > 0) {
+      doc.text(`Coupon Discount: Rs. ${couponDiscount}`, { align: "left" });
+    }
+
+    doc.moveDown(0.7);
+
+    doc.fontSize(13).text(`Grand Total: Rs. ${grandTotal}`, {
+      align: "left",
+    });
+
+    // FOOTER
     doc.moveDown(3);
 
     doc.fontSize(11).text(
       "Thank you for shopping with Cakez.in!",
-      0,                     // start at left edge
-      doc.y,                 // current Y position
+      0,
+      doc.y,
       { align: "center", width: doc.page.width }
     );
 
@@ -450,6 +487,7 @@ const downloadInvoice = async (req, res, next) => {
       doc.y,
       { align: "center", width: doc.page.width }
     );
+
     doc.end();
 
   } catch (error) {
@@ -558,31 +596,96 @@ const submitSingleReturn = async (req, res, next) => {
 //HELPER: RECALCULATE ORDER TOTALS
 function recalculateOrderTotals(order) {
 
+  // 1. Get valid items (not cancelled, not returned)
   const validItems = order.items.filter(item => {
     if (item.status === "Cancelled") return false;
     if (item.status === "Returned") return false;
-
-    if (
-      item.status === "Return Requested" &&
-      item.returnStatus === "Approved"
-    ) return false;
-
-    if (item.returnStatus === "Rejected") return false;
-
     return true;
   });
 
-  const subTotal = validItems.reduce((sum, item) => {
+  // 2. Calculate new subtotal
+  const newSubTotal = validItems.reduce((sum, item) => {
     return sum + item.price * item.quantity;
   }, 0);
 
-  const taxAmount = Math.round(subTotal * 0.05);
-  const shippingCharge = subTotal > 0 ? 50 : 0;
+  // 3. Calculate original subtotal (before any return)
+  const originalSubTotal = order.items.reduce((sum, item) => {
+    return sum + item.price * item.quantity;
+  }, 0);
 
-  order.subTotal = subTotal;
+  // 4. Recalculate remaining coupon proportionally
+  let newCouponDiscount = 0;
+
+  if (order.originalCouponDiscount > 0 && originalSubTotal > 0) {
+    newCouponDiscount = Math.round(
+      (newSubTotal / originalSubTotal) * order.originalCouponDiscount 
+    );
+  }
+
+  // 5. Recalculate tax & shipping
+  const taxAmount = Math.round(newSubTotal * 0.05);
+  const shippingCharge = newSubTotal > 0 ? 50 : 0;
+
+  // 6. Update order fields
+  order.subTotal = newSubTotal;
+  order.couponDiscount = newCouponDiscount;
   order.taxAmount = taxAmount;
   order.shippingCharge = shippingCharge;
-  order.totalAmount = subTotal + taxAmount + shippingCharge;
+
+  order.totalAmount =
+    newSubTotal + taxAmount + shippingCharge - newCouponDiscount;
+}
+// function recalculateOrderTotals(order) {
+
+//   const validItems = order.items.filter(item => {
+//     if (item.status === "Cancelled") return false;
+//     if (item.status === "Returned") return false;
+
+//     if (
+//       item.status === "Return Requested" &&
+//       item.returnStatus === "Approved"
+//     ) return false;
+
+//     //if (item.returnStatus === "Rejected") return false;
+
+//     return true;
+//   });
+
+//   const subTotal = validItems.reduce((sum, item) => {
+//     return sum + item.price * item.quantity;
+//   }, 0);
+
+//   const taxAmount = Math.round(subTotal * 0.05);
+//   const shippingCharge = subTotal > 0 ? 50 : 0;
+
+//   order.subTotal = subTotal;
+//   order.taxAmount = taxAmount;
+//   order.shippingCharge = shippingCharge;
+//   order.totalAmount = subTotal + taxAmount + shippingCharge;
+// }
+
+function calculateRefundWithCoupon(order, item) {
+
+  if (!order.couponCode || order.originalCouponDiscount <= 0) {
+    return item.price * item.quantity;
+  }
+
+  const originalSubTotal = order.items.reduce((sum, i) => {
+    return sum + i.price * i.quantity;
+  }, 0);
+
+  if (originalSubTotal <= 0) {
+    return item.price * item.quantity;
+  }
+
+  const itemTotal = item.price * item.quantity;
+
+  const couponShare =
+    (itemTotal / originalSubTotal) * order.originalCouponDiscount;
+
+  const refundAmount = itemTotal - couponShare;
+
+  return Math.round(refundAmount);
 }
 
 module.exports = {
