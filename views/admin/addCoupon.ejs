@@ -24,12 +24,26 @@
           </div>
 
           <div class="form-group">
-            <label>Discount Percentage :</label>
+            <label>Discount Type :</label>
+            <select id="discountType">
+              <option value="percentage">Percentage (%)</option>
+              <option value="flat">Flat (₹)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Discount :</label>
             <input type="number" id="couponAmount" placeholder="Eg: 20">
             <div id="couponAmount-error" class="error-message"></div>
           </div>
 
-          <div class="form-group">
+          <!-- <div class="form-group">
+            <label>Discount Percentage :</label>
+            <input type="number" id="couponAmount" placeholder="Eg: 20">
+            <div id="couponAmount-error" class="error-message"></div>
+          </div> -->
+
+          <div class="form-group" id="maxDiscountGroup">
             <label>Max Discount :</label>
             <input type="number" id="maxDiscount" placeholder="Eg: 300">
           </div>
@@ -74,6 +88,21 @@ const minPurchase = document.getElementById("minPurchase");
 const description = document.getElementById("description");
 const usageLimit = document.getElementById("usageLimit");
 const expiryDate = document.getElementById("expiryDate");
+const discountType = document.getElementById("discountType");
+const maxDiscountGroup = document.getElementById("maxDiscountGroup");
+
+function toggleMaxDiscount() {
+  if (discountType.value === "flat") {
+    maxDiscountGroup.style.display = "none";
+    maxDiscount.value = "";
+  } else {
+    maxDiscountGroup.style.display = "flex";
+  }
+}
+
+discountType.addEventListener("change", toggleMaxDiscount);
+window.addEventListener("load", toggleMaxDiscount);
+
 
 function handleFormSubmit(event) {
   event.preventDefault();
@@ -99,10 +128,20 @@ function handleFormSubmit(event) {
     isValid = false;
   }
 
-  if (!discount || discount < 1 || discount > 100) {
-    show("couponAmount-error", "Discount must be between 1 and 100");
+  if (!discount || discount < 1) {
+   show("couponAmount-error", "Invalid discount value");
     isValid = false;
   }
+
+  if (discountType.value === "percentage" && discount > 100) {
+    show("couponAmount-error", "Percentage cannot exceed 100");
+    isValid = false;
+  }
+
+  // if (!discount || discount < 1 || discount > 100) {
+  //   show("couponAmount-error", "Discount must be between 1 and 100");
+  //   sValid = false;
+  // }
 
   if (!description.value.trim()) {
     show("description-error", "Description is required");
@@ -122,8 +161,10 @@ function handleFormSubmit(event) {
   const data = {
     name,
     code,
+    discountType: discountType.value,
     discountValue: discount,
-    maxDiscountAmount: maxDiscount.value || null,
+    maxDiscountAmount: discountType.value === "percentage" ? maxDiscount.value || null : null,
+    //maxDiscountAmount: maxDiscount.value || null,
     minPurchaseAmount: minPurchase.value || 0,
     description: description.value.trim(),
     usageLimit: usageLimit.value || null,

@@ -40,6 +40,7 @@
               <th>Sl.No</th>
               <th>Coupon Code</th>
               <th>Coupon Name</th>
+              <th>Type</th>
               <th>Coupon Amount</th>
               <th>Max Discount</th>
               <th>Description</th>
@@ -59,7 +60,22 @@
                   <td><%= (currentPage - 1) * limit + index + 1 %></td>
                   <td><%= coupon.code %></td>
                   <td><%= coupon.name %></td>
-                  <td><%= coupon.discountValue %>%</td>
+                  <td>
+                    <% if (coupon.discountType === "percentage") { %>
+                      <span style="color:rgb(128, 189, 128);">%</span>
+                    <% } else { %>
+                      <span style="color:rgb(163, 163, 226);">Flat</span>
+                    <% } %>
+                  </td>
+
+                  <td>
+                    <% if (coupon.discountType === "percentage") { %>
+                      <%= coupon.discountValue %>%
+                    <% } else { %>
+                      ₹<%= coupon.discountValue %>
+                    <% } %>
+                  </td>
+                  <!-- <td><%= coupon.discountValue %>%</td> -->
                   <td><%= coupon.maxDiscountAmount || "-" %></td>
                   <td><%= coupon.description %></td>
                   <td><%= coupon.usageLimit || "∞" %></td>

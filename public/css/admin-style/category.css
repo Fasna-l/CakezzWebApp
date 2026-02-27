@@ -666,3 +666,11 @@ input:checked + .slider:before {
   color: white;
 }
 
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.categories-table {
+  min-width: 120px; /* adjust if needed */
+}
