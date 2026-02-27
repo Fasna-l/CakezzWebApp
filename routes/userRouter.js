@@ -95,9 +95,9 @@ router.get("/cart/checkout", userAuth, cartController.proceedToCheckout);
 router.get("/wishlist", userAuth, wishlistController.loadWishlist);
 
 // add / remove wishlist
-router.post("/wishlist/toggle", userAuth, wishlistController.toggleWishlist);
-router.post("/wishlist/remove", userAuth, wishlistController.removeFromWishlist);
-router.get("/wishlist-count", userAuth, wishlistController.wishlistCount);
+router.post("/wishlist/toggle", wishlistController.toggleWishlist);
+router.post("/wishlist/remove", wishlistController.removeFromWishlist);
+router.get("/wishlist-count", wishlistController.wishlistCount);
 
 
 //checkout

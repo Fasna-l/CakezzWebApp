@@ -146,11 +146,15 @@ const loadHomepage = async (req, res, next) => {
 
 const loadLogin = async (req,res,next)=>{
     try {
-        if(!req.session.user){
-            return res.render("login",{message:req.query.message || ""});
-        }else{
-            res.redirect("/")
-        }  
+        if(req.session.user){
+            return res.redirect("/");
+        }
+
+        const message = req.session.loginError;
+        delete req.session.loginError;  // clear after showing once
+
+        return res.render("login",{message});
+
     } catch (error) {
         next(error);
     }
@@ -161,20 +165,25 @@ const login = async (req,res,next)=>{
         const {email,password} = req.body;
         const findUser = await User.findOne({isAdmin:0,email:email});
         if(!findUser){
-            return res.render("login",{message:"We couldn't find an account with this email. Please try again or sign up."});
+          req.session.loginError = "We couldn't find an account with this email. Please try again or sign up.";
+          return res.redirect("/login");
         }
         if(findUser.isBlocked){
-            return res.render("login",{message:"Your account has been disabled. Please contact our team for assistance."})
+          req.session.loginError = "Your account has been disabled. Please contact our team for assistance.";
+          return res.redirect("/login");
         }
 
         const passwordMatch = await bcrypt.compare(password,findUser.password);
 
         if(!passwordMatch){
-            return res.render("login",{message:"Incorrect Password"})
+          req.session.loginError = "Incorrect Password";
+          return res.redirect("/login");
+            //return res.render("login",{message:"Incorrect Password"})
         }
 
         req.session.user = findUser._id
-        res.redirect("/");
+        return res.redirect("/")
+        //res.redirect("/");
 
     } catch (error) {
       next(error);
