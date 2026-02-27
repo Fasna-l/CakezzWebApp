@@ -1,184 +1,193 @@
 <%- include('../partials/user/header') %>
 
-<!--==================== MAIN CONTENT SECTION ====================--> 
-<!-- Hero Section--> 
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<!--==================== MAIN CONTENT SECTION ====================-->
+
+<!-- Hero Section-->
 <section class="hero-section">
   <div class="container">
     <div class="hero-banner-container">
       <img src="/images/banner image.jpg" alt="banner image" class="img-fluid" />
-      <button class="hero-shop-now-btn">Shop Now</button>
+      <button class="hero-shop-now-btn" onclick="window.location.href='/shop'">Shop Now</button>
     </div>
   </div>
 </section>
 
-<!--Cakes Section -->
+<!-- Cakes Section (Latest Products – 1 kg check) -->
 <section class="cakes-section">
   <div class="container">
     <div class="text-center mb-4">
       <h2 class="section-title mb-1">Cakes</h2>
       <p class="section-subtitle mb-3">Dreamy cakes for every occasion</p>
       <div class="d-flex justify-content-end">
-        <a href="#" class="view-all-btn">VIEW ALL</a>
+        <a href="/shop" class="view-all-btn">VIEW ALL</a>
       </div>
     </div>
 
     <div class="row">
-      <div class="col-lg-3 col-md-6">
-        <div class="cake-card">
-          <div class="wishlist-icon"><i class="far fa-heart"></i></div>
-          <img src="/images/RoseCake.jpg" alt="Rose Cake" />
-          <div class="cake-card-body">
-            <h5 class="cake-card-title">Pink Cake</h5>
-            <p class="cake-card-subtitle">Starting from ₹ 500</p>
-            <button class="cake-add-to-cart-btn">
-              <i class="fas fa-shopping-cart"></i>
-              Add to Cart
-            </button>
-          </div>
-        </div>
-      </div>
+      <% latestProducts.forEach(product => { 
+           const oneKgVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+      %>
+        <div class="col-lg-3 col-md-6">
+          <div class="cake-card">
+            <% if (product.offerPercentage > 0) { %>
+              <span class="offer-badge">
+                <%= product.offerPercentage %>%
+                <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
+              </span>
+            <% } %>
 
-      <div class="col-lg-3 col-md-6">
-        <div class="cake-card">
-          <div class="wishlist-icon"><i class="far fa-heart"></i></div>
-          <img src="/images/Gulab Jamun Cake.jpg" alt="Gulab Jamun Cake" />
-          <div class="cake-card-body">
-            <h5 class="cake-card-title">Gulab Jamun Cake</h5>
-            <p class="cake-card-subtitle">Starting from ₹ 600</p>
-            <button class="cake-add-to-cart-btn">
-              <i class="fas fa-shopping-cart"></i>
-              Add to Cart
-            </button>
-          </div>
-        </div>
-      </div>
 
-      <div class="col-lg-3 col-md-6">
-        <div class="cake-card">
-          <div class="wishlist-icon"><i class="far fa-heart"></i></div>
-          <img src="/images/Choco Cake.jpg" alt="Choco Truffle" />
-          <div class="cake-card-body">
-            <h5 class="cake-card-title">Choco Truffle</h5>
-            <p class="cake-card-subtitle">Starting from ₹ 800</p>
-            <button class="cake-add-to-cart-btn">
-              <i class="fas fa-shopping-cart"></i>
-              Add to Cart
-            </button>
-          </div>
-        </div>
-      </div>
+            <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
+              data-product-id="<%= product._id %>">
+              <i class="fa-heart"></i>
+            </div>
+            <a href="/product/<%= product._id %>">
+              <img src="/uploads/product/<%= product.productImage[0] %>" alt="<%= product.productName %>" />
+            </a>
 
-      <div class="col-lg-3 col-md-6">
-        <div class="cake-card">
-          <div class="wishlist-icon"><i class="far fa-heart"></i></div>
-          <img src="/images/BlackForest Cake.jpg" alt="BlackForest Cake" />
-          <div class="cake-card-body">
-            <h5 class="cake-card-title">BlackForest Cake</h5>
-            <p class="cake-card-subtitle">Starting from ₹ 700</p>
-            <button class="cake-add-to-cart-btn">
-              <i class="fas fa-shopping-cart"></i>
-              Add to Cart
-            </button>
+            <div class="cake-card-body">
+              <h5 class="cake-card-title"><%= product.productName %></h5>
+              <div class="price-rating-row">
+  <p class="cake-card-subtitle">
+    Starting from ₹<%= product.offerPercentage
+  ? Math.round(oneKgVariant.price - (oneKgVariant.price * product.offerPercentage) / 100)
+  : oneKgVariant.price
+%>
+
+  </p>
+
+  <% 
+    let avg = 0;
+    if(product.reviews && product.reviews.length){
+      avg = (product.reviews.reduce((a, b) => a + b.rating, 0) / product.reviews.length).toFixed(1);
+    }
+  %>
+
+  <% if(avg > 0){ %>
+    <span class="rating-badgelatestprdct rating-inline">★ <%= avg %></span>
+  <% } %>
+</div>
+
+              <% if (!oneKgVariant || oneKgVariant.stock <= 0) { %>
+                <p style="color:red; font-weight:600;">Sold Out (1 kg)</p>
+              <% } %>
+
+              <button 
+                class="cake-add-to-cart-btn"
+                data-product-id="<%= product._id %>"
+                data-size="1kg"
+                data-qty="1"
+                <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'disabled' : '' %>>
+  
+                <i class="fas fa-shopping-cart"></i>
+                <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
+              </button>
+
+            </div>
           </div>
         </div>
-      </div>
+      <% }) %>
     </div>
   </div>
 </section>
 
-<!-- Bestsellers Section--> 
+<!-- Bestsellers Section – check 3 kg / highest variant -->
 <section class="bestsellers-section">
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="section-title mb-0">Bestsellers</h2>
-      <a href="#" class="view-all-grey">VIEW ALL</a>
+      <a href="/shop" class="view-all-grey">VIEW ALL</a>
     </div>
 
-    <div class="row">
-      <div class="col-lg-3 col-md-6">
-        <div class="product-card">
-          <div class="wishlist-icon"><i class="far fa-heart"></i></div>
-          <div class="discount-badge">27% OFF</div>
-          <div class="rating-badge"><i class="fas fa-star"></i>4.5</div>
-          <img src="/images/Rasmalai Cake.jpg" alt="Rasmalai Cake" />
-          <div class="price-container">
-            <span class="sale-price">₹500</span>
-            <span class="original-price">₹650</span>
+    <div class="swiper mySwiper">
+      <div class="swiper-wrapper">
+        <% bestProducts.forEach(product => { 
+             const threeKgVariant = product.variants && product.variants.length > 0 
+               ? product.variants[product.variants.length - 1] 
+               : null;
+        %>
+          <div class="swiper-slide">
+            <div class="product-card">
+
+              <% if (product.offerPercentage > 0) { %>
+                <span class="offer-badge">
+                  <%= product.offerPercentage %>%
+                  <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
+                </span>
+              <% } %>
+              <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
+                data-product-id="<%= product._id %>">
+                <i class="fa-heart"></i>
+              </div>
+
+              <a href="/product/<%= product._id %>">
+                <img src="/uploads/product/<%= product.productImage[0] %>" alt="<%= product.productName %>">
+              </a>
+
+              <div class="price-container">
+                ₹<%=
+  threeKgVariant
+    ? Math.max(
+        0,
+        product.offerPercentage
+          ? Math.round(
+              threeKgVariant.price -
+              (threeKgVariant.price * product.offerPercentage) / 100
+            )
+          : threeKgVariant.price
+      )
+    : product.maxPrice || "N/A"
+%>
+
+              </div>
+
+              <% if (!threeKgVariant || threeKgVariant.stock <= 0) { %>
+                <p style="color:red; font-weight:600;">Sold Out (3 kg)</p>
+              <% } %>
+
+              <div class="product-card-body">
+                <button 
+                  class="add-to-cart-btn mb-3"
+                  data-product-id="<%= product._id %>"
+                  data-size="3kg"
+                  data-qty="1"
+                  <%= (!threeKgVariant || threeKgVariant.stock <= 0) ? 'disabled' : '' %>>
+  
+                  <i class="fas fa-shopping-cart"></i>
+                  <%= (!threeKgVariant || threeKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
+                </button>
+
+                <h5 class="product-title"><%= product.productName %></h5>
+                <% 
+                  let avg = 0;
+                    if(product.reviews && product.reviews.length){
+                      avg = (product.reviews.reduce((a, b) => a + b.rating, 0) / product.reviews.length).toFixed(1);
+                    }
+                %>
+
+                <% if(avg > 0){ %>
+                  <span class="rating-badge">★ <%= avg %></span>
+                <% } %>
+              </div>
+            </div>
           </div>
-          <div class="product-card-body">
-            <button class="add-to-cart-btn mb-3">
-              <i class="fas fa-shopping-cart"></i>
-              Add to Cart
-            </button>
-            <h5 class="product-title">Rasmalai Cake</h5>
-          </div>
-        </div>
+        <% }) %>
       </div>
 
-      <div class="col-lg-3 col-md-6">
-        <div class="product-card">
-          <div class="wishlist-icon"><i class="far fa-heart"></i></div>
-          <div class="discount-badge">20% OFF</div>
-          <div class="rating-badge"><i class="fas fa-star"></i>4.8</div>
-          <img src="/images/Pineapple Cake.jpg" alt="Pineapple Cake" />
-          <div class="price-container">
-            <span class="sale-price">₹600</span>
-            <span class="original-price">₹750</span>
-          </div>
-          <div class="product-card-body">
-            <button class="add-to-cart-btn mb-3">
-              <i class="fas fa-shopping-cart"></i>
-              Add to Cart
-            </button>
-            <h5 class="product-title">Pineapple Cake</h5>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-3 col-md-6">
-        <div class="product-card">
-          <div class="wishlist-icon"><i class="far fa-heart"></i></div>
-          <div class="discount-badge">17% OFF</div>
-          <div class="rating-badge"><i class="fas fa-star"></i>4.7</div>
-          <img src="/images/Fruit Cake.jpg" alt="Fruit Cake" />
-          <div class="price-container">
-            <span class="sale-price">₹750</span>
-            <span class="original-price">₹900</span>
-          </div>
-          <div class="product-card-body">
-            <button class="add-to-cart-btn mb-3">
-              <i class="fas fa-shopping-cart"></i>
-              Add to Cart
-            </button>
-            <h5 class="product-title">Fruit Cake</h5>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-lg-3 col-md-6">
-        <div class="product-card">
-          <div class="wishlist-icon"><i class="far fa-heart"></i></div>
-          <div class="discount-badge">16% OFF</div>
-          <div class="rating-badge"><i class="fas fa-star"></i>4.9</div>
-          <img src="/images/Mango Cake.jpg" alt="Mango Cake" />
-          <div class="price-container">
-            <span class="sale-price">₹800</span>
-            <span class="original-price">₹950</span>
-          </div>
-          <div class="product-card-body">
-            <button class="add-to-cart-btn mb-3">
-              <i class="fas fa-shopping-cart"></i>
-              Add to Cart
-            </button>
-            <h5 class="product-title">Mango Cake</h5>
-          </div>
-        </div>
-      </div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+      <div class="swiper-pagination"></div>
     </div>
   </div>
 </section>
 
-<!--CTA Section-->  
+<!-- CTA Section -->
 <section class="cta-section">
   <div class="container">
     <div class="row">
@@ -189,7 +198,19 @@
     </div>
   </div>
 </section>
+<!-- Small Weight Popup -->
+<div id="weightPopup" class="weight-popup"></div>
 
-<!--==================== END MAIN CONTENT SECTION ==================== --> 
+<!--==================== END MAIN CONTENT SECTION ====================-->
+<script>
+  var swiper = new Swiper(".mySwiper", {
+    slidesPerView: 4,
+    spaceBetween: 20,
+    loop: true,
+    autoplay: { delay: 3000, disableOnInteraction: false },
+    navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+    breakpoints: { 1024: { slidesPerView: 4 }, 768: { slidesPerView: 2 }, 480: { slidesPerView: 1 } }
+  });
+</script>
 
 <%- include('../partials/user/footer') %>

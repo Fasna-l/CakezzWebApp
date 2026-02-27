@@ -1,0 +1,104 @@
+<%- include('../partials/admin/header') %>
+<link rel="stylesheet" href="/css/admin-style/addCategory.css">
+
+<div class="dashboard-container">
+  <div class="dashboard-wrapper">
+    <%- include('../partials/admin/sidebar') %>
+
+    <div class="add-category-container">
+      <h1 class="page-title">Category Offer</h1>
+
+      <div class="form-card">
+        <form class="add-category-form" onsubmit="return handleFormSubmit(event)" novalidate>
+
+          <!-- Category (locked) -->
+          <div class="form-group">
+            <label>Category :</label>
+            <input type="text"
+              value="<%= categories.find(c => c._id == selectedCategoryId)?.categoryName %>"
+              disabled>
+            <input type="hidden" id="category" value="<%= selectedCategoryId %>">
+          </div>
+
+          <!-- Start Date -->
+          <div class="form-group">
+            <label>Start Date :</label>
+            <input type="date" id="startDate">
+            <div id="startDate-error" class="error-message"></div>
+          </div>
+
+          <!-- Discount -->
+          <div class="form-group">
+            <label>Discount (%) :</label>
+            <input type="number" id="discount" min="1" max="90">
+            <div id="discount-error" class="error-message"></div>
+          </div>
+
+          <!-- End Date -->
+          <div class="form-group">
+            <label>End Date :</label>
+            <input type="date" id="endDate">
+            <div id="endDate-error" class="error-message"></div>
+          </div>
+
+          <button type="submit" class="btn-add">Add</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  const category = document.getElementById("category");
+  const startDate = document.getElementById("startDate");
+  const endDate = document.getElementById("endDate");
+  const discount = document.getElementById("discount");
+
+  function handleFormSubmit(e) {
+    e.preventDefault();
+    if (!validate()) return;
+
+    fetch("/admin/category-offer/add", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        categoryId: category.value,
+        startDate: startDate.value,
+        endDate: endDate.value,
+        discount: discount.value
+      })
+    })
+    .then(() => Swal.fire("Added!", "", "success"))
+    .then(() => location.href = "/admin/category");
+  }
+
+  function validate() {
+    clear();
+    let ok = true;
+
+    if (!startDate.value) { err("startDate-error", "Start date required"); ok = false; }
+    if (!endDate.value) { err("endDate-error", "End date required"); ok = false; }
+    if (discount.value < 1 || discount.value > 90) {
+      err("discount-error", "Discount must be 1–90%");
+      ok = false;
+    }
+    return ok;
+  }
+
+  function err(id, msg) {
+    const el = document.getElementById(id);
+    el.innerText = msg;
+    el.style.display = "block";
+  }
+
+  function clear() {
+    document.querySelectorAll(".error-message").forEach(e => {
+      e.innerText = "";
+      e.style.display = "none";
+    });
+  }
+</script>
+
+<%- include('../partials/admin/footer') %>

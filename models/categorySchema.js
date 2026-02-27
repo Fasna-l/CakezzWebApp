@@ -15,23 +15,10 @@ const categorySchema = new Schema({
         type:Boolean,
         default:true
     },
-    categoryOffer:{
-        name:{
-            type:String,
-            required:false
-        },
-        discount:{
-            type:Number,
-            required:false
-        },
-        startDate:{
-            type:Date,
-            required:false
-        },
-        endDate:{
-            type:Date,
-            required:false
-        }
+    categoryOffer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "CategoryOffer",
+        default: null,
     }
 },{timestamps:true}
 );

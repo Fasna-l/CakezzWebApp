@@ -10,7 +10,7 @@
 
 /* Card wrapper */
 .signup-card {
-  background: #fff;
+  background : #fff;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -27,7 +27,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 420px; /* helps the image feel substantial on larger screens */
+  height: 720px; 
 }
 
 /* make image fill the left area nicely like the reference */
@@ -77,6 +77,10 @@
   outline: none;
   border-color: #e91e63;
   box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.12);
+}
+
+.signup-card .form-control::placeholder {
+  color: #999999;
 }
 
 /* Primary button styled only within signup card */
@@ -129,6 +133,11 @@
 }
 .link-pink:hover {
   text-decoration: underline;
+}
+.error-message{
+  color: #ff4d4d;
+  font-size: 0.75rem;
+  display: none;
 }
 
 /* Responsive */

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 - Page Not Found | Cakez.in Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-dark: #2a2a2a;
+      --card-dark: #333333;
+      --text-light: #ffffff;
+      --text-muted: #bbbbbb;
+      --accent-color:#ff4da6;
+      --hover-accent: #e63990;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-dark);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text-light);
+    }
+
+    .error-container {
+      text-align: center;
+      background-color: var(--card-dark);
+      padding: 3rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .icon-404 {
+      font-size: 5rem;
+      color: var(--accent-color);
+      margin-bottom: 1rem;
+    }
+
+    .error-code {
+      font-size: 5rem;
+      font-weight: bold;
+      color: var(--accent-color);
+      margin-bottom: 1rem;
+    }
+
+    .error-message {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 1rem;
+    }
+
+    .error-description {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+      color: #fff;
+      padding: 0.6rem 1.6rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--hover-accent);
+      border-color: var(--hover-accent);
+      transform: translateY(-2px);
+    }
+
+    .btn-outline-secondary {
+      color: var(--text-light);
+      border: 1px solid #555;
+      padding: 0.6rem 1.6rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+      background-color: #555;
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 480px) {
+      .error-container {
+        padding: 2rem;
+      }
+      .error-code {
+        font-size: 3.5rem;
+      }
+      .error-message {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="error-container">
+    <i class="bx bx-error-circle icon-404"></i>
+    <h1 class="error-code">404</h1>
+    <h2 class="error-message">Page Not Found</h2>
+    <p class="error-description">
+      Sorry, the page you’re looking for doesn’t exist or has been moved.
+    </p>
+    <div class="d-grid gap-2 d-md-block">
+      <a href="/admin" class="btn btn-primary me-md-2">
+        <i class="bx bxs-dashboard"></i> Go to Dashboard
+      </a>
+      <a href="#" onclick="history.back()" class="btn btn-outline-secondary">
+        <i class="bx bx-arrow-back"></i> Go Back
+      </a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

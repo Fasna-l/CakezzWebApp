@@ -1,0 +1,173 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/login.css">
+<!--==============================Login page==============================================-->
+<main class="login-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12">
+        <div class="login-card">
+          <div class="row g-0">
+            <!--Left: Illustration -->  
+            <div class="col-md-6">
+              <section class="promo-section" aria-label="login illustration">
+                <img
+                  src="/images/login-side-image.png"
+                  alt="Delivery person giving a gift to a customer"
+                  class="illustration-image"
+                />
+              </section>
+            </div>
+
+            <!--Right: Form --> 
+            <div class="col-md-6">
+              <section class="form-section" aria-labelledby="login-title">
+                <h2 id="login-title" class="form-title">Login</h2>
+
+                <form id="loginForm" action="/login" method="post" novalidate>    <!--novalidate-->
+
+                  <div class="form-group">
+                    <label class="form-label" for="email">Email Address</label>
+                    <input type="email" class="form-control" id="email" name="email" placeholder="Enter Email Address" required />
+                    <div class="error-message" id="error1"></div>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <div class="password-container">
+                      <input 
+                        type="password" 
+                        class="form-control" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter password" 
+                        required 
+                      />
+                      <i class="fa-solid fa-eye" id="eye"></i>
+                    </div>
+                    <!-- <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required /> -->
+                    <div class="error-message" id="error2"></div>
+                  </div>
+
+                  <!--Forgot Password--> 
+                  <div class="login-options">
+                        <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
+                  </div>
+                  
+                  <%if(locals.message && message.length>0){%>
+                    <div class="alert alert-danger text-center">
+                  <%=message%>
+                  </div>
+                  <%}%>
+                  
+
+                  <button type="submit" class="btn btn-primary cakezz-primary-btn">LOGIN ACCOUNT</button>
+                </form>
+
+                <a href="/auth/google" class="btn btn-google" style="text-decoration: none">
+                  <img
+                    src="/images/google.svg"
+                    alt="Google logo"
+                  />
+                  Sign Up with Google
+                </a>
+
+                <p class="signup-link">
+                  Do you have an account?
+                  <a href="/signup" class="link-pink">signup here</a>
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Select elements
+  const loginForm = document.getElementById("loginForm");
+  const emailid = document.getElementById("email");
+  const passwordid = document.getElementById("password");
+  const error1 = document.getElementById("error1");
+  const error2 = document.getElementById("error2");
+  const eye = document.getElementById("eye");
+
+  // Email validation
+  function emailValidateChecking() {
+    const emailval = emailid.value.trim();
+    const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (emailval === "") {
+      error1.style.display = "block";
+      error1.innerHTML = "Email is required";
+    } else if (!emailpattern.test(emailval)) {
+      error1.style.display = "block";
+      error1.innerHTML = "Invalid email format";
+    } else {
+      error1.style.display = "none";
+      error1.innerHTML = "";
+    }
+  }
+
+  // Password validation
+  function passValidateChecking() {
+    const passval = passwordid.value.trim();
+    const passpattern =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (passval === "") {
+      error2.style.display = "block";
+      error2.innerHTML = "Password is required";
+    } else if (!passpattern.test(passval)) {
+      error2.style.display = "block";
+      error2.innerHTML =
+        "Password must contain numbers, uppercase, lowercase, and special characters";
+    } else {
+      error2.style.display = "none";
+      error2.innerHTML = "";
+    }
+  }
+
+
+  // Clear email error while typing
+emailid.addEventListener("input", () => {
+  if (error1.innerHTML) {
+    error1.style.display = "none";
+    error1.innerHTML = "";
+  }
+});
+
+// Clear password error while typing
+passwordid.addEventListener("input", () => {
+  if (error2.innerHTML) {
+    error2.style.display = "none";
+    error2.innerHTML = "";
+  }
+});
+
+
+  // Submit validation
+  loginForm.addEventListener("submit", function(e) {
+    emailValidateChecking();
+    passValidateChecking();
+
+    // Prevent submit if errors exist
+    if (error1.innerHTML || error2.innerHTML) {
+      e.preventDefault();
+    }
+  });
+
+  //Password Visibility toggle
+  eye.addEventListener("click",function(){
+    //toggle icon
+    this.classList.toggle("fa-eye-slash");
+    //toggle input type
+    const type = passwordid.getAttribute("type") === "password" ? "text" : "password" ;
+    passwordid.setAttribute("type",type)
+  })
+
+});
+</script>
+
+<%- include('../partials/user/footer') %>

@@ -1,0 +1,313 @@
+/* Edit Address Page Styles */
+
+.account-container {
+  display: flex;
+  width: 90%;
+  max-width: 1200px;
+  margin: 90px auto;
+  gap: 30px;
+  min-height: 70vh;
+}
+
+/* Sidebar Styling */
+.account-sidebar {
+  width: 25%;
+  background: linear-gradient(135deg, #f16ead 0%, #4e0b2a 100%);
+  padding: 30px 20px;
+  border-radius: 15px;
+  height: fit-content;
+  box-shadow: 0 4px 15px rgba(255, 77, 166, 0.15);
+}
+
+.sidebar-title {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-menu li {
+  margin-bottom: 12px;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sidebar-link i {
+  font-size: 16px;
+}
+
+.sidebar-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sidebar-link.active {
+  background-color: #411128;
+  color: #fff;
+  border-color: #ff4da6;
+  font-weight: 600;
+}
+
+/* Main Content Area */
+.account-content {
+  flex: 1;
+  background: #fff;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.account-header {
+  margin-bottom: 30px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 5px;
+  text-align: center;
+}
+
+.account-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  color: black;
+}
+
+/* Form Styling */
+.address-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.form-group input {
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #ff4da6;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 77, 166, 0.1);
+}
+
+.form-group input::placeholder {
+  color: #999;
+}
+.form-group select {
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+  appearance: none; /* Removes default dropdown arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' fill='%23999' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 25px;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #ff4da6;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 77, 166, 0.1);
+}
+
+.form-group select option {
+  color: #333;
+  background-color: #fff;
+}
+
+/* Form Row for Side-by-side Fields */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* Save Button */
+.save-btn {
+  padding: 12px 32px;
+  background-color: #eb579e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  align-self: flex-start;
+  margin-top: 10px;
+}
+
+.save-btn:hover {
+  background-color: #e43a84;
+  box-shadow: 0 4px 12px rgba(255, 77, 166, 0.3);
+  transform: translateY(-2px);
+}
+
+.save-btn:active {
+  transform: translateY(0);
+}
+
+.cancel-btn{
+  border:2px solid rgb(194, 185, 185);
+  background-color: rgb(230, 213, 213);
+  border-radius: 10px;
+  padding:4px 4px 4px 4px;
+  text-decoration: none;
+  color: black;
+}
+
+.error-message{
+  color: #ff4d4d;
+  font-size: 0.75rem;
+  display: none;
+}
+
+/*address part*/
+.account-content {
+  background: #fff5f8;
+  padding: 25px;
+  border-radius: 12px;
+  flex: 1;
+}
+
+.account-header h2 {
+  color: black;
+  font-size: 1.5rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #444;
+}
+
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.save-btn {
+  background: #ff66a3;
+  color: white;
+  border: none;
+  padding: 10px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  background: #ddd;
+  color: #333;
+  padding: 5px;
+  border-radius: 8px;
+  text-decoration: none;
+  height: 40px;
+  margin-top: 10px;
+}
+
+.cancel-btn:hover {
+  background: #d4d3d3;
+}
+
+.save-btn:hover {
+  background: #ff3385;
+}
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .account-container {
+    flex-direction: column;
+    width: 95%;
+    margin: 40px auto;
+    gap: 20px;
+  }
+
+  .account-sidebar {
+    width: 100%;
+    padding: 20px;
+  }
+
+  .account-content {
+    padding: 25px;
+  }
+
+  .account-header h2 {
+    font-size: 22px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .account-container {
+    width: 98%;
+  }
+
+  .account-content {
+    padding: 15px;
+  }
+
+  .account-header h2 {
+    font-size: 18px;
+  }
+
+  .form-group input {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .save-btn {
+    width: 100%;
+    padding: 12px;
+  }
+
+  .form-row {
+    gap: 15px;
+  }
+}

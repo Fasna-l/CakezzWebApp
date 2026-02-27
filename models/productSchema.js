@@ -19,9 +19,9 @@ const productSchema = new Schema({
         type:[String],
         required:true
      },
-     isListed:{
-        type:Boolean,
-        default:true      //It indicates whether the product is listed or unlisted
+     isBlocked: {
+         type: Boolean,
+         default: false, // Indicates whether the category is active or disabled
      },
      status:{
         type:String,
@@ -29,6 +29,21 @@ const productSchema = new Schema({
         required:true,
         default:'Available'
      },
+     productOffer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Offer",
+        default: null,
+    },
+
+     reviews: [
+    {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        name: { type: String },
+        rating: { type: Number, required: true },
+        review: { type: String, trim: true },
+        date: { type: Date, default: Date.now }
+    }
+    ],
      variants:[
         {
             price:{

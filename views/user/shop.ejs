@@ -1,0 +1,165 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/shop.css">
+
+<div class="shop-container">
+  <nav class="breadcrumb">
+    <a href="/">Home</a>
+    <span>&gt;</span>
+    <span>Shop</span>
+  </nav>
+
+  <div class="shop-controls-container">
+    <div class="product-count">Total Products: <%= totalProducts %></div>
+
+    <form method="GET" action="/shop" class="filter-form">
+      <input type="text" name="search" placeholder="Search products..." value="<%= search %>" />
+
+      <select name="category">
+        <option value="">All Categories</option>
+        <% categories.forEach(cat => { %>
+          <option value="<%= cat._id %>" <%= categoryFilter == cat._id ? 'selected' : '' %>>
+            <%= cat.categoryName %>
+          </option>
+        <% }) %>
+      </select>
+
+      <select name="priceRange">
+        <option value="">Price Range</option>
+        <option value="0-499" <%= priceRange == '0-499' ? 'selected' : '' %>>₹499 & Below</option>
+        <option value="500-999" <%= priceRange == '500-999' ? 'selected' : '' %>>₹500 - ₹999</option>
+        <option value="1000-1499" <%= priceRange == '1000-1499' ? 'selected' : '' %>>₹1000 - ₹1499</option>
+        <option value="1500-100000" <%= priceRange == '1500-100000' ? 'selected' : '' %>>₹1500 & Above</option>
+      </select>
+
+
+      <select name="sort">
+        <option value="">Sort</option>
+        <option value="priceAsc" <%= sort == 'priceAsc' ? 'selected' : '' %>>Price: Low to High</option>
+        <option value="priceDesc" <%= sort == 'priceDesc' ? 'selected' : '' %>>Price: High to Low</option>
+        <option value="az" <%= sort == 'az' ? 'selected' : '' %>>A - Z</option>
+        <option value="za" <%= sort == 'za' ? 'selected' : '' %>>Z - A</option>
+      </select>
+
+      <button type="submit" class="filter-apply-btn">Apply</button>
+      <a href="/shop" class="filter-clear-btn">Clear</a>
+    </form>
+  </div>
+
+  <div class="products-grid">
+    <% if (products.length === 0) { %>
+      <p>No products found.</p>
+    <% } %>
+
+    <% products.forEach(product => { 
+         const oneKgVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+    %>
+      <div class="product-card">
+        <% if (product.offerPercentage > 0) { %>
+          <span class="offer-badge">
+            <%= product.offerPercentage %>%
+            <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
+          </span>
+        <% } %>
+
+        <a href="/product/<%= product._id %>">
+          <img src="/uploads/product/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="product-img">
+        </a>
+
+        <h3 class="product-name">
+          <a href="/product/<%= product._id %>" class="product-link"><%= product.productName %></a>
+        </h3>
+        <p class="product-price">
+
+          ₹<%= product.offerPercentage
+            ? Math.round(oneKgVariant.price - (oneKgVariant.price * product.offerPercentage) / 100)
+            : oneKgVariant.price
+          %>
+        </p>
+        <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
+          data-product-id="<%= product._id %>">
+          <i class="fa-heart"></i>
+        </div>
+
+
+        <% if (!oneKgVariant || oneKgVariant.stock <= 0) { %>
+          <p class="out-of-stock">Out of stock (1 kg)</p>
+        <% } %>
+
+        <button class="add-to-cart-btn"
+          data-product-id="<%= product._id %>"
+          data-size="1kg"
+          data-qty="1"
+          <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'disabled' : '' %>>
+  
+          <i class="fas fa-shopping-cart"></i>
+          <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
+        </button>
+
+
+        <% 
+          let avg = 0;
+          if(product.reviews && product.reviews.length){
+            avg = (product.reviews.reduce((a, b) => a + b.rating, 0) / product.reviews.length).toFixed(1);
+          }
+        %>
+        <% if(avg > 0){ %>
+          <span class="rating-badge">★ <%= avg %></span>
+        <% } %>
+      </div>
+    <% }); %>
+  </div>
+
+  <!--Pagination-->
+  <div class="pagination-container">
+
+  <!-- Prev -->
+    <% if (currentPage > 1) { %>
+      <a href="/shop?page=<%= currentPage - 1 %>&search=<%= search || '' %>&category=<%= categoryFilter || '' %>&priceRange=<%= priceRange || '' %>&sort=<%= sort || '' %>" class="pagination-link prev">« Prev</a>
+    <% } else { %>
+      <span class="pagination-link disabled">« Prev</span>
+    <% } %>
+
+    <% 
+      const startPage = Math.max(1, currentPage - 2);
+      const endPage = Math.min(totalPages, currentPage + 2);
+    %>
+
+    <% if (startPage > 1) { %>
+      <a href="/shop?page=1&search=<%= search || '' %>&category=<%= categoryFilter || '' %>&priceRange=<%= priceRange || '' %>&sort=<%= sort || '' %>" class="pagination-link">1</a>
+      <% if (startPage > 2) { %>
+        <span class="pagination-link disabled">...</span>
+      <% } %>
+    <% } %>
+
+    <% for (let i = startPage; i <= endPage; i++) { %>
+      <% if (i === currentPage) { %>
+        <span class="pagination-link current"><%= i %></span>
+      <% } else { %>
+        <a href="/shop?page=<%= i %>&search=<%= search || '' %>&category=<%= categoryFilter || '' %>&priceRange=<%= priceRange || '' %>&sort=<%= sort || '' %>" class="pagination-link"><%= i %></a>
+      <% } %>
+    <% } %>
+
+    <% if (endPage < totalPages) { %>
+      <% if (endPage < totalPages - 1) { %>
+        <span class="pagination-link disabled">...</span>
+      <% } %>
+      <a href="/shop?page=<%= totalPages %>&search=<%= search || '' %>&category=<%= categoryFilter || '' %>&priceRange=<%= priceRange || '' %>&sort=<%= sort || '' %>" class="pagination-link"><%= totalPages %></a>
+    <% } %>
+
+  <!-- Next -->
+    <% if (currentPage < totalPages) { %>
+      <a href="/shop?page=<%= currentPage + 1 %>&search=<%= search || '' %>&category=<%= categoryFilter || '' %>&priceRange=<%= priceRange || '' %>&sort=<%= sort || '' %>" class="pagination-link next">Next »</a>
+    <% } else { %>
+      <span class="pagination-link disabled">Next »</span>
+    <% } %>
+
+  </div>
+
+  <p style="text-align:center;color:#aaa;font-size:13px;margin-top:8px;">
+    Page <%= currentPage %> of <%= totalPages %>
+  </p>
+</div>
+
+<div id="weightPopup" class="weight-popup"></div>
+
+<%- include('../partials/user/footer') %>

@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
 const {Schema} = mongoose;
 
-
 const userSchema = new Schema({
     name:{
         type:String,
@@ -22,6 +21,14 @@ const userSchema = new Schema({
         type:String,
         required:false
     },
+    profileImage: {
+        type: String,
+        default: null
+    },
+    isGoogleUser: {
+        type: Boolean,
+        default: false
+    },
     isBlocked:{
         type:Boolean,
         default:false
@@ -30,6 +37,18 @@ const userSchema = new Schema({
         type:Boolean,
         default:false
     },
+    referralCode: {
+        type: String,
+        unique: true,
+        sparse: true
+    },
+
+    referredBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
+
     createdOn:{
         type:String,
         default: () => {

@@ -1,0 +1,120 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/password.css">
+
+<div class="account-container">
+  <!-- Sidebar -->
+  <div class="account-sidebar">
+    <h3 class="sidebar-title">My Wallet</h3>
+    <ul class="sidebar-menu">
+      <li><a href="/order" class="sidebar-link"><i class="fas fa-shopping-bag"></i> Order</a></li>
+      <li><a href="/wishlist" class="sidebar-link"><i class="fas fa-heart"></i> Wishlist</a></li>
+      <li><a href="/address" class="sidebar-link"><i class="fas fa-map-marker-alt"></i> Address</a></li>
+      <% if (!user.isGoogleUser) { %>
+        <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li>
+      <% } %>
+      <li><a href="/account" class="sidebar-link"><i class="fas fa-user"></i> Account Detail</a></li>
+      <li><a href="/wallet" class="sidebar-link active"><i class="fas fa-wallet"></i> Wallet</a></li>
+      <li><a href="/referral" class="sidebar-link"><i class="fas fa-share-alt"></i> Referral</a></li>
+      <li><a href="/logout" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  
+    <div class="account-content">
+        <div class="account-header">
+            <h2>MY WALLET</h2>
+        </div>
+
+        <!-- Wallet Balance Card -->
+        <div class="wallet-card">
+            <div class="wallet-info">
+                <i class="fas fa-wallet wallet-icon"></i>
+                <div>
+                    <p class="wallet-label">My Wallet Balance</p>
+                    <h3 class="wallet-amount">₹ <%= wallet ? wallet.balance : 0 %></h3>
+                </div>
+            </div>
+            <div class="wallet-actions">
+                <a href="/wallet/history" class="history-btn">Wallet History</a>
+            </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="payment-box">
+            <h4>Add Money to Wallet</h4>
+                <input 
+                    type="number" 
+                    id="walletAmount" 
+                    placeholder="Enter amount" 
+                    min="1"
+                    style="width:150px; padding:8px; border-radius:6px;"
+                >
+                <button id="addMoneyBtn" class="save-btn">Add Money</button>
+        </div> 
+    </div>
+
+  
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+document.getElementById("addMoneyBtn").addEventListener("click", async () => {
+  const amount = document.getElementById("walletAmount").value;
+
+  if (!amount || amount <= 0) {
+    alert("Please enter a valid amount");
+    return;
+  }
+
+  // 1. Create Razorpay order
+  const res = await fetch("/wallet/recharge", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ amount })
+  });
+
+  const data = await res.json();
+  if (!data.success) {
+    alert("Unable to create payment");
+    return;
+  }
+
+  // 2.Open Razorpay
+  const options = {
+    key: data.key,
+    amount: data.razorpayOrder.amount,
+    currency: "INR",
+    order_id: data.razorpayOrder.id,
+
+    handler: async function (response) {
+      // 3.Verify payment
+      const verifyRes = await fetch("/wallet/recharge/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+          amount
+        })
+      });
+
+      const verifyData = await verifyRes.json();
+
+      if (verifyData.success) {
+        window.location.reload();
+      } else {
+        alert("Payment failed");
+      }
+    }
+  };
+
+  const rzp = new Razorpay(options);
+  rzp.open();
+});
+</script>
+
+
+<%- include('../partials/user/footer') %>

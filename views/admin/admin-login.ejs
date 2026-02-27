@@ -1,0 +1,117 @@
+<%- include('../partials/admin/header') %>
+<div class="admin-login-container">
+    
+    <div class="admin-login-card">
+        <h2 class="admin-login-title">Admin login</h2>
+
+         <%if(locals.message && message.length>0){%>
+            <div class="alert alert-danger text-center">
+        <%=message%>
+            </div>
+        <%}%>
+        
+        <form id="adminLoginForm" class="admin-login-form" method="POST" action="/admin/login" novalidate>
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input 
+                    type="email" 
+                    class="form-control admin-input" 
+                    id="email" 
+                    name="email" 
+                    placeholder="Email" 
+                    required
+                >
+                <div id="error1" class="error-message"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <div class="admin-password-wrapper">
+                  <input 
+                    type="password" 
+                    class="form-control admin-input" 
+                    id="password" 
+                    name="password" 
+                    placeholder="Password" 
+                    required
+                  >
+                  <i class="fa-solid fa-eye admin-eye" id="adminEye"></i>
+                </div>
+                <div id="error2" class="error-message"></div>
+            </div>
+            
+            <button type="submit" class="admin-login-btn">Login</button>
+        </form>
+    </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const adminLoginForm = document.getElementById("adminLoginForm");
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const adminEye = document.getElementById("adminEye");
+  const error1 = document.getElementById("error1");
+  const error2 = document.getElementById("error2");
+
+  function validateEmail() {
+    const emailVal = email.value.trim();
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (emailVal === "") {
+      error1.style.display = "block";
+      error1.textContent = "Email is required";
+    } else if (!emailPattern.test(emailVal)) {
+      error1.style.display = "block";
+      error1.textContent = "Invalid email format";
+    } else {
+      error1.style.display = "none";
+      error1.textContent = "";
+    }
+  }
+
+  function validatePassword() {
+    const passVal = password.value.trim();
+    const passwordPattern =
+            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (passVal === "") {
+      error2.style.display = "block";
+      error2.textContent = "Password is required";
+    } else if (!passwordPattern.test(passVal)) {
+      error2.style.display = "block";
+      error2.textContent = "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters";
+    } else {
+      error2.style.display = "none";
+      error2.textContent = "";
+    }
+  }
+  // Clear errors while typing
+  email.addEventListener("input", function () {
+    error1.style.display = "none";
+    error1.textContent = "";
+  });
+
+  password.addEventListener("input", function () {
+    error2.style.display = "none";
+    error2.textContent = "";
+  });
+  
+  adminLoginForm.addEventListener("submit", function(e) {
+    validateEmail();
+    validatePassword();
+
+    if (error1.textContent || error2.textContent) {
+      e.preventDefault();
+    }
+  });
+  // Password visibility toggle
+  adminEye.addEventListener("click", function () {
+    this.classList.toggle("fa-eye-slash");
+
+    const type =
+      password.getAttribute("type") === "password" ? "text" : "password";
+
+    password.setAttribute("type", type);
+  });
+});
+</script>
+<%- include('../partials/admin/footer') %>

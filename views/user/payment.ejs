@@ -1,0 +1,274 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/payment.css">
+
+<div class="page-wrap">
+  <div class="container payment-page">
+
+    <h1 class="page-title">Payment</h1>
+
+    <div class="payment-grid">
+
+      <!-- LEFT SIDE -->
+      <section class="card payment-left">
+
+        <!-- PAYMENT METHOD -->
+        <div class="payment-method-box">
+          <h3 class="section-title">Pay With:</h3>
+
+          <label class="radio-option">
+            <input type="radio" name="paymentMethod" value="COD" checked>
+            <span>COD</span>
+          </label>
+
+          <label class="radio-option">
+            <input type="radio" name="paymentMethod" value="RAZORPAY">
+            <span>RAZORPAY</span>
+          </label>
+
+          <label class="radio-option">
+            <input type="radio" name="paymentMethod" value="WALLET">
+            <span>WALLET</span>
+          </label>
+        </div>
+
+        <!-- COUPONS -->
+        <div class="coupon-box">
+          <h3 class="section-title">Available coupons</h3>
+          <% if (!coupons.length) { %>
+            <p class="no-coupons">No coupons available for this order</p>
+          <% } %>
+
+          <% coupons.forEach(c => { %>
+            <div class="coupon-row">
+              <div>
+                <strong><%= c.code %></strong>
+                <p style="font-size:12px;color:#666;"><%= c.description %></p>
+              </div>
+              <button class="btn small copy-btn" data-code="<%= c.code %>">Copy</button>
+            </div>
+          <% }) %>
+        </div>
+
+      </section>
+
+      <!-- RIGHT SIDE -->
+      <aside class="card payment-summary">
+
+        <h3 class="section-title">Order Summary</h3>
+
+        <!-- MULTIPLE ORDER ITEMS -->
+<% checkoutItems.forEach(item => { %>
+  <div class="summary-item">
+    <div>
+      <p class="cake-name"><%= item.product.name %></p>
+      <p class="cake-qty">Qty: <%= item.quantity %></p>
+    </div>
+    <div class="cake-price">
+      ₹<%= item.price * item.quantity %>
+    </div>
+  </div>
+<% }) %>
+
+        <!-- APPLY COUPON -->
+          <div class="apply-coupon-box">
+            <input type="text" name="couponCode" id="couponCode" placeholder="Gift or discount code">
+            <button type="button" class="btn apply-btn" id="applyCouponBtn" >Apply</button>
+            <button type="button" class="btn small" id="removeCouponBtn" style="display:none;">
+              Remove
+            </button>
+          </div>
+        <!-- </form> -->
+
+        <!-- PRICE BOX -->
+        <div class="price-box">
+          <div class="price-row"><span>Subtotal :</span><span>₹<%= totals.subTotal %></span></div>
+          <div class="price-row"><span>Shipping</span><span><%= totals.shipping === 0 ? "Free" : "₹" + totals.shipping %></span></div>
+          <div class="price-row"><span>Tax:</span><span>₹<%= totals.tax %></span></div>
+
+          <% if (totals.discount && totals.discount > 0) { %>  
+            <div class="price-row discount">
+              <span>Discount:</span><span>- ₹<%= totals.discount %></span>
+            </div>
+          <% } %>
+
+          <hr class="price-divider">
+
+          <div class="price-row total">
+            <span>Total</span>
+            <span>₹<%= totals.grandTotal %></span>
+          </div>
+        </div>
+
+        <!-- Place Order -->
+        <form id="placeOrderForm" method="POST" action="/checkout/place-order">
+          <input type="hidden" name="selectedPayment" id="selectedPayment">
+
+          <button type="submit" class="btn place-order-btn">
+            Place Order
+          </button>
+        </form>
+
+      </aside>
+
+    </div>
+  </div>
+</div>
+
+<!-- RAZORPAY SDK -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+// Copy coupon code
+document.querySelectorAll(".copy-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const code = btn.dataset.code;
+    navigator.clipboard.writeText(code);
+    btn.textContent = "Copied!";
+    setTimeout(() => btn.textContent = "Copy", 1200);
+  });
+});
+
+// Payment method selection
+const radios = document.querySelectorAll("input[name='paymentMethod']");
+const hidden = document.getElementById("selectedPayment");
+
+function updateMethod() {
+  const checked = document.querySelector("input[name='paymentMethod']:checked");
+  hidden.value = checked.value;
+}
+updateMethod();
+
+radios.forEach(r => r.addEventListener("change", updateMethod));
+
+
+//place order submit (razorpay)
+
+const placeOrderForm = document.getElementById("placeOrderForm");
+
+placeOrderForm.addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const paymentMethod = hidden.value;
+
+  const response = await fetch("/checkout/place-order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ selectedPayment: paymentMethod })
+  });
+
+  // HANDLE BACKEND REDIRECTS (COD + WALLET FULL PAYMENT)
+  if (response.redirected) {
+    window.location.href = response.url;
+    return;
+  }
+
+
+  // COD FLOW → redirect
+  if (paymentMethod === "COD") {
+    window.location.href = response.url;
+    return;
+  }
+
+  // ONLINE PAYMENT FLOW
+  const data = await response.json();
+  if (!data.online) return;
+
+  // Create Razorpay order
+  const rpRes = await fetch("/payment/create-razorpay-order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId: data.orderId })
+  });
+
+  const rpData = await rpRes.json();
+
+  const options = {
+    key: rpData.key,
+    amount: rpData.razorpayOrder.amount,
+    currency: "INR",
+    order_id: rpData.razorpayOrder.id,
+
+    handler: async function (response) {
+      const verifyRes = await fetch("/payment/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+          orderId: data.orderId
+        })
+      });
+
+      const verifyData = await verifyRes.json();
+
+      if (verifyData.success) {
+        window.location.href = `/checkout/success/${data.orderId}`;
+      } else {
+        window.location.href = `/order-failure/${data.orderId}`;
+      }
+    },
+    //FAILURE HANDLER
+    modal: {
+      ondismiss: async function () {
+          await fetch("/payment/mark-failed", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId: data.orderId })
+        });
+        // User clicked FAILURE / closed popup / bank rejected
+        window.location.href = `/order-failure/${data.orderId}`;
+      }
+    }
+  };
+
+  const rzp = new Razorpay(options);
+  rzp.open();
+});
+
+</script>
+<script>
+const applyBtn = document.getElementById("applyCouponBtn");
+const removeBtn = document.getElementById("removeCouponBtn");
+const couponInput = document.getElementById("couponCode");
+
+applyBtn.addEventListener("click", async () => {
+  const code = couponInput.value.trim();
+  if (!code) return alert("Enter a coupon code");
+
+  const res = await fetch("/coupon/apply", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ couponCode: code })
+  });
+
+  const data = await res.json();
+
+  if (!data.success) {
+    alert(data.message);
+    return;
+  }
+
+  // Reload page to reflect updated totals
+  location.reload();
+});
+
+removeBtn.addEventListener("click", async () => {
+  await fetch("/coupon/remove", { method: "POST" });
+  location.reload();
+});
+</script>
+
+<% if (appliedCoupon) { %>
+<script>
+  // Coupon already applied → update UI
+  couponInput.value = "<%= appliedCoupon.code %>";
+  couponInput.disabled = true;
+
+  removeBtn.style.display = "inline-block";
+  applyBtn.style.display = "none";
+</script>
+<% } %>
+
+
+<%- include('../partials/user/footer') %>

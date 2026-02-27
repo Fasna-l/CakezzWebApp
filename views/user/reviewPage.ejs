@@ -1,0 +1,57 @@
+<%- include('../partials/user/header') %>
+
+<link rel="stylesheet" href="/css/user-style/review.css">
+
+<div class="review-wrapper">
+  <div class="review-box">
+    <div class="review-header">
+      <h2>Write Review</h2>
+      <a href="/product/<%= product._id %>" class="close-btn">✖</a>
+    </div>
+
+    <form action="/product/<%= product._id %>/review" method="post">
+      
+      <!-- Full Name -->
+      <label for="name">Full Name</label>
+      <input type="text" id="name" name="name" value="<%= user?.name || '' %>" required>
+
+      <!-- Review -->
+      <label for="review">Review</label>
+      <textarea id="review" name="review" rows="4" required></textarea>
+
+      <!-- Rating -->
+      <label>Rate this Product</label>
+      <div class="stars">
+        <input type="hidden" name="rating" id="rating" value="4">
+        <span class="star" data-value="1">★</span>
+        <span class="star" data-value="2">★</span>
+        <span class="star" data-value="3">★</span>
+        <span class="star" data-value="4" class="active">★</span>
+        <span class="star" data-value="5">★</span>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="submit-btn">SUBMIT YOUR REVIEW</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // ⭐ Star Rating Functionality
+  const stars = document.querySelectorAll(".star");
+  const ratingInput = document.getElementById("rating");
+
+  stars.forEach(star => {
+    star.addEventListener("click", function () {
+      const value = this.getAttribute("data-value");
+      ratingInput.value = value;
+      
+      stars.forEach(s => s.classList.remove("active"));
+      for (let i = 0; i < value; i++) {
+        stars[i].classList.add("active");
+      }
+    });
+  });
+</script>
+
+<%- include('../partials/user/footer') %>

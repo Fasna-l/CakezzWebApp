@@ -1,0 +1,34 @@
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 25px;
+}
+
+.btn-update {
+  padding: 10px 30px;
+  background-color: #ffffff;
+  color: #000;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-delete {
+  padding: 10px 30px;
+  background-color: #d9534f;
+  color: #fff;
+  border-radius: 6px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-delete:hover {
+  background-color: #c9302c;
+}
+
+.btn-update:hover {
+  background-color: #f1f1f1;
+}

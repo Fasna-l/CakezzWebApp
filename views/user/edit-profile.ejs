@@ -1,0 +1,185 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/account.css">
+
+<div class="account-container">
+  <!-- Sidebar Navigation -->
+  <div class="account-sidebar">
+    <h3 class="sidebar-title">My Account</h3>
+    <ul class="sidebar-menu">
+      <li><a href="/order" class="sidebar-link"><i class="fas fa-shopping-bag"></i> Order</a></li>
+      <li><a href="/wishlist" class="sidebar-link"><i class="fas fa-heart"></i> Wishlist</a></li>
+      <li><a href="/address" class="sidebar-link"><i class="fas fa-map-marker-alt"></i> Address</a></li>
+      <% if (!user.isGoogleUser) { %>
+        <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li>
+      <% } %>
+      <li><a href="/account" class="sidebar-link active"><i class="fas fa-user"></i> Account Detail</a></li>
+      <li><a href="/wallet" class="sidebar-link"><i class="fas fa-wallet"></i> Wallet</a></li>
+      <li><a href="/referral" class="sidebar-link"><i class="fas fa-share-alt"></i> Referral</a></li>
+      <li><a href="/logout" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="account-content">
+    <div class="account-header">
+      <h2>Edit Profile</h2>
+    </div>
+
+    <form id="editProfileForm" action="/edit-profile" method="POST" enctype="multipart/form-data" novalidate>
+      
+      <!-- Profile Picture Section -->
+      <div class="profile-picture-section">
+        <div class="profile-image-wrapper">
+          <img 
+            id="profileImagePreview" 
+            src="<%= user.profileImage ? '/uploads/profile/' + user.profileImage : '/images/default-avatar.png' %>" 
+            alt=""
+          />
+          <label for="profileImageInput" class="upload-btn" title="Upload Profile Picture">
+            <i class="fas fa-camera"></i>
+          </label>
+          <input type="file" id="profileImageInput" name="profileImage" accept="image/*" hidden />
+        </div>
+        <p class="upload-text">Upload Profile Picture</p>
+        <div id="imageError" class="error-message"></div>
+      </div>
+
+      <!-- Full Name -->
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input 
+          type="text" 
+          class="form-control"
+          id="name" 
+          name="name" 
+          placeholder="Enter Your Name" 
+          value="<%= user.name %>" 
+          required
+        />
+        <div id="error1" class="error-message"></div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          class="form-control"
+          id="email" 
+          name="email" 
+          placeholder="Enter Your Email" 
+          value="<%= user.email %>" 
+          <%= user.isGoogleUser ? "readonly" : "" %>
+          required
+        />
+
+        <% if (!user.isGoogleUser) { %>
+          <small>
+            Want to change your email? 
+            <a href="/change-email" class="link-pink">Click here to verify a new email address.</a>
+          </small>
+        <% } %>
+
+
+        <div id="error2" class="error-message"></div>
+      </div>
+
+      <button type="submit" class="save-btn">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById("editProfileForm");
+  const nameid = document.getElementById("name");
+  const emailid = document.getElementById("email");
+  const error1 = document.getElementById("error1");
+  const error2 = document.getElementById("error2");
+  const imageError = document.getElementById("imageError");
+  const input = document.getElementById("profileImageInput");
+  const preview = document.getElementById("profileImagePreview");
+
+  // Name Validation
+  function nameValidateChecking() {
+    const nameval = nameid.value.trim();
+    const namepattern = /^[A-Za-z\s'-]{1,50}$/;
+    const sameCharPattern = /^([A-Za-z'-])\\1{2,}$/;
+    const noLetterPattern = !/[A-Za-z]/.test(nameval);
+
+    if (nameval === "") {
+      error1.style.display = "block";
+      error1.innerHTML = "Please enter your name";
+    } else if (!namepattern.test(nameval)) {
+      error1.style.display = "block";
+      error1.innerHTML = "Name can only contain letters, spaces, hyphens (-), or apostrophes (')";
+    } else if (sameCharPattern.test(nameval)) {
+      error1.style.display = "block";
+      error1.innerHTML = "Name cannot contain the same character repeatedly";
+    } else if (noLetterPattern) {
+      error1.style.display = "block";
+      error1.innerHTML = "Name must contain alphabet letters";
+    } else {
+      error1.style.display = "none";
+      error1.innerHTML = "";
+    }
+  }
+
+  // Email Validation
+  function emailValidateChecking() {
+    const emailval = emailid.value.trim();
+    const emailpattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (emailval === "") {
+      error2.style.display = "block";
+      error2.innerHTML = "Email is required";
+    } else if (!emailpattern.test(emailval)) {
+      error2.style.display = "block";
+      error2.innerHTML = "Invalid email format";
+    } else {
+      error2.style.display = "none";
+      error2.innerHTML = "";
+    }
+  }
+
+  // Image Validation + Live Preview
+  input.addEventListener("change", function() {
+    const file = this.files[0];
+    if (file) {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+      if (!allowedTypes.includes(file.type)) {
+        imageError.style.display = "block";
+        imageError.innerHTML = "Only JPG, PNG, WEBP, or AVIF formats are allowed";
+        this.value = "";
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) {
+        imageError.style.display = "block";
+        imageError.innerHTML = "Image size must be less than 2MB";
+        this.value = "";
+        return;
+      }
+
+      imageError.style.display = "none";
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  // Submit Validation
+  form.addEventListener("submit", function(e) {
+    nameValidateChecking();
+    emailValidateChecking();
+
+    if (error1.innerHTML || error2.innerHTML) {
+      e.preventDefault();
+    }
+  });
+
+  nameid.addEventListener("input", nameValidateChecking);
+  emailid.addEventListener("input", emailValidateChecking);
+</script>
+
+<%- include('../partials/user/footer') %>

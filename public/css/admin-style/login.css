@@ -1,0 +1,218 @@
+/* Admin Login Page Styles */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background-color: #2a2a2a !important;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Admin Header */
+.admin-header {
+  z-index: 1000;
+  background-color: #1a1a1a;
+  padding: 20px 40px;
+  border-bottom: 1px solid #333;
+}
+
+.admin-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-logo {
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Login Page Title */
+.login-page-title {
+  color: #999;
+  font-size: 14px;
+  padding: 20px 40px;
+  background-color: #f5f5f5;
+}
+
+/* Admin Login Container */
+.admin-login-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2a2a2a !important;
+  padding: 40px 20px;
+}
+
+/* Admin Login Card */
+.admin-login-card {
+  background-color: #333333;
+  border-radius: 8px;
+  padding: 60px 50px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.admin-login-title {
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+/* Admin Login Form */
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  color: #cccccc;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Override Bootstrap form-control styles with !important to ensure dark theme */
+.admin-input {
+  background-color: #444444 !important;
+  border: 1px solid #555555 !important;
+  color: #ffffff !important;
+  padding: 12px 15px !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  transition: all 0.3s ease !important;
+}
+
+.admin-input::placeholder {
+  color: #888888 !important;
+}
+
+.admin-input:focus {
+  background-color: #4a4a4a !important;
+  border-color: #666666 !important;
+  color: #ffffff !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(100, 100, 100, 0.1) !important;
+}
+
+/* Admin Login Button */
+.admin-login-btn {
+  background-color: #444444 !important;
+  color: #ffffff !important;
+  border: none !important;
+  padding: 12px 20px !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  margin-top: 10px !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.admin-login-btn:hover {
+  background-color: #555555 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+}
+
+.admin-login-btn:active {
+  transform: translateY(0) !important;
+}
+
+.error-message{
+  color: #ff4d4d;
+  font-size: 0.75rem;
+  display: none;
+}
+
+/* Password Visibility Toggle */
+.admin-password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.admin-password-wrapper .admin-input {
+  padding-right: 40px !important;
+}
+
+.admin-eye {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888888;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+
+.admin-eye:hover {
+  color: #ffffff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .admin-header {
+    padding: 15px 20px;
+  }
+
+  .login-page-title {
+    padding: 15px 20px;
+    font-size: 12px;
+  }
+
+  .admin-login-card {
+    padding: 40px 30px;
+    max-width: 100%;
+  }
+
+  .admin-login-title {
+    font-size: 24px;
+    margin-bottom: 30px;
+  }
+
+  .admin-login-form {
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-login-card {
+    padding: 30px 20px;
+  }
+
+  .admin-login-title {
+    font-size: 20px;
+    margin-bottom: 25px;
+  }
+
+  .admin-input {
+    padding: 10px 12px !important;
+    font-size: 13px !important;
+  }
+}

@@ -1,0 +1,168 @@
+<%- include('../partials/user/header') %>
+
+<link rel="stylesheet" href="/css/user-style/shop.css">
+
+<div class="shop-container">
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a href="/">Home</a>
+    <span>&gt;</span>
+    <span>Wishlist</span>
+  </nav>
+
+  <!-- Wishlist Title -->
+  <div class="shop-controls-container">
+    <div class="product-count">
+      Wishlist (<span id="wishlist-page-count"><%= totalWishlistItems %></span>)
+    </div>
+  </div>
+
+  <!-- Wishlist Products Grid -->
+  <div class="products-grid">
+
+    <% if (!wishlist || wishlist.items.length === 0) { %>
+      <p>Your wishlist is empty.</p>
+    <% } %>
+
+    <% wishlist.items.forEach(item => { 
+        const product = item.product;
+        const selectedVariant = product.variants.find(v => v.size === item.size);
+    %>
+
+      <div class="product-card">
+
+        <% if (product.offerPercentage > 0) { %>
+          <span class="offer-badge">
+            <%= product.offerPercentage %>%
+            <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
+          </span>
+        <% } %>
+
+        <!-- Product Image -->
+        <a href="/product/<%= product._id %>">
+          <img 
+            src="/uploads/product/<%= product.productImage[0] %>" 
+            alt="<%= product.productName %>" 
+            class="product-img">
+        </a>
+
+        <!-- Product Name -->
+        <h3 class="product-name">
+          <a href="/product/<%= product._id %>" class="product-link">
+            <%= product.productName %>
+          </a>
+        </h3>
+
+        <!-- ✅ Selected Weight Display -->
+        <p><strong>Weight:</strong> <%= item.size %></p>
+
+        <!-- Price -->
+        <p class="product-price">
+          ₹<%= product.offerPercentage > 0
+            ? Math.round(
+                selectedVariant.price -
+                (selectedVariant.price * product.offerPercentage) / 100
+              )
+            : selectedVariant?.price || 'N/A'
+          %>
+        </p>
+
+        <!-- Remove from Wishlist -->
+        <div 
+          class="wishlist-icon active remove-from-wishlist"
+          data-product-id="<%= product._id %>"
+          data-size="<%= item.size %>">
+          <i class="fas fa-heart"></i>
+        </div>
+
+        <!-- Stock Info -->
+        <% if (!selectedVariant || selectedVariant.stock <= 0) { %>
+          <p class="out-of-stock">
+            Out of stock (<%= item.size %>)
+          </p>
+        <% } %>
+
+        <!-- Add to Cart -->
+        <button 
+          class="add-to-cart-btn from-wishlist"
+          data-product-id="<%= product._id %>"
+          data-size="<%= item.size %>"
+          data-qty="1"
+          <%= (!selectedVariant || selectedVariant.stock <= 0) ? 'disabled' : '' %>>
+          
+          <i class="fas fa-shopping-cart"></i>
+          <%= (!selectedVariant || selectedVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
+        </button>
+
+        <!-- Rating Badge -->
+        <% 
+          let avg = 0;
+          if (product.reviews && product.reviews.length) {
+            avg = (
+              product.reviews.reduce((a, b) => a + b.rating, 0) 
+              / product.reviews.length
+            ).toFixed(1);
+          }
+        %>
+
+        <% if (avg > 0) { %>
+          <span class="rating-badge">★ <%= avg %></span>
+        <% } %>
+
+      </div>
+    <% }) %>
+
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-container">
+
+    <% if (wishlistCurrentPage > 1) { %>
+      <a href="/wishlist?page=<%= wishlistCurrentPage - 1 %>" class="pagination-link prev">« Prev</a>
+    <% } else { %>
+      <span class="pagination-link disabled">« Prev</span>
+    <% } %>
+
+    <% 
+      const startPage = Math.max(1, wishlistCurrentPage - 2);
+      const endPage = Math.min(wishlistTotalPages, wishlistCurrentPage + 2);
+    %>
+
+    <% if (startPage > 1) { %>
+      <a href="/wishlist?page=1" class="pagination-link">1</a>
+      <% if (startPage > 2) { %>
+        <span class="pagination-link disabled">...</span>
+      <% } %>
+    <% } %>
+
+    <% for (let i = startPage; i <= endPage; i++) { %>
+      <% if (i === wishlistCurrentPage) { %>
+        <span class="pagination-link current"><%= i %></span>
+      <% } else { %>
+        <a href="/wishlist?page=<%= i %>" class="pagination-link"><%= i %></a>
+      <% } %>
+    <% } %>
+
+    <% if (endPage < wishlistTotalPages) { %>
+      <% if (endPage < wishlistTotalPages - 1) { %>
+        <span class="pagination-link disabled">...</span>
+      <% } %>
+      <a href="/wishlist?page=<%= wishlistTotalPages %>" class="pagination-link"><%= wishlistTotalPages %></a>
+    <% } %>
+
+    <% if (wishlistCurrentPage < wishlistTotalPages) { %>
+      <a href="/wishlist?page=<%= wishlistCurrentPage + 1 %>" class="pagination-link next">Next »</a>
+    <% } else { %>
+      <span class="pagination-link disabled">Next »</span>
+    <% } %>
+
+  </div>
+
+  <p style="text-align:center;color:#aaa;font-size:13px;margin-top:8px;">
+    Page <%= wishlistCurrentPage %> of <%= wishlistTotalPages %>
+  </p>
+
+</div>
+
+<%- include('../partials/user/footer') %>

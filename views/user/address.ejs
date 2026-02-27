@@ -1,0 +1,266 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/address.css">
+
+<div class="account-container">
+  <!-- Sidebar -->
+  <div class="account-sidebar">
+    <h3 class="sidebar-title">My Account</h3>
+    <ul class="sidebar-menu">
+      <li><a href="/order" class="sidebar-link"><i class="fas fa-shopping-bag"></i> Order</a></li>
+      <li><a href="/wishlist" class="sidebar-link"><i class="fas fa-heart"></i> Wishlist</a></li>
+      <li><a href="/address" class="sidebar-link active"><i class="fas fa-map-marker-alt"></i> Address</a></li>
+      <% if (!user.isGoogleUser) { %>
+        <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li>
+      <% } %>
+      <li><a href="/account" class="sidebar-link"><i class="fas fa-user"></i> Account Detail</a></li>
+      <li><a href="/wallet" class="sidebar-link"><i class="fas fa-wallet"></i> Wallet</a></li>
+      <li><a href="/referral" class="sidebar-link"><i class="fas fa-share-alt"></i> Referral</a></li>
+      <li><a href="/logout" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="address-main-content">
+    <!-- Saved Addresses Section -->
+    <div class="saved-addresses-section" id="savedAddresses">
+      <h2 class="section-title">Saved Addresses</h2>
+
+      <% if (addresses && addresses.length > 0) { %>
+        <div class="address-list">
+          <% addresses.forEach((addr) => { %>
+            <div class="address-card" data-id="<%= addr._id %>">
+              <div class="address-selector">
+                <input 
+                  type="radio" 
+                  name="selectedAddress" 
+                  value="<%= addr._id %>" 
+                  <%= addr.isDefault ? "checked" : "" %> 
+                  onclick="setDefaultAddress('<%= addr._id %>')" 
+                />
+              </div>
+              <div class="address-info">
+                <p><strong><%= addr.addressType %> Address</strong></p>
+                <p><%= addr.streetAddress %>, <%= addr.city %></p>
+                <p><%= addr.state %> - <%= addr.pincode %></p>
+                <p><%= addr.district %></p>
+                <p>📞 <%= addr.phone %></p>
+                <% if (addr.landmark) { %><p>🏷️ Landmark: <%= addr.landmark %></p><% } %>
+                <% if (addr.isDefault) { %><span class="default-badge">Default</span><% } %>
+              </div>
+              <div class="address-actions">
+                <a href="/edit-address/<%= addr._id %>" class="action-btn edit-btn">Edit</a>
+                <button class="action-btn delete-btn" onclick="confirmDelete('<%= addr._id %>')">Delete</button>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p class="no-address">No addresses saved yet.</p>
+      <% } %>
+    </div>
+
+    <!-- Add Address Form Section -->
+    <div class="add-address-section" id="addAddressFormSection">
+      <h2 class="form-title">Add New Address</h2>
+      <form id="addAddressForm" method="POST" action="/add-address" novalidate>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" name="phone" id="phone" placeholder="Enter 10-digit number" required>
+          <span class="error-message" id="phoneError"></span>
+        </div>
+
+        <div class="form-group">
+          <label>Street Address</label>
+          <input type="text" name="streetAddress" id="streetAddress" placeholder="House No, Street Name" required>
+          <span class="error-message" id="streetAddressError"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" name="city" id="city" placeholder="City" required>
+            <span class="error-message" id="cityError"></span>
+          </div>
+          <div class="form-group">
+            <label>District</label>
+            <select name="district" id="district" required>
+              <option value="">Select District</option>
+              <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+              <option value="Kollam">Kollam</option>
+              <option value="Pathanamthitta">Pathanamthitta</option>
+              <option value="Alappuzha">Alappuzha</option>
+              <option value="Kottayam">Kottayam</option>
+              <option value="Idukki">Idukki</option>
+              <option value="Ernakulam">Ernakulam</option>
+              <option value="Thrissur">Thrissur</option>
+              <option value="Palakkad">Palakkad</option>
+              <option value="Malappuram">Malappuram</option>
+              <option value="Kozhikode">Kozhikode</option>
+              <option value="Wayanad">Wayanad</option>
+              <option value="Kannur">Kannur</option>
+              <option value="Kasaragod">Kasaragod</option>
+            </select>
+              <span class="error-message" id="districtError"></span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Pincode</label>
+            <input type="text" name="pincode" id="pincode" placeholder="6-digit code" required>
+            <span class="error-message" id="pincodeError"></span>
+          </div>
+          <div class="form-group">
+            <label>State</label>
+            <input type="text" name="state" id="state" placeholder="State" value="Kerala" readonly  required>
+            <span class="error-message" id="stateError"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Landmark (Optional)</label>
+          <input type="text" name="landmark" id="landmark" placeholder="Nearby place (optional)">
+          <span class="error-message" id="landmarkError"></span>
+        </div>
+
+        <div class="form-group">
+          <label>Address Type</label>
+          <select name="addressType" id="addressType">
+            <option value="Home">Home</option>
+            <option value="Work">Work</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="save-address-btn">Save Address</button>
+          <button type="reset" class="cancel-btn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/user/footer') %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  function validateAddressForm(data) {
+  let valid = true;
+  document.querySelectorAll('.error-message').forEach(el => {
+    el.textContent = '';
+    el.style.display = 'none';
+  });
+
+  const phoneRegex = /^\d{10}$/;
+  const textRegex = /^[A-Za-z\s]+$/i;
+  const pincodeRegex = /^\d{6}$/;
+
+  if (!data.phone || !phoneRegex.test(data.phone.trim())) {
+    document.getElementById('phoneError').textContent = 'Enter valid 10-digit number';
+    document.getElementById('phoneError').style.display = 'block';
+    valid = false;
+  }
+  if (!data.streetAddress || data.streetAddress.trim().length < 5) {
+    document.getElementById('streetAddressError').textContent = 'Enter valid street address';
+    document.getElementById('streetAddressError').style.display = 'block';
+    valid = false;
+  }
+  if (!data.city || !textRegex.test(data.city.trim())) {
+    document.getElementById('cityError').textContent = 'Enter valid city';
+    document.getElementById('cityError').style.display = 'block';
+    valid = false;
+  }
+  if (!data.state || !textRegex.test(data.state.trim())) {
+    document.getElementById('stateError').textContent = 'Enter valid state';
+    document.getElementById('stateError').style.display = 'block';
+    valid = false;
+  }
+  if (!data.pincode || !pincodeRegex.test(data.pincode.trim())) {
+    document.getElementById('pincodeError').textContent = 'Enter 6-digit pincode';
+    document.getElementById('pincodeError').style.display = 'block';
+    valid = false;
+  }
+  if (!data.district || !textRegex.test(data.district.trim())) {
+    document.getElementById('districtError').textContent = 'Enter valid District';
+    document.getElementById('districtError').style.display = 'block';
+    valid = false;
+  }
+  if (data.landmark && data.landmark.trim().length < 2) {
+    document.getElementById('landmarkError').textContent = 'Invalid landmark';
+    document.getElementById('landmarkError').style.display = 'block';
+    valid = false;
+  }
+
+  return valid;
+}
+
+
+  const form = document.getElementById('addAddressForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(e.target).entries());
+    if (!validateAddressForm(data)) return;
+
+    const res = await fetch("/add-address", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (result.success) {
+      Swal.fire({
+        title: "Address Added!",
+        text: "Your address has been saved successfully.",
+        icon: "success",
+        showConfirmButton: false,
+        timer: 1200
+      }).then(() => {
+        window.location.reload();
+      });
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Something went wrong",
+        text: result.message || "Failed to add address.",
+      });
+    }
+
+  });
+
+  // Delete Address
+  window.confirmDelete = async function(id) {
+    Swal.fire({
+      title: 'Delete Address?',
+      text: 'This address will be removed permanently.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#e74c3c',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const res = await fetch(`/delete-address/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+          Swal.fire('Deleted!', 'Address has been deleted.', 'success');
+          setTimeout(() => window.location.reload(), 1000);
+        }
+      }
+    });
+  };
+
+  // Set Default Address
+  window.setDefaultAddress = async function(id) {
+    const res = await fetch(`/set-default-address/${id}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      Swal.fire('Success', 'Default address updated!', 'success');
+      setTimeout(() => window.location.reload(), 1000);
+    }
+  };
+
+});
+</script>

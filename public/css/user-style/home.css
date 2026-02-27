@@ -5,10 +5,12 @@
   box-sizing: border-box;
 }
 
+
 body {
   font-family: "Arial", sans-serif;
   background-color: #fff;
 }
+
 
 .btn-pink {
   background-color: #e91e63;
@@ -24,9 +26,11 @@ body {
   color: #fff;
 }
 
+
 .text-pink {
   color: #e91e63;
 }
+
 
 /* ==================== HEADER CSS ==================== */
 .navbar {
@@ -53,6 +57,7 @@ body {
   color: #e91e63 !important;
 }
 
+
 .header-icons {
   display: flex;
   align-items: center;
@@ -66,6 +71,7 @@ body {
 .header-icons i:hover {
   color: #e91e63;
 }
+
 
 /* ==================== HERO SECTION CSS ==================== */
 .hero-section {
@@ -81,12 +87,15 @@ body {
   display: inline-block;
   width: 100%;
 }
+
+
 .hero-banner-container img {
   padding-top: 50px;
   width: 100%;
   height: 300px;
   display: block;
 }
+
 
 .hero-shop-now-btn {
   position: absolute;
@@ -114,6 +123,9 @@ body {
     font-size: 0.9rem;
   }
 }
+
+
+
 
 /* ==================== CAKES SECTION CSS ==================== */
 .cakes-section {
@@ -169,7 +181,7 @@ body {
 .cake-card-subtitle {
   font-size: 0.9rem;
   color: #666;
-  margin-bottom: 15px;
+  margin-bottom: 5px;
 }
 .cake-add-to-cart-btn {
   background-color: #c2185b;
@@ -204,6 +216,7 @@ body {
   color: #fff;
   text-decoration: none;
 }
+
 
 /* ==================== BESTSELLERS SECTION CSS ==================== */
 .bestsellers-section {
@@ -265,6 +278,7 @@ body {
   background-color: #ad1457;
 }
 
+
 /* Rating and discount badges */
 .rating {
   display: flex;
@@ -277,6 +291,7 @@ body {
   font-size: 14px;
   margin-right: 2px;
 }
+
 
 .price-container {
   display: flex;
@@ -302,6 +317,7 @@ body {
   color: #e91e63;
 }
 
+
 .wishlist-icon {
   position: absolute;
   top: 10px;
@@ -325,6 +341,7 @@ body {
   color: #e91e63;
 }
 
+
 .view-all-grey {
   background-color: #6c757d;
   color: #fff;
@@ -341,6 +358,7 @@ body {
   color: #fff;
   text-decoration: none;
 }
+
 
 .rating-badge {
   background-color: #28a745;
@@ -362,6 +380,7 @@ body {
   font-size: 12px;
 }
 
+
 .discount-badge {
   background-color: #90ee90;
   color: #006400;
@@ -377,6 +396,7 @@ body {
   right: 80px;
   z-index: 2;
 }
+
 
 /* ==================== CTA SECTION CSS ==================== */
 .cta-section {
@@ -400,6 +420,7 @@ body {
 .cta-black-text {
   color: #000;
 }
+
 
 /* ==================== FOOTER CSS ==================== */
 .footer {
@@ -443,6 +464,7 @@ body {
   font-size: 0.9rem;
 }
 
+
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
   .hero-content h1 {
@@ -455,6 +477,7 @@ body {
     font-size: 2rem;
   }
 }
+
 
 /* ==================== USER DROPDOWN ==================== */
 .user-dropdown {
@@ -545,4 +568,201 @@ body {
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   border-bottom: 8px solid #fff;
+}
+
+
+/* Remove default background & make arrows clean */
+.swiper-button-prev,
+.swiper-button-next {
+    background: none !important;
+    width: 30px;
+    height: 30px;
+    color: black !important;
+    font-weight: bold;
+}
+
+/* Arrow Icon Styling */
+.swiper-button-prev::after,
+.swiper-button-next::after {
+    font-size: 25px;
+    color: gray !important;
+}
+
+/* Position to middle (slightly upward) */
+.swiper-button-prev,
+.swiper-button-next {
+    top: 35% !important;  /* 50% is exact center, 45% moves slightly upward */
+    transform: translateY(-50%);
+}
+
+/* Push arrows to outside of cards */
+.swiper-button-prev {
+    left: -40px;  /* You can adjust (-50px or -60px) based on your layout */
+}
+
+.swiper-button-next {
+    right: -40px;
+}
+
+/* Optional: Hover effect */
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+    color: #ff0077; /* pink hover (optional) */
+    cursor: pointer;
+}
+
+.out-of-stock {
+  color: red;
+  font-weight: bold;
+  margin-top: 5px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.cake-add-to-cart-btn:disabled,
+.add-to-cart-btn:disabled {
+  background-color: #ccc !important;
+  color: #666 !important;
+  cursor: not-allowed !important;
+}
+
+.cart-icon-wrapper {
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+}
+
+#cart-count {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background: #ff3d3d;
+  color: #fff;
+  padding: 2px 6px;
+  font-size: 12px;
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+#wishlist-count {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  background: #ff3d3d;
+  color: #fff;
+  padding: 2px 6px;
+  font-size: 12px;
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.wishlist-icon i {
+  color: #999;          /* white/grey heart */
+  transition: 0.2s;
+}
+
+.wishlist-icon.active i {
+  color: #e91e63;       /* pink heart */
+}
+
+/* DEFAULT HEART (NOT WISHLISTED) */
+.wishlist-icon i {
+  font-family: "Font Awesome 5 Free";
+  font-weight: 400; /* regular (outline) */
+  color: #ccc;
+  transition: all 0.3s ease;
+}
+
+/* ACTIVE HEART (WISHLISTED) */
+.wishlist-icon.active i {
+  font-weight: 900; /* solid (filled) */
+  color: #e91e63;   /* pink */
+}
+
+/* FIX FONT AWESOME HEART TILT (NO ROTATION) */
+.wishlist-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wishlist-icon i {
+  line-height: 1;
+  transform: translateY(0);
+}
+
+/* MICRO ALIGNMENT FIX FOR SOLID HEART */
+.wishlist-icon.active i {
+  transform: translateX(-0.5px);
+}
+
+.rating-badge {
+  display: inline-block;
+  background: #4caf50;
+  color: #000;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 4px;
+  margin-top: 6px;
+}
+.rating-badgelatestprdct {
+  display: inline-block;
+  background: #4caf50;
+  color: #000;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 4px;
+  margin-top: 0px;
+  margin-bottom: 50px;
+  margin:4px
+}
+
+
+/* OFFER BADGE */
+.offer-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #e53935;
+  color: #fff;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+/* OFFER TEXT (Product Details Page) */
+.offer-text {
+  margin: 6px 0;
+  color: #2e7d32;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.weight-popup {
+  position: absolute;
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  display: none;
+  z-index: 999;
+}
+
+.weight-popup button {
+  margin: 4px;
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.weight-popup button:hover {
+  background: #f16ead;
+  color: white;
 }

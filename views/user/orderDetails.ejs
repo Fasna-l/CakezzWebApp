@@ -1,0 +1,260 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/order-details.css">
+
+<div class="account-container">
+
+  <!-- Sidebar -->
+  <div class="account-sidebar">
+    <h3 class="sidebar-title">My Account</h3>
+    <ul class="sidebar-menu">
+      <li><a href="/order" class="sidebar-link active"><i class="fas fa-shopping-bag"></i> Order</a></li>
+      <li><a href="/wishlist" class="sidebar-link"><i class="fas fa-heart"></i> Wishlist</a></li>
+      <li><a href="/address" class="sidebar-link"><i class="fas fa-map-marker-alt"></i> Address</a></li>
+      <% if (!user.isGoogleUser) { %>
+        <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li>
+      <% } %>
+      <li><a href="/account" class="sidebar-link"><i class="fas fa-user"></i> Account Detail</a></li>
+      <li><a href="/wallet" class="sidebar-link"><i class="fas fa-wallet"></i> Wallet</a></li>
+      <li><a href="/referral" class="sidebar-link"><i class="fas fa-share-alt"></i> Referral</a></li>
+      <li><a href="/logout" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="orders-main-content">
+    <div class="order-details-card">
+     <%
+  const isCancelledFlow = order.orderStatus === "Cancelled";
+  const isReturnFlow =
+    order.orderStatus === "Return Requested" ||
+    order.orderStatus === "Returned" ||
+    order.orderStatus === "Rejected" ||
+    order.orderStatus === "Return Rejected";
+
+  // Helper: what stages should be active
+  const stage1 = ['Pending','Processing','Packed','Shipped','Out for Delivery','Delivered'].includes(order.orderStatus);
+  const stage2 = ['Packed','Shipped','Out for Delivery','Delivered'].includes(order.orderStatus);
+  const stage3 = ['Shipped','Out for Delivery','Delivered'].includes(order.orderStatus);
+  const stage4 = ['Delivered'].includes(order.orderStatus);
+%>
+<%
+  const now = new Date();
+  const deliveryTime = order.deliveryDate ? new Date(order.deliveryDate) : null;
+  const diffInHours = deliveryTime ? (now - deliveryTime) / (1000 * 60 * 60) : 999;
+  const isReturnWindowOpen = diffInHours <= 2;
+%>
+
+<%
+  const isPaymentFailed = order.paymentStatus === "Failed";
+%>
+
+      <div class="order-header">
+        <h2>Order Details</h2>
+        <p class="order-id">Order ID: <%= order.orderId %></p>
+      </div>
+
+      <% if (cancelCouponError) { %>
+        <p style="color:red; font-weight:bold; margin:6px 0;">
+          <%= cancelCouponError %>
+        </p>
+      <% } %>
+
+
+      <!-- Modern Order Tracking -->
+
+<% if (!isPaymentFailed) { %>
+<div class="winni-tracking-container">
+
+  <!-- STEP 1 -->
+  <div class="winni-step <%= !isCancelledFlow && !isReturnFlow && stage1 ? 'active' : '' %>">
+      <div class="circle">1</div>
+      <p>Placed</p>
+  </div>
+
+  <div class="step-line <%= !isCancelledFlow && !isReturnFlow && stage2 ? 'active' : '' %>"></div>
+
+  <!-- STEP 2 -->
+  <div class="winni-step <%= !isCancelledFlow && !isReturnFlow && stage2 ? 'active' : '' %>">
+      <div class="circle">2</div>
+      <p>Packed</p>
+  </div>
+
+  <div class="step-line <%= !isCancelledFlow && !isReturnFlow && stage3 ? 'active' : '' %>"></div>
+
+  <!-- STEP 3 -->
+  <div class="winni-step <%= !isCancelledFlow && !isReturnFlow && stage3 ? 'active' : '' %>">
+      <div class="circle">3</div>
+      <p>Shipped</p>
+  </div>
+
+  <div class="step-line <%= !isCancelledFlow && !isReturnFlow && stage4 ? 'active' : '' %>"></div>
+
+  <!-- STEP 4 -->
+  <div class="winni-step <%= !isCancelledFlow && !isReturnFlow && stage4 ? 'active' : '' %>">
+      <div class="circle">4</div>
+      <p>Delivered</p>
+  </div>
+
+</div>
+<% } %>
+
+      <!-- TOP SUMMARY BOX -->
+      <div class="order-summary-box">
+        <h4>
+          <%= order.items.length === 1 
+            ? order.items[0].productName 
+            : order.items[0].productName + " + " + (order.items.length - 1) + " more" 
+          %>
+        </h4>
+
+        <p>Ordered On:
+          <%= new Date(order.orderDate).toLocaleDateString('en-GB', {
+              day: '2-digit', month: 'long', year: 'numeric'
+          }) %>
+        </p>
+
+        <ul class="summary-list">
+          <!-- Payment Method -->
+          <li>
+            Payment Method:
+            <strong><%= order.paymentMethod %></strong>
+          </li>
+          <li>
+            Payment Status:
+            <strong class="payment-status <%= order.paymentStatus.toLowerCase() %>">
+              <%= order.paymentStatus %>
+            </strong>
+          </li>
+
+  
+          <li>Total Quantity:
+            <strong><%= order.items.reduce((t,i)=>t+i.quantity,0) %></strong>
+          </li>
+          <li>Shipping Charge:
+            <strong>₹<%= order.shippingCharge %></strong>
+          </li>
+          <li>Tax:
+            <strong>₹<%= order.taxAmount %></strong>
+          </li>
+          <li>Final Amount:
+            <strong>₹<%= order.totalAmount %></strong>
+          </li>
+          <li>Status:
+            <strong><%= order.orderStatus %></strong>
+          </li>
+        </ul>
+
+        <!-- Delivery Address -->
+        <div class="address-block">
+          <h4>Delivery Address</h4>
+          <p><%= order.shippingAddress.streetAddress %></p>
+          <p><%= order.shippingAddress.city %>, <%= order.shippingAddress.district %></p>
+          <p><%= order.shippingAddress.state %> - <%= order.shippingAddress.pinCode %></p>
+          <p>📞 <%= order.shippingAddress.phoneNumber %></p>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="order-btn-group">
+
+          <% if (order.orderStatus === "Pending") { %>
+            <a href="/order/cancel/<%= order._id %>" class="btn btn-danger">Cancel Order</a>
+          <% } %>
+
+          <% if (order.orderStatus === 'Delivered') { %>
+
+            <% if (isReturnWindowOpen) { %>
+              <a href="/order/return/<%= order._id %>" class="btn btn-secondary">
+                Request Return
+              </a>
+            <% } else { %>
+              <button class="btn btn-secondary" disabled>
+                Return Period Expired
+              </button>
+            <% } %>
+
+          <% } %>
+
+
+          <% if (order.paymentStatus === "Failed") { %>
+            <a href="/payment/retry/<%= order._id %>" class="btn retry-btn">
+            🔁 Retry Payment
+            </a>
+          <% } %>
+
+
+          <a href="/order/invoice/<%= order._id %>" class="btn btn-primary">Download Invoice</a>
+        </div>
+
+      </div>
+
+      <!-- ORDER ITEMS LIST -->
+      <div class="item-list-section">
+        <h3>Items in this Order</h3>
+       <% order.items.forEach(item => { %>
+      <div class="item-row">
+
+        <div class="item-left">
+          <img src="/uploads/product/<%= item.productImage %>" alt="" class="item-thumb">
+
+          <div class="item-info">
+            <p class="item-name"><%= item.productName %></p>
+            <p>Size: <strong><%= item.size %></strong></p>
+            <p>Qty: <strong><%= item.quantity %></strong></p>
+            <p>Price: <strong>₹<%= item.price %></strong></p>
+            <p>Status: <strong><%= item.status %></strong></p>
+            <!-- Refund Info -->
+            
+            <% if (item.refundAmount && item.refundAmount > 0) { %> 
+              <p style="color: green; font-weight: bold;">
+                Refund Processed: ₹<%= item.refundAmount %>
+              </p>
+            <% } %>
+
+            <% if (item.returnStatus === "Rejected") { %>
+              <p style="color: red; font-weight: bold;">
+                Return Rejected (No Refund)
+              </p>
+            <% } %>
+          </div>
+        </div>
+
+      <!-- Right side button -->
+      <div class="item-right">
+        <% if (order.orderStatus === "Pending" && item.status === "Pending") { %>
+          <a href="/order/cancel/<%= order._id %>?item=<%= item._id %>" class="cancel-item-btn">
+            Cancel Item
+          </a>
+        <% } %>
+
+        <% if (order.orderStatus === 'Delivered' && 
+                item.status === 'Delivered' && 
+                item.returnStatus !== 'Rejected' &&
+                item.status !== 'Returned') { %>
+
+          <% if (isReturnWindowOpen) { %>
+            <a href="/order/<%= order._id %>/item/<%= item._id %>/return"                   
+              class="return-item-btn"
+              style="background:#99267c; padding:8px 15px; border-radius:6px; color:#f1eeee; text-decoration:none;">
+              Return Item
+            </a>
+          <% } else { %>
+            <span style="color:red; font-size:0.9rem;">
+              Return period expired
+            </span>
+          <% } %>
+
+        <% } %>
+      </div>
+
+  </div>
+<% }) %>
+
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<%- include('../partials/user/footer') %>
+

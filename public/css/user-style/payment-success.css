@@ -1,0 +1,92 @@
+.success-wrap {
+  width: 100%;
+  padding: 80px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.success-card {
+  background: #fff;
+  width: 450px;
+  padding: 40px 30px;
+  border-radius: 14px;
+  border: 1px solid rgba(233,219,226,0.9);
+  text-align: center;
+  box-shadow: 0px 3px 10px rgba(0,0,0,0.06);
+}
+
+/* Success Icon */
+.success-icon img {
+  width: 90px;
+  height: 90px;
+  margin-bottom: 22px;
+}
+
+/* Title */
+.success-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 10px;
+}
+
+/* Subtext */
+.success-msg {
+  color: #555;
+  margin-bottom: 22px;
+  font-size: 15px;
+}
+
+/* Delivery Box */
+.delivery-box {
+  background: #fff5f8;
+  padding: 18px;
+  border-radius: 10px;
+  border: 1px solid #ffdbe8;
+  margin-bottom: 30px;
+}
+
+.delivery-label {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.delivery-date {
+  font-size: 18px;
+  color: #d20f57;
+  font-weight: 600;
+}
+
+/* Buttons */
+.success-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn {
+  padding: 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.view-btn {
+  background: #ff2b7a;
+  color: white;
+}
+
+.shop-btn {
+  background: #ffb6cf;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .success-card {
+    width: 90%;
+    padding: 30px 20px;
+  }
+}

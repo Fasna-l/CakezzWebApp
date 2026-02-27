@@ -1,0 +1,66 @@
+<%- include('../partials/user/header') %>
+<link rel="stylesheet" href="/css/user-style/cancel-order.css">
+
+<div class="account-container">
+
+  <!-- Sidebar -->
+  <div class="account-sidebar">
+    <h3 class="sidebar-title">My Account</h3>
+    <ul class="sidebar-menu">
+      <li><a href="/order" class="sidebar-link active"><i class="fas fa-shopping-bag"></i> Order</a></li>
+      <li><a href="/wishlist" class="sidebar-link"><i class="fas fa-heart"></i> Wishlist</a></li>
+      <li><a href="/address" class="sidebar-link"><i class="fas fa-map-marker-alt"></i> Address</a></li>
+      <% if (!user.isGoogleUser) { %>
+        <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li>
+      <% } %>
+      <li><a href="/account" class="sidebar-link"><i class="fas fa-user"></i> Account Detail</a></li>
+      <li><a href="/wallet" class="sidebar-link"><i class="fas fa-wallet"></i> Wallet</a></li>
+      <li><a href="/referral" class="sidebar-link"><i class="fas fa-share-alt"></i> Referral</a></li>
+      <li><a href="/logout" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="orders-main-content">
+    <div class="cancel-card">
+
+      <!--  Dynamic Title -->
+      <h2>
+        <%= itemId ? "Cancel Item" : "Cancel Order" %>
+      </h2>
+      <p class="subtitle">
+        <%= itemId ? "Please tell us why you want to cancel this item." : "Please tell us why you want to cancel your order (optional)." %>
+      </p>
+
+      <!--  IMPORTANT: Dynamic form action -->
+      <form 
+        action="/order/cancel/<%= order._id %><%= itemId ? ('?itemId=' + itemId) : '' %>" 
+        method="POST" 
+        class="cancel-form">
+
+        <!--  Hidden input for itemId -->
+        <% if (itemId) { %>
+          <input type="hidden" name="itemId" value="<%= itemId %>">
+        <% } %>
+
+        <label for="reason">Reason</label>
+        <textarea
+          id="reason"
+          name="reason"
+          rows="6"
+          placeholder="<%= itemId ? 'Why are you cancelling this item?' : 'Write your reason here (optional)...' %>"></textarea>
+
+        <div class="cancel-buttons">
+          <button type="submit" class="btn btn-primary">
+            <%= itemId ? "Confirm Item Cancellation" : "Confirm Cancellation" %>
+          </button>
+          <a href="/order/<%= order._id %>" class="btn btn-secondary">Go Back</a>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/user/footer') %>
