@@ -1,10 +1,15 @@
+let selectedProductId = null;
+const popup = document.getElementById("weightPopup");
+
 document.addEventListener("click", async (e) => {
 
+  /* =========================================
+     ADD TO CART FROM WISHLIST PAGE
+  ========================================= */
   const addToCartBtn = e.target.closest(".add-to-cart-btn.from-wishlist");
 
   if (addToCartBtn && window.location.pathname.includes("/wishlist")) {
     e.preventDefault();
-    e.stopImmediatePropagation();
 
     const productId = addToCartBtn.dataset.productId;
     const size = addToCartBtn.dataset.size;
@@ -15,42 +20,33 @@ document.addEventListener("click", async (e) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, size, quantity: qty })
-    });
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-/*  FAILED CASES:
-   - Out of stock
-   - Max quantity exceeded
-*/
-    if (!data.success) {
-      showToast(data.message, "error");
-      return; 
-    }
+      if (!data.success) {
+        showToast(data.message, "error");
+        return;
+      }
 
-/* ✅ SUCCESS CASE ONLY */
+      // Remove card from UI
+      addToCartBtn.closest(".product-card")?.remove();
 
-// Remove from UI
-const card = addToCartBtn.closest(".product-card");
-if (card) card.remove();
+      // Update page count
+      const countEl = document.getElementById("wishlist-page-count");
+      if (countEl) {
+        countEl.textContent = Math.max(0, Number(countEl.textContent) - 1);
+      }
 
-// Update count
-const countEl = document.getElementById("wishlist-page-count");
-if (countEl) {
-  countEl.textContent = Math.max(0, Number(countEl.textContent) - 1);
-}
-updateWishlistCount();
+      // Remove from backend wishlist
+      await fetch("/wishlist/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, size })
+      });
 
-// Remove from backend wishlist
-fetch("/wishlist/remove", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ productId })
-});
-
-showToast("Added to cart");
-
-
+      updateWishlistCount();
+      showToast("Added to cart");
 
     } catch (err) {
       console.error("Cart add failed:", err);
@@ -59,76 +55,189 @@ showToast("Added to cart");
     return;
   }
 
-  //REMOVE FROM WISHLIST PAGE
+
+  /* =========================================
+     REMOVE FROM WISHLIST PAGE
+  ========================================= */
   const removeBtn = e.target.closest(".remove-from-wishlist");
 
   if (removeBtn && window.location.pathname.includes("/wishlist")) {
     e.preventDefault();
 
     const productId = removeBtn.dataset.productId;
+    const size = removeBtn.dataset.size;
 
-    fetch("/wishlist/remove", {
+    await fetch("/wishlist/remove", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId })
-    })
-      .then(() => {
-        removeBtn.closest(".product-card")?.remove();
+      body: JSON.stringify({ productId, size })
+    });
 
-        const countEl = document.getElementById("wishlist-page-count");
-        if (countEl) {
-          countEl.textContent = Math.max(
-            0,
-            Number(countEl.textContent) - 1
-          );
-        }
+    removeBtn.closest(".product-card")?.remove();
 
-        updateWishlistCount();
+    const countEl = document.getElementById("wishlist-page-count");
+    if (countEl) {
+      countEl.textContent = Math.max(0, Number(countEl.textContent) - 1);
+    }
 
-        document
-          .querySelectorAll(`.wishlist-icon[data-product-id="${productId}"]`)
-          .forEach(icon => icon.classList.remove("active"));
-
-        showToast("Removed from wishlist");
-      })
-      .catch(() => {
-        showToast("Something went wrong", "error");
-      });
+    updateWishlistCount();
+    showToast("Removed from wishlist");
 
     return;
   }
 
-  //HEART TOGGLE (OTHER PAGES)
+
+  /* =========================================
+     HEART CLICK (HOME / SHOP)
+  ========================================= */
+
   const heart = e.target.closest(".wishlist-icon");
 
-  if (heart && !window.location.pathname.includes("/wishlist")) {
+  if (
+    heart &&
+    !window.location.pathname.includes("/wishlist") &&
+    heart.id !== "pd-wishlist"
+  ) {
     e.preventDefault();
 
-    const productId = heart.dataset.productId;
+    selectedProductId = heart.dataset.productId;
 
-    fetch("/wishlist/toggle", {
+    if (!popup) return;
+
+    // Position popup near clicked heart
+    const rect = heart.getBoundingClientRect();
+
+    popup.style.top = window.scrollY + rect.bottom + 6 + "px";
+    popup.style.left = window.scrollX + rect.left + "px";
+
+    popup.innerHTML = `
+      <button data-size="1kg">1kg</button>
+      <button data-size="2kg">2kg</button>
+      <button data-size="3kg">3kg</button>
+    `;
+
+    popup.style.display = "block";
+    return;
+  }
+
+  /* =========================================
+   HEART CLICK (PRODUCT DETAILS PAGE)
+========================================= */
+
+if (heart && window.location.pathname.includes("/product/") && heart.id === "pd-wishlist") {
+  e.preventDefault();
+
+  const productId = heart.dataset.productId;
+
+  const activeBtn = document.querySelector(".weight-btn.active");
+  if (!activeBtn) return;
+
+  const size = activeBtn.dataset.size;
+
+  const res = await fetch("/wishlist/toggle", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ productId, size })
+  });
+
+  const data = await res.json();
+
+  if (!data.success) {
+    showToast(data.message || "Please login", "error");
+    return;
+  }
+
+  heart.classList.toggle("active", data.isAdded);
+
+  /* 🔥 UPDATE LOCAL wishlistItems ARRAY */
+if (typeof wishlistItems !== "undefined") {
+
+  if (data.isAdded) {
+    wishlistItems.push({ product: productId, size });
+  } else {
+    const index = wishlistItems.findIndex(item =>
+      String(item.product) === String(productId) &&
+      item.size === size
+    );
+    if (index > -1) wishlistItems.splice(index, 1);
+  }
+
+}
+
+  updateWishlistCount();
+  showToast(data.message);
+
+  return;
+}
+
+
+  /* =========================================
+     WEIGHT SELECT FROM POPUP
+  ========================================= */
+
+  const weightBtn = e.target.closest("#weightPopup button");
+
+  if (weightBtn && selectedProductId) {
+
+    const size = weightBtn.dataset.size;
+
+    const res = await fetch("/wishlist/toggle", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (!data.success) {
-          showToast(data.message, "error");
-          return;
-        }
-
-        heart.classList.toggle("active", data.isAdded);
-        updateWishlistCount();
-        showToast(data.message);
+      body: JSON.stringify({
+        productId: selectedProductId,
+        size
       })
-      .catch(() => {
-        showToast("Please login to continue", "error");
-      });
+    });
+
+    const data = await res.json();
+
+    //if user not logged in or any failure
+    if (!data.success) {
+      showToast(data.message || "Please login to continue", "error");
+
+      if (popup) popup.style.display = "none";
+      selectedProductId = null;
+      return;
+    }
+
+/*  SUCCESS */
+    document
+      .querySelectorAll(
+        `.wishlist-icon[data-product-id="${selectedProductId}"]`
+      )
+      .forEach(icon =>
+        icon.classList.toggle("active", data.isAdded)
+      );
+
+    updateWishlistCount();
+    showToast(data.message);
+
+    if (popup) popup.style.display = "none";
+    selectedProductId = null;
+    return;
   }
+
+
+  /* =========================================
+     CLICK OUTSIDE → CLOSE POPUP
+  ========================================= */
+
+  if (
+    popup &&
+    !e.target.closest("#weightPopup") &&
+    !e.target.closest(".wishlist-icon")
+  ) {
+    popup.style.display = "none";
+    selectedProductId = null;
+  }
+
 });
 
-//UPDATE HEADER COUNT
+
+/* =========================================
+   UPDATE HEADER COUNT
+========================================= */
 async function updateWishlistCount() {
   try {
     const res = await fetch("/wishlist-count");

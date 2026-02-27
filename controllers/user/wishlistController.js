@@ -71,7 +71,7 @@ const toggleWishlist = async (req, res, next) => {
       return res.json({ success: false, message: "Please login to continue" });
     }
 
-    const { productId } = req.body;
+    const { productId, size } = req.body;
     const userId = req.session.user;
 
     const product = await Product.findById(productId);
@@ -83,30 +83,36 @@ const toggleWishlist = async (req, res, next) => {
     if (!wishlist) wishlist = new Wishlist({ user: userId, items: [] });
 
     const exists = wishlist.items.find(
-      i => i.product.toString() === productId
+      i => i.product.toString() === productId && i.size === size
     );
 
     if (exists) {
       wishlist.items = wishlist.items.filter(
-        i => i.product.toString() !== productId
+        i => !(i.product.toString() === productId && i.size === size)
       );
+
       await wishlist.save();
-      const count = wishlist.items.length;
+
+      //const count = wishlist.items.length;
+      
       return res.json({
         success: true,
         message: "Removed from wishlist",
         isAdded: false,
-        wishlistCount: count
+        //wishlistCount: count
       });
     } else {
-      wishlist.items.push({ product: productId });
+      wishlist.items.push({ product: productId, size });
+      
       await wishlist.save();
-      const count = wishlist.items.length;
+      
+      //const count = wishlist.items.length;
+      
       return res.json({
         success: true,
         message: "Added to wishlist",
         isAdded: true,
-        wishlistCount: count
+        //wishlistCount: count
       });
     }
   } catch (error) {
@@ -118,11 +124,11 @@ const toggleWishlist = async (req, res, next) => {
 const removeFromWishlist = async (req, res, next) => {
   try {
     const userId = req.session.user;
-    const { productId } = req.body;
+    const { productId,size } = req.body;
 
     await Wishlist.updateOne(
       { user: userId },
-      { $pull: { items: { product: productId } } }
+      { $pull: { items: { product: productId, size } } }
     );
 
     res.json({ success: true });

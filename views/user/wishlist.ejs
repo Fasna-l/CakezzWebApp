@@ -16,7 +16,6 @@
     <div class="product-count">
       Wishlist (<span id="wishlist-page-count"><%= totalWishlistItems %></span>)
     </div>
-    <h6>Default Weight :1 kg</h6>
   </div>
 
   <!-- Wishlist Products Grid -->
@@ -28,9 +27,7 @@
 
     <% wishlist.items.forEach(item => { 
         const product = item.product;
-        const oneKgVariant = product.variants && product.variants.length > 0 
-          ? product.variants[0] 
-          : null;
+        const selectedVariant = product.variants.find(v => v.size === item.size);
     %>
 
       <div class="product-card">
@@ -41,7 +38,6 @@
             <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
           </span>
         <% } %>
-
 
         <!-- Product Image -->
         <a href="/product/<%= product._id %>">
@@ -58,35 +54,45 @@
           </a>
         </h3>
 
+        <!-- ✅ Selected Weight Display -->
+        <p><strong>Weight:</strong> <%= item.size %></p>
+
         <!-- Price -->
-         <p class="product-price">
-            ₹<%= product.offerPercentage > 0
-              ? product.finalPrice
-              : oneKgVariant?.price || 'N/A'
-            %>
-          </p>
-        <!-- Remove from Wishlist (Heart Icon) -->
+        <p class="product-price">
+          ₹<%= product.offerPercentage > 0
+            ? Math.round(
+                selectedVariant.price -
+                (selectedVariant.price * product.offerPercentage) / 100
+              )
+            : selectedVariant?.price || 'N/A'
+          %>
+        </p>
+
+        <!-- Remove from Wishlist -->
         <div 
           class="wishlist-icon active remove-from-wishlist"
-          data-product-id="<%= product._id %>">
+          data-product-id="<%= product._id %>"
+          data-size="<%= item.size %>">
           <i class="fas fa-heart"></i>
         </div>
 
         <!-- Stock Info -->
-        <% if (!oneKgVariant || oneKgVariant.stock <= 0) { %>
-          <p class="out-of-stock">Out of stock (1 kg)</p>
+        <% if (!selectedVariant || selectedVariant.stock <= 0) { %>
+          <p class="out-of-stock">
+            Out of stock (<%= item.size %>)
+          </p>
         <% } %>
 
-        <!-- Add to Cart Button -->
+        <!-- Add to Cart -->
         <button 
           class="add-to-cart-btn from-wishlist"
           data-product-id="<%= product._id %>"
-          data-size="1kg"
+          data-size="<%= item.size %>"
           data-qty="1"
-          <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'disabled' : '' %>>
+          <%= (!selectedVariant || selectedVariant.stock <= 0) ? 'disabled' : '' %>>
           
           <i class="fas fa-shopping-cart"></i>
-          <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
+          <%= (!selectedVariant || selectedVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
         </button>
 
         <!-- Rating Badge -->

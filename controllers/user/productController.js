@@ -170,20 +170,19 @@ const loadProductDetails = async (req, res, next) => {
 
     const user = userId ? await User.findById(userId).lean() : null; 
 
-    let wishlistProductIds = [];
+    let wishlistItems = [];
 
     if (req.session.user) {
       const wishlist = await Wishlist.findOne({ user: req.session.user }).lean();
-      wishlistProductIds = wishlist
-        ? wishlist.items.map(i => i.product.toString())
-        : [];
+      wishlistItems = wishlist ? wishlist.items : [];
     }
+
     res.render("product-details", {
       product,
       relatedProducts,
       user,
-      cartCount,       
-      wishlistProductIds
+      cartCount, 
+      wishlistItems
     });
 
   } catch (error) {

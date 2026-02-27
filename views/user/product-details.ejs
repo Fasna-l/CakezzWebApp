@@ -44,10 +44,20 @@
   </span>
 <% } %>
 
-  <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
-    data-product-id="<%= product._id %>"> 
-    <i class="fa-heart"></i>
-  </div>
+<%
+  const defaultSize = product.variants?.[0]?.size;
+  const isWishlisted = wishlistItems?.some(item =>
+    item.product.toString() === product._id.toString() &&
+    item.size === defaultSize
+  );
+%>
+
+<div class="wishlist-icon <%= isWishlisted ? 'active' : '' %>"
+     id="pd-wishlist"
+     data-product-id="<%= product._id %>">
+  <i class="fa-heart"></i>
+</div>
+
 </div>
       <!-- Price -->
       <div class="price-section">
@@ -189,89 +199,89 @@
   <h2 class="related-title">Related Products</h2>
 
   <!-- reuse shop grid -->
-  <div class="products-grid">
+<div class="products-grid">
 
-    <% if (relatedProducts && relatedProducts.length > 0) { %>
-      <% relatedProducts.forEach(product => { 
-        const oneKgVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
-      %>
+  <% if (relatedProducts && relatedProducts.length > 0) { %>
+    <% relatedProducts.forEach(product => { 
+      const oneKgVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
 
-        <div class="product-card">
+      const isRelatedWishlisted = wishlistItems?.some(item =>
+        String(item.product) === String(product._id) &&
+        item.size === "1kg"
+      );
+    %>
 
-          <% if (product.offerPercentage > 0) { %>
-            <span class="offer-badge">
-              <%= product.offerPercentage %>%
-              <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
-            </span>
-          <% } %>
+      <div class="product-card">
 
+        <% if (product.offerPercentage > 0) { %>
+          <span class="offer-badge">
+            <%= product.offerPercentage %>%
+            <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
+          </span>
+        <% } %>
 
-          <!-- Product Image -->
-          <a href="/product/<%= product._id %>">
-            <img 
-              src="/uploads/product/<%= product.productImage[0] %>" 
-              alt="<%= product.productName %>" 
-              class="product-img"
-            >
+        <a href="/product/<%= product._id %>">
+          <img 
+            src="/uploads/product/<%= product.productImage[0] %>" 
+            alt="<%= product.productName %>" 
+            class="product-img"
+          >
+        </a>
+
+        <h3 class="product-name">
+          <a href="/product/<%= product._id %>" class="product-link">
+            <%= product.productName %>
           </a>
+        </h3>
 
-          <!-- Product Name -->
-          <h3 class="product-name">
-            <a href="/product/<%= product._id %>" class="product-link">
-              <%= product.productName %>
-            </a>
-          </h3>
-
-          <!-- Price -->
-          <p class="product-price">
-            ₹<%= product.offerPercentage
-  ? Math.round(oneKgVariant.price - (oneKgVariant.price * product.offerPercentage) / 100)
-  : oneKgVariant.price
-%>
-          </p>
-
-          <!-- Wishlist -->
-          <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
-               data-product-id="<%= product._id %>">
-            <i class="fa-heart"></i>
-          </div>
-
-          <!-- Stock -->
-          <% if (!oneKgVariant || oneKgVariant.stock <= 0) { %>
-            <p class="out-of-stock">Out of stock (1 kg)</p>
-          <% } %>
-
-          <!-- Add to Cart -->
-          <button
-            class="add-to-cart-btn"
-            data-product-id="<%= product._id %>"
-            data-size="1kg"
-            data-qty="1"
-            <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'disabled' : '' %>>
-            <i class="fas fa-shopping-cart"></i>
-            <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
-          </button>
-
-          <!-- Rating -->
-          <% 
-            let avg = 0;
-            if (product.reviews && product.reviews.length) {
-              avg = (product.reviews.reduce((a, b) => a + b.rating, 0) / product.reviews.length).toFixed(1);
-            }
+        <p class="product-price">
+          ₹<%= product.offerPercentage
+            ? Math.round(oneKgVariant.price - (oneKgVariant.price * product.offerPercentage) / 100)
+            : oneKgVariant.price
           %>
+        </p>
 
-          <% if (avg > 0) { %>
-            <span class="rating-badge">★ <%= avg %></span>
-          <% } %>
-
+        <div class="wishlist-icon <%= isRelatedWishlisted ? 'active' : '' %>"
+             data-product-id="<%= product._id %>">
+          <i class="fa-heart"></i>
         </div>
-      <% }) %>
-    <% } else { %>
-      <p>No related products found.</p>
-    <% } %>
 
-  </div>
+        <% if (!oneKgVariant || oneKgVariant.stock <= 0) { %>
+          <p class="out-of-stock">Out of stock (1 kg)</p>
+        <% } %>
+
+        <button
+          class="add-to-cart-btn"
+          data-product-id="<%= product._id %>"
+          data-size="1kg"
+          data-qty="1"
+          <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'disabled' : '' %>>
+          <i class="fas fa-shopping-cart"></i>
+          <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
+        </button>
+
+        <% 
+          let avg = 0;
+          if (product.reviews && product.reviews.length) {
+            avg = (product.reviews.reduce((a, b) => a + b.rating, 0) / product.reviews.length).toFixed(1);
+          }
+        %>
+
+        <% if (avg > 0) { %>
+          <span class="rating-badge">★ <%= avg %></span>
+        <% } %>
+
+      </div>
+
+    <% }) %>
+  <% } else { %>
+    <p>No related products found.</p>
+  <% } %>
+
 </div>
+
+<div id="weightPopup" class="weight-popup"></div>
+
 <script>
   const offerPercentage = JSON.parse(`<%= product.offerPercentage || 0 %>`);
 </script>
@@ -284,7 +294,8 @@
   const soldOut = document.getElementById("pd-soldout");
   const qtyInput = document.getElementById("pd-qty");
   const variants = JSON.parse(`<%- JSON.stringify(product?.variants || []) %>`);
-
+  const wishlistItems =JSON.parse(`<%- JSON.stringify(wishlistItems || []) %>`);
+  
   //  Hover Zoom Effect
   mainImage.addEventListener("mousemove", (e) => {
     const rect = mainImage.getBoundingClientRect();
@@ -328,22 +339,64 @@
     addBtn.disabled = false;
     addBtn.textContent = "ADD TO CART";
   }
+
+  // Adjust quantity if it exceeds available stock
+  if (Number(qtyInput.value) > v.stock) {
+    qtyInput.value = v.stock > 0 ? v.stock : 1;
+  }
+}
+
+function updateWishlistIcon(size) {
+  const heart = document.getElementById("pd-wishlist");
+  if (!heart) return;
+
+  const productId = heart.dataset.productId;
+
+  const exists = wishlistItems.some(item =>
+    String(item.product) === String(productId) &&
+    item.size === size
+  );
+
+  heart.classList.toggle("active", exists);
 }
 
   //  Default size select
   renderSize(variants[0].size);
+  updateWishlistIcon(variants[0].size);
 
   //  Handle weight change clicks
   document.getElementById("pd-weights").addEventListener("click", (e) => {
     if (e.target.classList.contains("weight-btn")) {
       document.querySelectorAll(".weight-btn").forEach(btn => btn.classList.remove("active"));
       e.target.classList.add("active");
-      renderSize(e.target.dataset.size);
+      
+      const selectedSize = e.target.dataset.size;
+      renderSize(selectedSize);
+      updateWishlistIcon(selectedSize);
+      //renderSize(e.target.dataset.size);
     }
   });
   // MAX LIMIT 5 allowed for a single item per user
   document.getElementById("pd-qty-plus").addEventListener("click", () => {
     let currentQty = Number(qtyInput.value);
+
+    //get selected weight(1kg,2kg,3kg)
+    const activeBtn = document.querySelector(".weight-btn.active");
+    if(!activeBtn) return;
+
+    const selectedSize = activeBtn.dataset.size;
+    const selectedVariant = variants.find(v => v.size === selectedSize);
+    if(!selectedVariant) return;
+
+    const stock = selectedVariant.stock;
+
+    //check stock 
+    if(currentQty >= stock){
+      showToast("Not enough stock","error");
+      return;
+    }
+
+    //check maximum allowed quantity (5 per item)
     if (currentQty >= 5) {
       showToast("Maximum 5 per item allowed.", "error");
       return;
@@ -362,15 +415,15 @@
     "3kg": "Serves 20 - 30 people"
   };
 
-  const popup = document.getElementById('servingPopup');
+  const servingPopup  = document.getElementById('servingPopup');
   const weights = document.getElementById("pd-weights");
 
   function toggleServingInfo() {
-    popup.style.display = popup.style.display === "block" ? "none" : "block";
+    servingPopup .style.display = servingPopup .style.display === "block" ? "none" : "block";
   }
 
   function updateServingInfo(size) {
-    popup.textContent = servingMessages[size] || "Serving size info not available";
+    servingPopup .textContent = servingMessages[size] || "Serving size info not available";
   }
 
   weights.addEventListener('click', (e) => {
