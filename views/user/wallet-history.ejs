@@ -65,22 +65,53 @@
                 <% }) %>
             </tbody>
         </table>
-        <div class="pagination">
+        <!--Pagination-->
+        <div class="pagination-container">
+
             <% if (currentPage > 1) { %>
-                <a href="/wallet/history?page=<%= currentPage - 1 %>" class="pagination-link">Previous</a>
+                <a href="/wallet/history?page=<%= currentPage - 1 %>" class="pagination-link prev">« Prev</a>
+            <% } else { %>
+                <span class="pagination-link disabled">« Prev</span>
             <% } %>
 
-            <% for (let i = 1; i <= totalPages; i++) { %>
-                <a href="/wallet/history?page=<%= i %>"
-                class="pagination-link <%= i === currentPage ? 'active' : '' %>">
-                <%= i %>
-                </a>
+            <% 
+                const startPage = Math.max(1, currentPage - 2);
+                const endPage = Math.min(totalPages, currentPage + 2);
+            %>
+
+            <% if (startPage > 1) { %>
+                <a href="/wallet/history?page=1" class="pagination-link">1</a>
+                <% if (startPage > 2) { %>
+                <span class="pagination-link disabled">...</span>
+                <% } %>
+            <% } %>
+
+            <% for (let i = startPage; i <= endPage; i++) { %>
+                <% if (i === currentPage) { %>
+                <span class="pagination-link current"><%= i %></span>
+                <% } else { %>
+                <a href="/wallet/history?page=<%= i %>" class="pagination-link"><%= i %></a>
+                <% } %>
+            <% } %>
+
+            <% if (endPage < totalPages) { %>
+                <% if (endPage < totalPages - 1) { %>
+                <span class="pagination-link disabled">...</span>
+                <% } %>
+                <a href="/wallet/history?page=<%= totalPages %>" class="pagination-link"><%= totalPages %></a>
             <% } %>
 
             <% if (currentPage < totalPages) { %>
-                <a href="/wallet/history?page=<%= currentPage + 1 %>" class="pagination-link">Next</a>
+                <a href="/wallet/history?page=<%= currentPage + 1 %>" class="pagination-link next">Next »</a>
+            <% } else { %>
+                <span class="pagination-link disabled">Next »</span>
             <% } %>
-            </div>
+
+        </div>
+
+        <p style="text-align:center;color:#aaa;font-size:13px;margin-top:8px;">
+            Page <%= currentPage %> of <%= totalPages %>
+        </p>
     </div>
 </div>
 <%- include('../partials/user/footer') %>

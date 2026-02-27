@@ -789,3 +789,63 @@
   font-size: 14px;
   font-weight: 500;
 }
+
+/* =====================================
+   UNIVERSAL PAGINATION (SHOP + WISHLIST)
+===================================== */
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+}
+
+.pagination-link {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-dark);
+  transition: all 0.3s ease;
+  background: #fff;
+}
+
+/* Hover */
+.pagination-link:hover {
+  border-color: var(--primary-pink);
+  color: var(--primary-pink);
+}
+
+/* Active Page */
+.pagination-link.current {
+  background-color: var(--primary-pink);
+  color: #fff;
+  border-color: var(--primary-pink);
+  font-weight: 600;
+}
+
+/* Disabled */
+.pagination-link.disabled {
+  color: #bbb;
+  border-color: #eee;
+  cursor: not-allowed;
+  background: #fafafa;
+}
+
+/* Prev & Next buttons */
+.pagination-link.prev,
+.pagination-link.next {
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 0 14px;
+}

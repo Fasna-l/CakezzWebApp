@@ -66,10 +66,6 @@ const createCoupon = async (req, res, next) => {
       return res.status(400).json({message:"Percentage cannot exceed 100%"})
     }
 
-    // if (discountValue < 1 || discountValue > 100) {
-    //   return res.status(400).json({ message: "Discount must be 1–100%" });
-    // }
-
     if (usageLimit === "" || usageLimit === undefined) {
       usageLimit = null;
     } else {
@@ -83,7 +79,6 @@ const createCoupon = async (req, res, next) => {
       discountValue,
       minPurchaseAmount: minPurchaseAmount || 0,
       maxDiscountAmount: discountType === "percentage" ? maxDiscountAmount || null : null,
-      //maxDiscountAmount: maxDiscountAmount || null,
       expiryDate,
       usageLimit,
       perUserLimit:1
@@ -127,10 +122,6 @@ const updateCoupon = async (req, res, next) => {
       return res.status(400).json({ message: "Percentage cannot exceed 100%" });
     }
 
-    // if (discountValue < 1 || discountValue > 100) {
-    //   return res.status(400).json({ message: "Invalid discount" });
-    // }
-
     if (usageLimit === "" || usageLimit === undefined) {
       usageLimit = null;
     } else {
@@ -143,7 +134,6 @@ const updateCoupon = async (req, res, next) => {
       discountValue,
       minPurchaseAmount,
       maxDiscountAmount: discountType === "percentage" ? maxDiscountAmount || null : null,
-      //maxDiscountAmount: maxDiscountAmount || null,
       description,
       expiryDate,
       usageLimit,

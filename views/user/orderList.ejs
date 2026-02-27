@@ -40,8 +40,8 @@
       </div>
 
       <% if (orders && orders.length > 0) { %>
-        <div class="order-list">
 
+        <div class="order-list">
           <% orders.forEach(function(order) { %>
             <div class="order-item">
 
@@ -85,17 +85,13 @@
                 <div class="review-items" id="review-box-<%= order._id %>" style="display:none;">
                   <% order.items.forEach(function(item) { %>
                     <div class="review-item-row">
-
                       <img src="/uploads/product/<%= item.productImage %>" class="review-thumb">
-
                       <div class="review-item-info">
                         <p><%= item.productName %></p>
                       </div>
-
                       <a href="/product/<%= item.productId %>/review" class="review-btn">
                         Write Review
                       </a>
-
                     </div>
                   <% }); %>
                 </div>
@@ -112,34 +108,69 @@
 
             </div>
           <% }); %>
-
         </div>
 
-        <!-- Pagination -->
-        <div class="pagination">
+        <!-- ================= SMART PAGINATION ================= -->
+        <div class="pagination-container">
+
           <% if (pagination.totalPages > 1) { %>
 
+            <!-- Prev -->
             <% if (pagination.currentPage > 1) { %>
-              <a href="?page=<%= pagination.currentPage - 1 %>" class="page-btn">Prev</a>
+              <a href="/order?page=<%= pagination.currentPage - 1 %>&q=<%= q || '' %>" class="pagination-link prev">« Prev</a>
+            <% } else { %>
+              <span class="pagination-link disabled">« Prev</span>
             <% } %>
 
-            <% for (let i = 1; i <= pagination.totalPages; i++) { %>
-              <a 
-                href="?page=<%= i %>" 
-                class="page-number <%= pagination.currentPage === i ? 'active' : '' %>">
-                <%= i %>
-              </a>
+            <% 
+              const startPage = Math.max(1, pagination.currentPage - 2);
+              const endPage = Math.min(pagination.totalPages, pagination.currentPage + 2);
+            %>
+
+            <!-- First Page -->
+            <% if (startPage > 1) { %>
+              <a href="/order?page=1&q=<%= q || '' %>" class="pagination-link">1</a>
+              <% if (startPage > 2) { %>
+                <span class="pagination-link disabled">...</span>
+              <% } %>
             <% } %>
 
+            <!-- Middle Pages -->
+            <% for (let i = startPage; i <= endPage; i++) { %>
+              <% if (i === pagination.currentPage) { %>
+                <span class="pagination-link current"><%= i %></span>
+              <% } else { %>
+                <a href="/order?page=<%= i %>&q=<%= q || '' %>" class="pagination-link"><%= i %></a>
+              <% } %>
+            <% } %>
+
+            <!-- Last Page -->
+            <% if (endPage < pagination.totalPages) { %>
+              <% if (endPage < pagination.totalPages - 1) { %>
+                <span class="pagination-link disabled">...</span>
+              <% } %>
+              <a href="/order?page=<%= pagination.totalPages %>&q=<%= q || '' %>" class="pagination-link"><%= pagination.totalPages %></a>
+            <% } %>
+
+            <!-- Next -->
             <% if (pagination.currentPage < pagination.totalPages) { %>
-              <a href="?page=<%= pagination.currentPage + 1 %>" class="page-btn">Next</a>
+              <a href="/order?page=<%= pagination.currentPage + 1 %>&q=<%= q || '' %>" class="pagination-link next">Next »</a>
+            <% } else { %>
+              <span class="pagination-link disabled">Next »</span>
             <% } %>
 
           <% } %>
+
         </div>
 
+        <p style="text-align:center;color:#aaa;font-size:13px;margin-top:8px;">
+          Page <%= pagination.currentPage %> of <%= pagination.totalPages %>
+        </p>
+
       <% } else { %>
-        <p>No orders found</p>
+
+        <p style="text-align:center;margin-top:20px;">No orders found</p>
+
       <% } %>
 
     </div>

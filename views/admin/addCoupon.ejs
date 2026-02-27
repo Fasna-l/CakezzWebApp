@@ -37,12 +37,6 @@
             <div id="couponAmount-error" class="error-message"></div>
           </div>
 
-          <!-- <div class="form-group">
-            <label>Discount Percentage :</label>
-            <input type="number" id="couponAmount" placeholder="Eg: 20">
-            <div id="couponAmount-error" class="error-message"></div>
-          </div> -->
-
           <div class="form-group" id="maxDiscountGroup">
             <label>Max Discount :</label>
             <input type="number" id="maxDiscount" placeholder="Eg: 300">
@@ -138,11 +132,6 @@ function handleFormSubmit(event) {
     isValid = false;
   }
 
-  // if (!discount || discount < 1 || discount > 100) {
-  //   show("couponAmount-error", "Discount must be between 1 and 100");
-  //   sValid = false;
-  // }
-
   if (!description.value.trim()) {
     show("description-error", "Description is required");
     isValid = false;
@@ -164,7 +153,6 @@ function handleFormSubmit(event) {
     discountType: discountType.value,
     discountValue: discount,
     maxDiscountAmount: discountType.value === "percentage" ? maxDiscount.value || null : null,
-    //maxDiscountAmount: maxDiscount.value || null,
     minPurchaseAmount: minPurchase.value || 0,
     description: description.value.trim(),
     usageLimit: usageLimit.value || null,

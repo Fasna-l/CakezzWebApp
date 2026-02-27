@@ -135,7 +135,7 @@
   border:1px solid #ccc;
 }
 
-.pagination {
+/* .pagination {
   margin-top:20px;
   display:flex;
   justify-content: center;
@@ -156,7 +156,7 @@
   background:#ff66a3;
   border-color:#ff66a3;
   color:white;
-}
+} */
 
 .no-orders {
   text-align:center;
@@ -218,7 +218,7 @@
   margin-top: 3px;
 }
 
-.pagination {
+/* .pagination {
   display: flex;
   justify-content: center;
   gap: 6px;
@@ -236,4 +236,71 @@
 .dots {
   padding: 6px 4px;
   font-size: 14px;
+} */
+
+/* =====================================
+   ORDER LIST SMART PAGINATION
+===================================== */
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.pagination-link {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #f0e0e7;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+/* Hover */
+.pagination-link:hover {
+  border-color: #ff66a3;
+  color: #e91e63;
+}
+
+/* Current Page */
+.pagination-link.current {
+  background: #e91e63;
+  color: #fff;
+  border-color: #ff66a3;
+  font-weight: 600;
+}
+
+/* Disabled */
+.pagination-link.disabled {
+  color: #bbb;
+  border-color: #eee;
+  background: #fafafa;
+  cursor: not-allowed;
+}
+
+/* Prev & Next buttons */
+.pagination-link.prev,
+.pagination-link.next {
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+/* Page text */
+.orders-card p {
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+  margin-top: 10px;
 }

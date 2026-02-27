@@ -110,35 +110,52 @@
   </div>
 
   <!-- Pagination -->
-  <% if (wishlistTotalPages > 1) { %>
-    <div class="pagination">
+  <div class="pagination-container">
 
-      <% if (wishlistCurrentPage > 1) { %>
-        <a 
-          href="/wishlist?page=<%= wishlistCurrentPage - 1 %>" 
-          class="pagination-link">
-          Previous
-        </a>
+    <% if (wishlistCurrentPage > 1) { %>
+      <a href="/wishlist?page=<%= wishlistCurrentPage - 1 %>" class="pagination-link prev">« Prev</a>
+    <% } else { %>
+      <span class="pagination-link disabled">« Prev</span>
+    <% } %>
+
+    <% 
+      const startPage = Math.max(1, wishlistCurrentPage - 2);
+      const endPage = Math.min(wishlistTotalPages, wishlistCurrentPage + 2);
+    %>
+
+    <% if (startPage > 1) { %>
+      <a href="/wishlist?page=1" class="pagination-link">1</a>
+      <% if (startPage > 2) { %>
+        <span class="pagination-link disabled">...</span>
       <% } %>
+    <% } %>
 
-      <% for (let i = 1; i <= wishlistTotalPages; i++) { %>
-        <a 
-          href="/wishlist?page=<%= i %>" 
-          class="pagination-link <%= i === wishlistCurrentPage ? 'active' : '' %>">
-          <%= i %>
-        </a>
+    <% for (let i = startPage; i <= endPage; i++) { %>
+      <% if (i === wishlistCurrentPage) { %>
+        <span class="pagination-link current"><%= i %></span>
+      <% } else { %>
+        <a href="/wishlist?page=<%= i %>" class="pagination-link"><%= i %></a>
       <% } %>
+    <% } %>
 
-      <% if (wishlistCurrentPage < wishlistTotalPages) { %>
-        <a 
-          href="/wishlist?page=<%= wishlistCurrentPage + 1 %>" 
-          class="pagination-link">
-          Next
-        </a>
+    <% if (endPage < wishlistTotalPages) { %>
+      <% if (endPage < wishlistTotalPages - 1) { %>
+        <span class="pagination-link disabled">...</span>
       <% } %>
+      <a href="/wishlist?page=<%= wishlistTotalPages %>" class="pagination-link"><%= wishlistTotalPages %></a>
+    <% } %>
 
-    </div>
-  <% } %>
+    <% if (wishlistCurrentPage < wishlistTotalPages) { %>
+      <a href="/wishlist?page=<%= wishlistCurrentPage + 1 %>" class="pagination-link next">Next »</a>
+    <% } else { %>
+      <span class="pagination-link disabled">Next »</span>
+    <% } %>
+
+  </div>
+
+  <p style="text-align:center;color:#aaa;font-size:13px;margin-top:8px;">
+    Page <%= wishlistCurrentPage %> of <%= wishlistTotalPages %>
+  </p>
 
 </div>
 
