@@ -1,9 +1,10 @@
-const razorpay = require("../config/razorpay");
-const Order = require("../models/orderSchema");
-const Product = require("../models/productSchema");
-const Cart = require("../models/cartSchema");
-const Wallet = require("../models/walletSchema");
-const crypto = require("crypto");
+import razorpay from "../config/razorpay.js";
+import Order from "../models/orderSchema.js";
+import Product from "../models/productSchema.js";
+import Cart from "../models/cartSchema.js";
+import Wallet from "../models/walletSchema.js";
+import crypto from "crypto";
+import logger from "../utils/logger.js";
 
 //create Razorpay order 
 const createRazorpayOrder = async (req, res, next) => {
@@ -25,6 +26,11 @@ const createRazorpayOrder = async (req, res, next) => {
     // store razorpay order id
     order.paymentDetails.razorpayOrderId = razorpayOrder.id;
     await order.save();
+
+    logger.info(
+      `RAZORPAY ORDER CREATED | UserId: ${order.userId} | OrderId: ${order._id} | Amount: ${order.payableAmount}`
+    );
+    
     res.json({
       success: true,
       key: process.env.RAZORPAY_KEY_ID,
@@ -54,6 +60,10 @@ const verifyPayment = async (req, res, next) => {
     if (!order) return res.json({ success: false });
 
     if (expectedSign !== razorpay_signature) {
+      logger.error(
+        `PAYMENT SIGNATURE MISMATCH | UserId: ${order.userId} | OrderId: ${order._id}`
+      );
+      
       order.paymentStatus = "Failed";
       order.orderStatus = "Payment Failed";
       await order.save();
@@ -79,6 +89,9 @@ const verifyPayment = async (req, res, next) => {
 
     order.items.forEach(it => { it.status = "Pending" });
     await order.save();
+    logger.info(
+      `PAYMENT SUCCESS | UserId: ${order.userId} | OrderId: ${order._id} | RazorpayPaymentId: ${razorpay_payment_id} | Amount: ${order.totalAmount}`
+    );
     // CLEAR CART ONLY AFTER SUCCESS
     await Cart.findOneAndUpdate(
       { user: order.userId },
@@ -104,7 +117,12 @@ const markPaymentFailed = async (req, res, next) => {
       orderStatus: "Payment Failed"
     });
 
+    logger.warn(
+      `PAYMENT FAILED | OrderId: ${orderId}`
+    );
+
     res.json({ success: true });
+    
   } catch (error) {
     next(error);
   }
@@ -119,6 +137,9 @@ const retryPayment = async (req, res, next) => {
     }
     // If there is still payable amount → Razorpay retry
     if (order.payableAmount > 0) {
+      logger.info(
+        `PAYMENT RETRY INITIATED | UserId: ${order.userId} | OrderId: ${order._id}`
+      );
       return retryRazorpay(order, res);
     }
     // If nothing pending (edge case)
@@ -145,7 +166,7 @@ const retryRazorpay = async (order, res) => {
   });
 };
 
-module.exports = {
+export default {
   createRazorpayOrder,
   verifyPayment,
   markPaymentFailed,

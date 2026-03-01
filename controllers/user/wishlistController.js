@@ -1,6 +1,6 @@
-const Wishlist = require("../../models/wishlistSchema");
-const Product = require("../../models/productSchema");
-const calculateBestOffer = require("../../helpers/offerCalculator");
+import Wishlist from "../../models/wishlistSchema.js";
+import Product from "../../models/productSchema.js";
+import calculateBestOffer from "../../helpers/offerCalculator.js";
 
 const loadWishlist = async (req, res, next) => {
   try {
@@ -151,7 +151,7 @@ const wishlistCount = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   loadWishlist,
   toggleWishlist,
   removeFromWishlist,

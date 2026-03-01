@@ -1,8 +1,14 @@
-const Product = require("../../models/productSchema");
-const Category = require("../../models/categorySchema");
-const sharp = require("sharp");
-const fs = require("fs");
-const path = require("path");
+import Product from "../../models/productSchema.js";
+import Category from "../../models/categorySchema.js";
+import sharp from "sharp";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import logger from "../../utils/logger.js";
+
+// Fix __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /* Get Product Listing Page */
 const productinfo = async (req, res, next) => {
@@ -126,6 +132,9 @@ const addProduct = async (req, res, next) => {
     });
 
     await newProduct.save();
+    logger.info(
+      `ADMIN PRODUCT CREATED | ProductId: ${newProduct._id} | Name: ${productName} | Status: ${newProduct.status}`
+    );
     return res.status(200).json({ success: true });
 
   } catch (error) {
@@ -137,6 +146,9 @@ const productBlocked = async (req,res,next)=>{
     try {
         let id = req.params.id;
         await Product.updateOne({_id:id},{$set:{isBlocked:true}});
+        logger.warn(
+          `ADMIN PRODUCT BLOCKED | ProductId: ${id}`
+        );
         return res.status(200).json({ success: true });
     } catch (error) {
         next(error);
@@ -147,6 +159,9 @@ const productUnBlocked = async (req,res,next)=>{
     try {
         const id = req.params.id;
         await Product.updateOne({_id:id},{$set:{isBlocked:false}});
+        logger.info(
+          `ADMIN PRODUCT UNBLOCKED | ProductId: ${id}`
+        );
         return res.status(200).json({ success: true });
     } catch (error) {
         next(error);
@@ -223,6 +238,9 @@ const editProduct = async (req, res, next) => {
     product.status = updatedStock > 0 ? "Available" : "Out_of_stock";
 
     await product.save();
+    logger.info(
+      `ADMIN PRODUCT UPDATED | ProductId: ${productId} | Name: ${product.productName} | Status: ${product.status}`
+    );
     res.json({ success: true, message: "Product updated successfully!" ,redirectUrl: `/admin/products?page=${page}` });
 
   } catch (error) {
@@ -230,7 +248,7 @@ const editProduct = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   productinfo,
   getProductAddPage,
   addProduct,

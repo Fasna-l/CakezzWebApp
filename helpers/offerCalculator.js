@@ -1,5 +1,5 @@
-const Offer = require("../models/offerSchema");
-const CategoryOffer = require("../models/categoryOfferSchema");
+import Offer from "../models/offerSchema.js";
+import CategoryOffer from "../models/categoryOfferSchema.js";
 
 const calculateBestOffer = async (product, basePrice) => {
   let bestDiscount = 0;
@@ -47,4 +47,4 @@ const calculateBestOffer = async (product, basePrice) => {
   };
 };
 
-module.exports = calculateBestOffer;
+export default calculateBestOffer;

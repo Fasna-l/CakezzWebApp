@@ -1,8 +1,9 @@
-const Order = require("../../models/orderSchema");
-const Product = require("../../models/productSchema");
-const User = require("../../models/userSchema");
-const Wallet = require("../../models/walletSchema");
-const PDFDocument = require("pdfkit");
+import Order from "../../models/orderSchema.js";
+import Product from "../../models/productSchema.js";
+import User from "../../models/userSchema.js";
+import Wallet from "../../models/walletSchema.js";
+import PDFDocument from "pdfkit";
+import logger from "../../utils/logger.js";
 
 const loadOrderList = async (req, res, next) => {
   try {
@@ -265,6 +266,15 @@ const cancelOrder = async (req, res, next) => {
       order.refundStatus = "Processed";
     }
     await order.save();
+    if (itemId) {
+      logger.info(
+        `ITEM CANCELLED | UserId: ${userId} | OrderId: ${order._id} | Item: ${itemId} | Refund: ${refundAmount}`
+      );
+    } else {
+      logger.warn(
+        `ORDER CANCELLED | UserId: ${userId} | OrderId: ${order._id} | Refund: ${refundAmount}`
+      );
+    }
     return res.redirect(`/order/${orderId}`);
 
   } catch (error) {
@@ -330,7 +340,9 @@ const submitReturnRequest = async (req, res, next) => {
     order.markModified("items");
     recalculateOrderTotals(order);
     await order.save();
-
+    logger.info(
+      `RETURN REQUESTED | UserId: ${order.userId} | OrderId: ${order._id} | Type: Full Order`
+    );
     res.redirect(`/order/${orderId}`);
 
   } catch (error) {
@@ -342,6 +354,9 @@ const submitReturnRequest = async (req, res, next) => {
 const downloadInvoice = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id).lean();
+    logger.info(
+      `INVOICE DOWNLOADED | UserId: ${order.userId} | OrderId: ${order._id}`
+    );
     const user = await User.findById(order.userId).lean();
 
     const doc = new PDFDocument({ margin: 50 });
@@ -585,7 +600,9 @@ const submitSingleReturn = async (req, res, next) => {
     order.markModified("items");
     recalculateOrderTotals(order);
     await order.save();
-
+    logger.info(
+      `RETURN REQUESTED | UserId: ${userId} | OrderId: ${order._id} | Item: ${itemId}`
+    );
     res.redirect(`/order/${orderId}`);
 
   } catch (error) {
@@ -635,34 +652,6 @@ function recalculateOrderTotals(order) {
   order.totalAmount =
     newSubTotal + taxAmount + shippingCharge - newCouponDiscount;
 }
-// function recalculateOrderTotals(order) {
-
-//   const validItems = order.items.filter(item => {
-//     if (item.status === "Cancelled") return false;
-//     if (item.status === "Returned") return false;
-
-//     if (
-//       item.status === "Return Requested" &&
-//       item.returnStatus === "Approved"
-//     ) return false;
-
-//     //if (item.returnStatus === "Rejected") return false;
-
-//     return true;
-//   });
-
-//   const subTotal = validItems.reduce((sum, item) => {
-//     return sum + item.price * item.quantity;
-//   }, 0);
-
-//   const taxAmount = Math.round(subTotal * 0.05);
-//   const shippingCharge = subTotal > 0 ? 50 : 0;
-
-//   order.subTotal = subTotal;
-//   order.taxAmount = taxAmount;
-//   order.shippingCharge = shippingCharge;
-//   order.totalAmount = subTotal + taxAmount + shippingCharge;
-// }
 
 function calculateRefundWithCoupon(order, item) {
 
@@ -688,7 +677,7 @@ function calculateRefundWithCoupon(order, item) {
   return Math.round(refundAmount);
 }
 
-module.exports = {
+export default {
   loadOrderList,
   loadOrderDetails,
   loadCancelPage,

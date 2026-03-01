@@ -1,5 +1,5 @@
-const Address = require("../../models/addressSchema");
-const User = require("../../models/userSchema");
+import Address from "../../models/addressSchema.js";
+import User from "../../models/userSchema.js";
 
 // Load Address Page
 const loadAddressPage = async (req, res, next) => {
@@ -118,7 +118,7 @@ const setDefaultAddress = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   loadAddressPage,
   addAddress,
   loadEditAddress,

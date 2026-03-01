@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const crypto = require("crypto");
+import mongoose from "mongoose";
+import crypto from "crypto";
 
 const orderSchema = new mongoose.Schema({
   orderId: {
@@ -150,4 +150,4 @@ orderSchema.pre("validate", function (next) {
 
 
 const Order = mongoose.model("Order", orderSchema);
-module.exports = Order
+export default Order;

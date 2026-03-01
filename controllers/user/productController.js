@@ -1,10 +1,10 @@
-const User = require("../../models/userSchema");
-const Product = require("../../models/productSchema");
-const Category = require("../../models/categorySchema");
-const Cart = require("../../models/cartSchema");
-const Wishlist = require("../../models/wishlistSchema");
-const calculateBestOffer = require("../../helpers/offerCalculator");
-const mongoose = require("mongoose");
+import User from "../../models/userSchema.js";
+import Product from "../../models/productSchema.js";
+import Category from "../../models/categorySchema.js";
+import Cart from "../../models/cartSchema.js";
+import Wishlist from "../../models/wishlistSchema.js";
+import calculateBestOffer from "../../helpers/offerCalculator.js";
+import mongoose from "mongoose";
 
 // Load Shop Page
 const loadShoppage = async (req, res, next) => {
@@ -232,7 +232,7 @@ const submitReview = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   loadShoppage,
   loadProductDetails,
   loadReviewPage,

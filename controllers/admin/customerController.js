@@ -1,4 +1,5 @@
-const User = require("../../models/userSchema")
+import User from "../../models/userSchema.js";
+import logger from "../../utils/logger.js";
 
 const customerInfo = async (req,res,next)=>{
     try {
@@ -52,6 +53,10 @@ const customerBlocked = async (req,res,next)=>{
     try {
         let id = req.params.id;
         await User.updateOne({_id:id},{$set:{isBlocked:true}});
+        
+        logger.warn(
+            `ADMIN CUSTOMER BLOCKED | CustomerId: ${id}`
+        );
         return res.status(200).json({ success: true });
     } catch (error) {
         next(error);
@@ -62,14 +67,17 @@ const customerUnBlocked = async (req,res,next)=>{
     try {
         let id = req.params.id;
         await User.updateOne({_id:id},{$set:{isBlocked:false}});
+        logger.info(
+            `ADMIN CUSTOMER UNBLOCKED | CustomerId: ${id}`
+        );
         return res.status(200).json({ success: true });
     } catch (error) {
         next(error);
     }
 }
 
-module.exports = {
-    customerInfo,
-    customerBlocked,
-    customerUnBlocked
-}
+export default {
+  customerInfo,
+  customerBlocked,
+  customerUnBlocked,
+};

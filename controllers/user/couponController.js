@@ -1,5 +1,5 @@
-const Coupon = require("../../models/couponSchema");
-const Cart = require("../../models/cartSchema");
+import Coupon from "../../models/couponSchema.js";
+import Cart from "../../models/cartSchema.js";
 
 // GET AVAILABLE COUPONS (payment.ejs)
 const getAvailableCoupons = async (req, res, next) => {
@@ -140,7 +140,7 @@ const removeCoupon = async (req, res, next) => {
 };
 
 
-module.exports = {
+export default {
   getAvailableCoupons,
   applyCoupon,
   removeCoupon,

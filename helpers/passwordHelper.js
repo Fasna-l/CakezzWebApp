@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
 
 //  Securely hash passwords
 async function securePassword(password) {
@@ -10,4 +10,4 @@ async function securePassword(password) {
   }
 }
 
-module.exports = { securePassword };
+export { securePassword };

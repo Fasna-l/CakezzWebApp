@@ -1,14 +1,21 @@
-const path = require("path");
-const fs = require("fs");
-const sharp = require("sharp");
-const User = require("../../models/userSchema");
-const Otp = require("../../models/otpSchema"); 
-const nodemailer = require("nodemailer");
-const bcrypt = require("bcrypt");
-const env = require("dotenv").config();
-const { generateOtp } = require("../../helpers/otpHelper");
-const { sendVerificationEmail } = require("../../helpers/emailHelper");
-const { securePassword } = require("../../helpers/passwordHelper");
+import path from "path";
+import fs from "fs";
+import sharp from "sharp";
+import bcrypt from "bcrypt";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+
+import User from "../../models/userSchema.js";
+import Otp from "../../models/otpSchema.js";
+
+import { generateOtp } from "../../helpers/otpHelper.js";
+import { sendVerificationEmail } from "../../helpers/emailHelper.js";
+import { securePassword } from "../../helpers/passwordHelper.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config();
 
 //Load Account page(Profile Page)
 const loadAccountPage = async (req, res, next) => {
@@ -386,7 +393,7 @@ const postChangePassword = async (req, res, next) => {
   }
 };
 
-module.exports ={
+export default {
   loadAccountPage,
   loadEditProfile,
   updateProfile,
@@ -402,4 +409,4 @@ module.exports ={
   postNewPassword,
   getChangePasswordPage,
   postChangePassword,
-}
+};

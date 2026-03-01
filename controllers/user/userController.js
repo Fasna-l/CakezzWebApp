@@ -1,20 +1,31 @@
-const path = require("path");
-const fs = require("fs");
-const sharp = require("sharp");
-const User = require("../../models/userSchema");
-const Category = require("../../models/categorySchema");
-const Product = require("../../models/productSchema");
-const Cart = require("../../models/cartSchema");
-const Otp = require("../../models/otpSchema");  
-const Wallet = require("../../models/walletSchema");
-const Wishlist = require("../../models/wishlistSchema");
-const mongoose = require("mongoose");
-const env = require("dotenv").config();
-const bcrypt = require("bcrypt");
-const { generateOtp } = require("../../helpers/otpHelper");
-const { sendVerificationEmail } = require("../../helpers/emailHelper");
-const { securePassword } = require("../../helpers/passwordHelper");
-const calculateBestOffer = require("../../helpers/offerCalculator");
+import path from "path";
+import fs from "fs";
+import sharp from "sharp";
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+
+import User from "../../models/userSchema.js";
+import Category from "../../models/categorySchema.js";
+import Product from "../../models/productSchema.js";
+import Cart from "../../models/cartSchema.js";
+import Otp from "../../models/otpSchema.js";
+import Wallet from "../../models/walletSchema.js";
+import Wishlist from "../../models/wishlistSchema.js";
+import Coupon from "../../models/couponSchema.js"; // 🔥 moved from inside function
+import { authLogger } from "../../utils/logger.js";
+
+import { generateOtp } from "../../helpers/otpHelper.js";
+import { sendVerificationEmail } from "../../helpers/emailHelper.js";
+import { securePassword } from "../../helpers/passwordHelper.js";
+import calculateBestOffer from "../../helpers/offerCalculator.js";
+
+dotenv.config();
+
+// ES module __dirname fix
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const pageNotFound = async (req,res,next)=>{
     try {
@@ -38,6 +49,7 @@ const googleAuth = async (req, res, next) => {
     }
 
     req.session.user = user._id;
+    authLogger.info(`GOOGLE LOGIN SUCCESS | UserId: ${user._id} | Email: ${user.email} | IP: ${req.ip}`);
 
      // ENSURE WALLET EXISTS FOR GOOGLE USER
     const walletExists = await Wallet.findOne({ userId: user._id });
@@ -164,11 +176,15 @@ const login = async (req,res,next)=>{
     try {
         const {email,password} = req.body;
         const findUser = await User.findOne({isAdmin:0,email:email});
+        
         if(!findUser){
+          authLogger.warn(`LOGIN FAILED | Email: ${email} | Reason: User not found | IP: ${req.ip}`);
           req.session.loginError = "We couldn't find an account with this email. Please try again or sign up.";
           return res.redirect("/login");
         }
+        
         if(findUser.isBlocked){
+          authLogger.warn(`LOGIN BLOCKED | UserId: ${findUser._id} | IP: ${req.ip}`);
           req.session.loginError = "Your account has been disabled. Please contact our team for assistance.";
           return res.redirect("/login");
         }
@@ -176,12 +192,14 @@ const login = async (req,res,next)=>{
         const passwordMatch = await bcrypt.compare(password,findUser.password);
 
         if(!passwordMatch){
+          authLogger.warn(`LOGIN FAILED | UserId: ${findUser._id} | Reason: Wrong password | IP: ${req.ip}`);
           req.session.loginError = "Incorrect Password";
           return res.redirect("/login");
             //return res.render("login",{message:"Incorrect Password"})
         }
 
         req.session.user = findUser._id
+        authLogger.info(`LOGIN SUCCESS | UserId: ${findUser._id} | Email: ${email} | IP: ${req.ip}`);
         return res.redirect("/")
         //res.redirect("/");
 
@@ -264,13 +282,13 @@ const verifyOtp = async (req, res,next) => {
         }
         const newUser = new User({ name, email, password: hashedPassword ,referralCode: generateReferralCode(), referredBy: referrerUser ? referrerUser._id : null });
         await newUser.save();
+        authLogger.info(`NEW USER REGISTERED | UserId: ${newUser._id} | Email: ${newUser.email} | IP: ${req.ip}`);
 
         // ================= REFERRAL REWARD =================
         if (referralCode) {
           const referrer = await User.findOne({ referralCode });
 
           if (referrer) {
-          const Coupon = require("../../models/couponSchema");
 
         // CHECK IF REFERRAL COUPON ALREADY EXISTS
           const existingReferralCoupon = await Coupon.findOne({
@@ -342,6 +360,7 @@ const resendOtp = async(req,res,next)=>{
 
 const logout = async (req,res,next) =>{
   try {
+    authLogger.info(`LOGOUT | UserId: ${req.session.user} | IP: ${req.ip}`);
     req.session.user = null;
     return res.redirect("/login");
   } catch (error) {
@@ -349,15 +368,15 @@ const logout = async (req,res,next) =>{
   }
 }
 
-module.exports = {
-    loadHomepage,
-    pageNotFound,
-    googleAuth,
-    loadSignup,
-    signup,
-    verifyOtp,
-    resendOtp,
-    loadLogin,
-    login,
-    logout,
-}
+export default {
+  loadHomepage,
+  pageNotFound,
+  googleAuth,
+  loadSignup,
+  signup,
+  verifyOtp,
+  resendOtp,
+  loadLogin,
+  login,
+  logout,
+};

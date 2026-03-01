@@ -1,4 +1,5 @@
-const Coupon = require("../../models/couponSchema");
+import Coupon from "../../models/couponSchema.js";
+import logger from "../../utils/logger.js";
 
 const listCoupons = async (req, res, next) => {
   try {
@@ -71,7 +72,7 @@ const createCoupon = async (req, res, next) => {
     } else {
       usageLimit = Number(usageLimit);
     }
-    await Coupon.create({
+    const newCoupon = await Coupon.create({
       code: code.toUpperCase(),
       name,
       description,
@@ -83,6 +84,10 @@ const createCoupon = async (req, res, next) => {
       usageLimit,
       perUserLimit:1
     });
+
+    logger.info(
+      `ADMIN COUPON CREATED | Code: ${newCoupon.code} | Type: ${newCoupon.discountType} | Value: ${newCoupon.discountValue}`
+    );
 
     res.status(201).json({ success: true });
   } catch (error) {
@@ -128,7 +133,7 @@ const updateCoupon = async (req, res, next) => {
       usageLimit = Number(usageLimit);
     }
 
-    await Coupon.findByIdAndUpdate(req.params.id, {
+    const updatedCoupon = await Coupon.findByIdAndUpdate(req.params.id, {
       name,
       discountType,
       discountValue,
@@ -138,7 +143,11 @@ const updateCoupon = async (req, res, next) => {
       expiryDate,
       usageLimit,
       perUserLimit:1
-    });
+    }, { new: true });
+
+    logger.info(
+      `ADMIN COUPON UPDATED | Code: ${updatedCoupon.code} | Type: ${updatedCoupon.discountType} | Value: ${updatedCoupon.discountValue}`
+    );
 
     res.status(200).json({ success: true });
   } catch (error) {
@@ -154,6 +163,10 @@ const toggleCoupon = async (req, res, next) => {
     coupon.isActive = !coupon.isActive;
     await coupon.save();
 
+    logger.warn(
+      `ADMIN COUPON TOGGLED | Code: ${coupon.code} | Active: ${coupon.isActive}`
+    );
+
     res.json({ success: true, isActive: coupon.isActive });
   } catch (error) {
     next(error);
@@ -162,19 +175,24 @@ const toggleCoupon = async (req, res, next) => {
 
 const deleteCoupon = async (req, res, next) => {
   try {
-    await Coupon.findByIdAndDelete(req.params.id);
+    const deletedCoupon = await Coupon.findByIdAndDelete(req.params.id);
+    if (deletedCoupon) {
+      logger.warn(
+        `ADMIN COUPON DELETED | Code: ${deletedCoupon.code}`
+      );
+    }
     res.json({ success: true });
   } catch (error) {
     next(error);
   }
 };
 
-module.exports = {
+export default {
   listCoupons,
   loadAddCoupon,
   createCoupon,
   loadEditCoupon,
   updateCoupon,
   toggleCoupon,
-  deleteCoupon
+  deleteCoupon,
 };

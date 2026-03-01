@@ -1,6 +1,6 @@
-const User = require("../models/userSchema");
+import User from "../models/userSchema.js";
 
-const userAuth = async (req, res, next) => {
+export const userAuth = async (req, res, next) => {
   try {
     if (!req.session.user) {
       return res.redirect("/login");
@@ -14,7 +14,7 @@ const userAuth = async (req, res, next) => {
     }
 
     if (user.isBlocked) {
-      req.session.user = null; // Only remove user session, not destroy whole session
+      req.session.user = null;
       return res.redirect("/login?message=Your account is blocked");
     }
 
@@ -25,15 +25,10 @@ const userAuth = async (req, res, next) => {
   }
 };
 
-const adminAuth = (req, res, next) => {    // pending: admin session management(completely change the adminAuth middleware function to this)
-    if (req.session.admin) {
-        next();
-    } else {
-        res.redirect("/admin/login");
-    }
+export const adminAuth = (req, res, next) => {
+  if (req.session.admin) {
+    next();
+  } else {
+    res.redirect("/admin/login");
+  }
 };
-
-module.exports = {
-    userAuth,
-    adminAuth
-}

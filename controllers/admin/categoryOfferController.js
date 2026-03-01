@@ -1,5 +1,5 @@
-const CategoryOffer = require("../../models/categoryOfferSchema");
-const Category = require("../../models/categorySchema");
+import CategoryOffer from "../../models/categoryOfferSchema.js";
+import Category from "../../models/categorySchema.js";
 
 const loadAddCategoryOffer = async (req, res, next) => {
   try {
@@ -98,7 +98,7 @@ const deleteCategoryOffer = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   loadAddCategoryOffer,
   addCategoryOffer,
   loadEditCategoryOffer,

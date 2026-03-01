@@ -1,11 +1,14 @@
+import logger from "../utils/logger.js";
+
 const errorHandler = (err, req, res, next) => {
-  console.error(" Error:", err);
+  logger.error(`${err.message} - ${req.method} ${req.originalUrl}`);
+  //console.error("Error:", err);
 
   // API requests (fetch / ajax)
   if (req.headers.accept?.includes("application/json")) {
     return res.status(err.status || 500).json({
       success: false,
-      message: err.message || "Internal Server Error"
+      message: err.message || "Internal Server Error",
     });
   }
 
@@ -18,4 +21,4 @@ const errorHandler = (err, req, res, next) => {
   return res.status(err.status || 500).redirect("/pageNotFound");
 };
 
-module.exports = errorHandler;
+export default errorHandler;
