@@ -13,7 +13,8 @@ import Cart from "../../models/cartSchema.js";
 import Otp from "../../models/otpSchema.js";
 import Wallet from "../../models/walletSchema.js";
 import Wishlist from "../../models/wishlistSchema.js";
-import Coupon from "../../models/couponSchema.js"; // 🔥 moved from inside function
+import ReferralSettings from "../../models/referralSettingsSchema.js";
+import Coupon from "../../models/couponSchema.js"; // moved from inside function
 import { authLogger } from "../../utils/logger.js";
 
 import { generateOtp } from "../../helpers/otpHelper.js";
@@ -210,7 +211,8 @@ const login = async (req,res,next)=>{
 
 const loadSignup = async (req,res,next)=>{
     try {
-        return res.render("signup")
+      const referralCode = req.query.code || "";
+      return res.render("signup", { referralCode });
     } catch (error) {
       next(error);
     }
@@ -285,43 +287,31 @@ const verifyOtp = async (req, res,next) => {
         authLogger.info(`NEW USER REGISTERED | UserId: ${newUser._id} | Email: ${newUser.email} | IP: ${req.ip}`);
 
         // ================= REFERRAL REWARD =================
-        if (referralCode) {
-          const referrer = await User.findOne({ referralCode });
-
-          if (referrer) {
-
-        // CHECK IF REFERRAL COUPON ALREADY EXISTS
-          const existingReferralCoupon = await Coupon.findOne({
-            assignedUser: referrer._id,
-            description: "Referral reward coupon"
-          });
-
-          if (!existingReferralCoupon) {
-            const couponCode =
-              "REF-" + Math.random().toString(36).substring(2, 8).toUpperCase();
-
-            await Coupon.create({
-              name: "Referral Coupon",
-              code: couponCode,
-              description: "Referral reward coupon",
-              discountType: "percentage",
-              discountValue: 10,
-              minPurchaseAmount: 500,
-              maxDiscountAmount: 200,
-              expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-              isActive: true,
-              usageLimit: 1,
-              perUserLimit: 1,
-              assignedUser: referrer._id
-            });
-          }
-        }
-      }
       // AUTO-CREATE WALLET (STEP 1)
       await Wallet.create({
         userId: newUser._id,
         balance: 0
       });
+
+      //Referral signup reward (A give code to B : this is for B)
+      if(referrerUser) {
+        const wallet = await Wallet.findOne({ userId: newUser._id});
+
+        const settings = await ReferralSettings.findOne();
+
+        const rewardAmount = settings?.refereeReward || 50;
+
+        await wallet.addTransaction({
+          type:"referral",
+          amount: rewardAmount,
+          description:"Referral signup bonus"
+        });
+        // await wallet.addTransaction({
+        //   type:"referral",
+        //   amount: 50,
+        //   description:"Referral signup bonus"
+        // });
+      }
 
       req.session.user = newUser._id;
       console.log("User data saved successfully");
