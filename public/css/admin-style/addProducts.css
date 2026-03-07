@@ -196,3 +196,38 @@ body {
   font-size: 0.75rem;
   display: none;
 }
+
+.banner-grid{
+  display:flex;
+  flex-wrap:wrap;
+  gap:20px;
+  margin-top:20px;
+}
+
+.banner-card{
+  position:relative;
+  width:240px;
+  border-radius:8px;
+  overflow:hidden;
+  box-shadow:0 3px 10px rgba(0,0,0,0.15);
+}
+
+.banner-image{
+  width:100%;
+  height:140px;
+  object-fit:cover;
+}
+
+.banner-delete-btn{
+  position:absolute;
+  top:8px;
+  right:8px;
+  background:red;
+  color:white;
+  border:none;
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  cursor:pointer;
+  font-size:14px;
+}

@@ -147,4 +147,10 @@ router.post("/coupon/remove", userAuth, couponController.removeCoupon);
 // Referral
 router.get("/referral", userAuth, referralController.loadReferralPage);
 
+// Contact
+router.get("/contact", userController.loadContact);
+
+// About
+router.get("/about", userController.loadAbout);
+
 export default router;
