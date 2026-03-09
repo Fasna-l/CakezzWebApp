@@ -26,5 +26,5 @@ function showToast(message, type = "success") {
   setTimeout(() => {
     toast.classList.remove("show");
     setTimeout(() => toast.remove(), 300);
-  }, 1500);
+  }, 3000);
 }

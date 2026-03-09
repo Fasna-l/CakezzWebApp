@@ -2,7 +2,6 @@ import logger from "../utils/logger.js";
 
 const errorHandler = (err, req, res, next) => {
   logger.error(`${err.message} - ${req.method} ${req.originalUrl}`);
-  //console.error("Error:", err);
 
   // API requests (fetch / ajax)
   if (req.headers.accept?.includes("application/json")) {

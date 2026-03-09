@@ -311,11 +311,6 @@ const verifyOtp = async (req, res,next) => {
           amount: rewardAmount,
           description:"Referral signup bonus"
         });
-        // await wallet.addTransaction({
-        //   type:"referral",
-        //   amount: 50,
-        //   description:"Referral signup bonus"
-        // });
       }
 
       req.session.user = newUser._id;

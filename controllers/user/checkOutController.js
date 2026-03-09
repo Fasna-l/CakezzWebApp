@@ -222,6 +222,15 @@ const placeOrder = async (req, res, next) => {
 
     let walletUsed = 0;
     let remainingAmount = req.session.checkoutTotals.grandTotal;
+    
+    //COD limit (1000) 
+    if (paymentMethod === "COD" && remainingAmount > 1000) {
+      return res.json({
+        success: false,
+        message: "Cash on delivery is not available for orders above ₹1000. Please choose another payment method."
+      });
+    }
+    
     let wallet = null;
 
     if (paymentMethod === "WALLET") {
@@ -353,12 +362,6 @@ const placeOrder = async (req, res, next) => {
           amount: rewardAmount,
           description: `Referral reward for ${user.name}'s first order`
         });
-
-        // await referrerWallet.addTransaction({
-        //   type: "referral",
-        //   amount: 50,
-        //   description: `Referral reward for ${user.name}'s first order`
-        // });
 
         logger.info(
           `REFERRAL REWARD | Referrer: ${user.referredBy} | Referred User: ${userId} | Amount: ₹${rewardAmount}`
