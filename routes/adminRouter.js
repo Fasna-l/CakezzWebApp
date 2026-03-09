@@ -12,13 +12,11 @@ import salesReportController from "../controllers/admin/salesReportController.js
 import referralController from "../controllers/admin/referralController.js";
 import bannerController from "../controllers/admin/bannerController.js";
 
-import { userAuth, adminAuth, setActivePage } from "../middlewares/auth.js";
+import { userAuth, adminAuth} from "../middlewares/auth.js";
 import multer from "multer";
 import { uploads } from "../helpers/multer.js";
 
 const router = express.Router();
-
-router.use(setActivePage);
 
 router.get("/pageerror", adminController.pageerror);
 
