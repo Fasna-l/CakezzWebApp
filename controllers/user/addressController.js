@@ -95,10 +95,25 @@ const updateAddress = async (req, res, next) => {
 const deleteAddress = async (req, res, next) => {
   try {
     const { id } = req.params;
-    await Address.updateOne(
-      { "addresses._id": id },
-      { $pull: { addresses: { _id: id } } }
+    const userId = req.session.user;
+
+    const addressDoc = await Address.findOne({ user: userId });
+
+    const deletedAddr = addressDoc.addresses.find(
+      (addr) => addr._id.toString() === id
     );
+
+    addressDoc.addresses = addressDoc.addresses.filter(
+      (addr) => addr._id.toString() !== id
+    );
+
+    // If deleted address was default, set another as default
+    if (deletedAddr?.isDefault && addressDoc.addresses.length > 0) {
+      addressDoc.addresses[0].isDefault = true;
+    }
+
+    await addressDoc.save();
+
     res.json({ success: true, message: "Address deleted" });
   } catch (error) {
     next(error);

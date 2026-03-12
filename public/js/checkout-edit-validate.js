@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (result.success) {
       window.location.href = "/checkout";
     } else {
-      alert(result.message || "Failed to update address");
+      showToast(result.message || "Failed to update address", "error");
     }
   });
 

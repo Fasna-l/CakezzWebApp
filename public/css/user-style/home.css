@@ -807,6 +807,44 @@ body {
   box-shadow:0 0 6px rgba(233,30,99,0.6);
 }
 
+.product-link {
+  text-decoration: none;
+  color: black;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.product-link:hover {
+  color: #d81b60;   /* pink */
+}
+
+.weight-popup{
+  position:absolute;
+  background:white;
+  border:1px solid #ddd;
+  padding:6px;
+  display:none;
+  z-index:1000;
+}
+
+.weight-popup button{
+  margin:3px;
+  padding:6px 10px;
+  border:1px solid #ff6b8b;
+  background:white;
+  cursor:pointer;
+}
+
+.weight-popup button:hover{
+  background:#ff6b8b;
+  color:white;
+}
+
+.weight-popup .out-stock{
+  background:#eee;
+  color:#999;
+  cursor:not-allowed;
+}
 
 @media (max-width:768px){
   .bannerSwiper{

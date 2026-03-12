@@ -64,7 +64,7 @@ document.getElementById("addMoneyBtn").addEventListener("click", async () => {
   const amount = document.getElementById("walletAmount").value;
 
   if (!amount || amount <= 0) {
-    alert("Please enter a valid amount");
+    showToast("Please enter a valid amount", "warning");
     return;
   }
 
@@ -77,7 +77,7 @@ document.getElementById("addMoneyBtn").addEventListener("click", async () => {
 
   const data = await res.json();
   if (!data.success) {
-    alert("Unable to create payment");
+    showToast("Unable to create payment", "error");
     return;
   }
 
@@ -106,7 +106,7 @@ document.getElementById("addMoneyBtn").addEventListener("click", async () => {
       if (verifyData.success) {
         window.location.reload();
       } else {
-        alert("Payment failed");
+        showToast("Payment failed", "error");
       }
     }
   };

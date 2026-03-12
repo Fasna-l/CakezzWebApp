@@ -1,7 +1,4 @@
 import path from "path";
-import fs from "fs";
-import sharp from "sharp";
-import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
@@ -15,7 +12,7 @@ import Wallet from "../../models/walletSchema.js";
 import Wishlist from "../../models/wishlistSchema.js";
 import ReferralSettings from "../../models/referralSettingsSchema.js";
 import Banner from "../../models/bannerSchema.js";
-import Coupon from "../../models/couponSchema.js"; // moved from inside function
+import Order from "../../models/orderSchema.js";
 import { authLogger } from "../../utils/logger.js";
 
 import { generateOtp } from "../../helpers/otpHelper.js";
@@ -98,26 +95,40 @@ const loadHomepage = async (req, res, next) => {
     ]);
 
     // Best Products (Top priced items)
-    let bestProducts = await Product.aggregate([
-      { $match: { isBlocked: false, category: { $in: categories.map(c => c._id) } } },
+    let bestProducts = await Order.aggregate([
+      { $unwind: "$items" },
+
+      {
+        $group: {
+          _id: "$items.productId",
+          totalSold: { $sum: "$items.quantity" }
+        }
+      },
+
+      { $sort: { totalSold: -1 } },
+
+      { $limit: 10 },
 
       {
         $lookup: {
-          from: "categories",
-          localField: "category",
+          from: "products",
+          localField: "_id",
           foreignField: "_id",
-          as: "category"
+          as: "product"
         }
       },
-      { $unwind: "$category" },
+
+      { $unwind: "$product" },
+
       {
-        $addFields: {
-          totalStock: { $sum: "$variants.stock" },
-          maxPrice: { $max: "$variants.price" }
+        $match: {
+          "product.isBlocked": false
         }
       },
-      { $sort: { maxPrice: -1 } },
-      { $limit: 8 }
+
+      {
+        $replaceRoot: { newRoot: "$product" }
+      }
     ]);
 
     // APPLY BEST OFFER (Product vs Category)
