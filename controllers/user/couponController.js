@@ -114,7 +114,10 @@ const applyCoupon = async (req, res, next) => {
     return res.json({
       success: true,
       discount,
-      grandTotal: totals.grandTotal
+      grandTotal: totals.grandTotal,
+      maxDiscount: coupon.maxDiscountAmount,
+      discountType: coupon.discountType,
+      discountValue: coupon.discountValue
     });
 
   } catch (error) {

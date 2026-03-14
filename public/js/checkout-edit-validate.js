@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!validateAddressForm(data)) return;
 
     const res = await fetch(form.action, {
-      method: "POST",
+      method:"PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });

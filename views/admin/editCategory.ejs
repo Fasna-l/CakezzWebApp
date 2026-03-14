@@ -54,8 +54,8 @@
     const categoryId   = "<%= category._id %>";
 
     try {
-      const res  = await fetch(`/admin/edit-category/${categoryId}`, {
-        method: "POST",
+      const res  = await fetch(`/admin/categories/${categoryId}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ categoryName, description })
       });

@@ -41,7 +41,7 @@ router.patch("/categories/:id/list", adminAuth, categoryController.listCategory)
 router.patch("/categories/:id/unlist", adminAuth, categoryController.unlistCategory);
 
 router.get("/edit-category", adminAuth, categoryController.getEditCategory);
-router.post("/edit-category/:id", adminAuth, categoryController.editCategory);
+router.patch("/categories/:id", adminAuth, categoryController.editCategory);
 
 // Product Management
 router.get("/products", adminAuth, productController.productinfo);
@@ -50,27 +50,25 @@ router.post("/products/add", adminAuth, uploads.array("productImage", 6), produc
 router.patch("/products/:id/block", adminAuth, productController.productBlocked);
 router.patch("/products/:id/unblock", adminAuth, productController.productUnBlocked);
 router.get("/edit-product", adminAuth, productController.getEditProduct);
-router.post("/edit-product/:id", adminAuth, uploads.array("productImage", 4), productController.editProduct);
+router.patch("/products/:id", adminAuth, uploads.array("productImage", 4), productController.editProduct);
 
 // Order Management
 router.get("/orders", adminAuth, orderController.loadOrderList);
 router.get("/order-details/:id", adminAuth, orderController.loadOrderDetails);
-router.post("/order/update-status/:id", adminAuth, orderController.updateOrderStatus);
-router.post("/order/cancel/:id", adminAuth, orderController.cancelOrder);
-
-router.get("/order/:orderId/item/:itemId/approve-return", adminAuth, orderController.approveReturnItem);
-router.get("/order/:orderId/item/:itemId/reject-return", adminAuth, orderController.rejectReturnItem);
+router.patch("/orders/:id/status", adminAuth, orderController.updateOrderStatus);
+router.patch("/orders/:id/cancel", adminAuth, orderController.cancelOrder);
+router.patch("/orders/:orderId/items/:itemId/approve-return", adminAuth, orderController.approveReturnItem);
+router.patch("/orders/:orderId/items/:itemId/reject-return", adminAuth, orderController.rejectReturnItem);
 router.get("/return-requests", adminAuth, orderController.loadReturnRequests);
-
-router.get("/order/:id/reject-whole-return", adminAuth, orderController.rejectWholeReturn);
-router.get("/order/:id/approve-whole-return", adminAuth, orderController.approveWholeReturn);
+router.patch("/orders/:id/reject-return", adminAuth, orderController.rejectWholeReturn);
+router.patch("/orders/:id/approve-return", adminAuth, orderController.approveWholeReturn);
 
 // Coupon Management
 router.get("/coupons", adminAuth, adminCouponController.listCoupons);
 router.get("/coupons/add", adminAuth, adminCouponController.loadAddCoupon);
 router.post("/coupons/add", adminAuth, adminCouponController.createCoupon);
 router.get("/coupons/edit/:id", adminAuth, adminCouponController.loadEditCoupon);
-router.post("/coupons/edit/:id", adminAuth, adminCouponController.updateCoupon);
+router.patch("/coupons/:id", adminAuth, adminCouponController.updateCoupon);
 router.patch("/coupons/toggle/:id", adminAuth, adminCouponController.toggleCoupon);
 router.delete("/coupons/:id", adminAuth, adminCouponController.deleteCoupon);
 
@@ -78,14 +76,14 @@ router.delete("/coupons/:id", adminAuth, adminCouponController.deleteCoupon);
 router.get("/offer/add", adminAuth, offerController.loadAddOffer);
 router.post("/offer/add", adminAuth, offerController.addOffer);
 router.get("/offer/edit/:id", adminAuth, offerController.loadEditOffer);
-router.post("/offer/update", adminAuth, offerController.updateOffer);
+router.patch("/offers/:id", adminAuth, offerController.updateOffer);
 router.delete("/offer/delete/:id", adminAuth, offerController.deleteOffer);
 
 // Category Offer
 router.get("/category-offer/add", adminAuth, categoryOfferController.loadAddCategoryOffer);
 router.post("/category-offer/add", adminAuth, categoryOfferController.addCategoryOffer);
 router.get("/category-offer/edit/:id", adminAuth, categoryOfferController.loadEditCategoryOffer);
-router.post("/category-offer/update", adminAuth, categoryOfferController.updateCategoryOffer);
+router.patch("/category-offers/:id", adminAuth, categoryOfferController.updateCategoryOffer);
 router.delete("/category-offer/delete/:id", adminAuth, categoryOfferController.deleteCategoryOffer);
 
 // Sales Report
@@ -95,24 +93,11 @@ router.get("/sales-report/excel", adminAuth, salesReportController.exportSalesRe
 
 //referralpage
 router.get("/referrals", adminAuth, referralController.loadReferralPage);
-router.post("/referral-settings",adminAuth, referralController.updateReferralSettings);
+router.patch("/referral-settings", adminAuth, referralController.updateReferralSettings);
 
-//banner image
-// Banner Management
-
+// Banner Image(slider) Management
 router.get("/banners", adminAuth, bannerController.loadBannerPage);
-
-router.post(
-  "/banners/add",
-  adminAuth,
-  uploads.single("bannerImage"),
-  bannerController.addBanner
-);
-
-router.delete(
-  "/banners/delete/:id",
-  adminAuth,
-  bannerController.deleteBanner
-);
+router.post("/banners",adminAuth,uploads.single("bannerImage"),bannerController.addBanner);
+router.delete("/banners/:id",adminAuth,bannerController.deleteBanner);
 
 export default router;

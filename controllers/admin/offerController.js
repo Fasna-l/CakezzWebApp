@@ -65,7 +65,8 @@ const loadEditOffer = async (req, res, next) => {
 
 const updateOffer = async (req, res, next) => {
   try {
-    const { offerId, offerName, discount, expiryDate, description } = req.body;
+    const { offerName, discount, expiryDate, description } = req.body;
+    const offerId = req.params.id;
 
     const updated = await Offer.findByIdAndUpdate(
       offerId,

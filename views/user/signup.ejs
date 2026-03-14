@@ -46,13 +46,21 @@
 
                   <div class="form-group">
                     <label class="form-label" for="password">Password</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required />
+                    <div class="password-container">
+                      <input type="password" class="form-control" id="password" name="password" placeholder="Enter password" required />
+                      <i class="fa-solid fa-eye toggle-password" data-target="password"></i>
+                    </div>
+
                     <div id="error3" class="error-message"></div>
                   </div>
 
                   <div class="form-group">
                     <label class="form-label" for="confirmPassword">Confirm Password</label>
-                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="confirmPassword" required />
+                    <div class="password-container">
+                      <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" placeholder="confirmPassword" required />
+                      <i class="fa-solid fa-eye toggle-password" data-target="confirmPassword"></i>
+                    </div>
+
                   <div id="error4" class="error-message"></div>
                   </div>
 
@@ -180,10 +188,31 @@
       if(error1.innerHTML || error2.innerHTML || error3.innerHTML || error4.innerHTML){
         e.preventDefault();
       }
-
-
     })
+
+    //check while typing
+    passwordid.addEventListener("input", passValidateChecking);
+    cpasswordid.addEventListener("input", passValidateChecking);
+
+    // Password toggle
+    document.querySelectorAll(".toggle-password").forEach(icon => {
+
+      icon.addEventListener("click", function () {
+
+        const input = document.getElementById(this.dataset.target);
+
+        const type =
+          input.getAttribute("type") === "password" ? "text" : "password";
+
+        input.setAttribute("type", type);
+
+        this.classList.toggle("fa-eye-slash");
+
+      });
+
+    });
   })
+
 
 </script>
 <%- include('../partials/user/footer') %>

@@ -133,15 +133,29 @@ const loadHomepage = async (req, res, next) => {
 
     // APPLY BEST OFFER (Product vs Category)
     for (let product of latestProducts) {
+
+      const fullProduct = await Product.findById(product._id)
+        .populate("category")
+        .lean();
+
       const basePrice = product.minPrice;
-      const offer = await calculateBestOffer(product, basePrice);
+
+      const offer = await calculateBestOffer(fullProduct, basePrice);
+
       product.offerPercentage = offer.discountPercentage;
       product.appliedOfferType = offer.appliedOfferType;
     }
 
     for (let product of bestProducts) {
-      const basePrice = product.maxPrice;
-      const offer = await calculateBestOffer(product, basePrice);
+
+      const fullProduct = await Product.findById(product._id)
+        .populate("category")
+        .lean();
+
+      const basePrice = product.variants[product.variants.length - 1]?.price || 0;
+
+      const offer = await calculateBestOffer(fullProduct, basePrice);
+
       product.offerPercentage = offer.discountPercentage;
       product.appliedOfferType = offer.appliedOfferType;
     }
@@ -212,7 +226,6 @@ const login = async (req,res,next)=>{
           authLogger.warn(`LOGIN FAILED | UserId: ${findUser._id} | Reason: Wrong password | IP: ${req.ip}`);
           req.session.loginError = "Incorrect Password";
           return res.redirect("/login");
-            //return res.render("login",{message:"Incorrect Password"})
         }
 
         req.session.user = findUser._id

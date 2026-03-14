@@ -34,12 +34,12 @@ router.post("/product/:id/review", userAuth, productController.submitReview);
 // Profile
 router.get("/account", userAuth, profileController.loadAccountPage);
 router.get("/edit-profile", userAuth, profileController.loadEditProfile);
-router.post("/edit-profile", userAuth, uploads.single("profileImage"), profileController.updateProfile);
+router.patch("/edit-profile", userAuth, uploads.single("profileImage"), profileController.updateProfile);
 
 // Email Change
 router.get("/change-email", userAuth, profileController.loadEmailChangePage);
 router.post("/verify-email-change", userAuth, profileController.sendEmailChangeOtp);
-router.post("/verify-email-change-otp", userAuth, profileController.verifyEmailChangeOtp);
+router.patch("/verify-email-change-otp", userAuth, profileController.verifyEmailChangeOtp);
 router.post("/resend-email-change-otp", userAuth, profileController.resendEmailChangeOtp);
 
 // Signup
@@ -62,7 +62,7 @@ router.get(
 // Login
 router.get("/login", userController.loadLogin);
 router.post("/login", userController.login);
-router.get("/logout", userController.logout);
+router.post("/logout", userController.logout);
 
 // Forgot Password
 router.get("/forgot-password", profileController.getForgotPassPage);
@@ -74,21 +74,21 @@ router.post("/reset-password", profileController.postNewPassword);
 
 // Change Password
 router.get("/password", userAuth, profileController.getChangePasswordPage);
-router.post("/password", userAuth, profileController.postChangePassword);
+router.patch("/password", userAuth, profileController.postChangePassword);
 
 // Address
 router.get("/address", userAuth, addressController.loadAddressPage);
-router.post("/add-address", userAuth, addressController.addAddress);
-router.get("/edit-address/:id", userAuth, addressController.loadEditAddress);
-router.post("/update-address/:id", userAuth, addressController.updateAddress);
-router.delete("/delete-address/:id", userAuth, addressController.deleteAddress);
-router.post("/set-default-address/:id", userAuth, addressController.setDefaultAddress);
+router.post("/address", userAuth, addressController.addAddress);
+router.get("/address/:id/edit", userAuth, addressController.loadEditAddress);
+router.patch("/address/:id", userAuth, addressController.updateAddress);
+router.delete("/address/:id", userAuth, addressController.deleteAddress);
+router.patch("/address/:id/default", userAuth, addressController.setDefaultAddress);
 
 // Cart
-router.post("/add-to-cart", userAuth, cartController.addToCart);
-router.post("/cart/update-qty", userAuth, cartController.updateQuantity);
-router.post("/cart/remove", userAuth, cartController.removeCartItem);
 router.get("/cart", userAuth, cartController.getCartPage);
+router.post("/cart", userAuth, cartController.addToCart);
+router.patch("/cart", userAuth, cartController.updateQuantity);
+router.delete("/cart", userAuth, cartController.removeCartItem);
 
 // Cart count (fixed require issue)
 router.get("/cart-count", userAuth, async (req, res) => {
@@ -100,38 +100,40 @@ router.get("/cart/checkout", userAuth, cartController.proceedToCheckout);
 
 // Wishlist
 router.get("/wishlist", userAuth, wishlistController.loadWishlist);
-router.post("/wishlist/toggle", wishlistController.toggleWishlist);
-router.post("/wishlist/remove", wishlistController.removeFromWishlist);
-router.get("/wishlist-count", wishlistController.wishlistCount);
+router.post("/wishlist", wishlistController.toggleWishlist);
+router.delete("/wishlist", wishlistController.removeFromWishlist);
+router.get("/wishlist/count", wishlistController.wishlistCount);
 
 // Checkout
 router.get("/checkout", userAuth, checkOutController.getCheckout);
-router.get("/checkout/add-address", userAuth, (req, res) => {
+// Address inside checkout
+router.get("/checkout/address/new", userAuth, (req, res) => {
   res.render("checkout-add-address", {
     checkoutItems: req.session.checkoutItems || [],
     totals: req.session.checkoutTotals || {}
   });
 });
-router.post("/checkout/add-address", userAuth, checkOutController.postAddAddress);
-router.get("/checkout/edit-address/:id", userAuth, checkOutController.getEditAddress);
-router.post("/checkout/update-address/:id", userAuth, checkOutController.postEditAddress);
-router.post("/checkout/save-delivery", userAuth, checkOutController.saveDeliveryDate);
+
+router.post("/checkout/address", userAuth, checkOutController.postAddAddress);
+router.get("/checkout/address/:id/edit", userAuth, checkOutController.getEditAddress);
+router.patch("/checkout/address/:id", userAuth, checkOutController.postEditAddress);
+router.post("/checkout/delivery", userAuth, checkOutController.saveDeliveryDate);
 router.get("/checkout/payment", userAuth, checkOutController.getPaymentPage);
-router.post("/checkout/place-order", userAuth, checkOutController.placeOrder);
-router.get("/checkout/success/:orderId", userAuth, checkOutController.getSuccessPage);
-router.get("/personalize", userAuth, checkOutController.getPersonalizePage);
-router.get("/order-failure/:orderId", userAuth, checkOutController.loadPaymentFailurePage);
+router.post("/orders", userAuth, checkOutController.placeOrder);
+router.get("/orders/:orderId/success", userAuth, checkOutController.getSuccessPage);
+router.get("/checkout/personalize", userAuth, checkOutController.getPersonalizePage);
+router.get("/orders/:orderId/failure", userAuth, checkOutController.loadPaymentFailurePage);
 
 // Orders
 router.get("/order", userAuth, orderController.loadOrderList);
-router.get("/order/:id", userAuth, orderController.loadOrderDetails);
 router.get("/order/cancel/:id", userAuth, orderController.loadCancelPage);
-router.post("/order/cancel/:id", userAuth, orderController.cancelOrder);
+router.patch("/order/cancel/:id", userAuth, orderController.cancelOrder);
 router.get("/order/return/:id", userAuth, orderController.loadReturnPage);
 router.post("/order/return/:id", userAuth, orderController.submitReturnRequest);
 router.get("/order/invoice/:id", userAuth, orderController.downloadInvoice);
 router.get("/order/:orderId/item/:itemId/return", userAuth, orderController.loadSingleReturnPage);
 router.post("/order/:orderId/item/:itemId/return", userAuth, orderController.submitSingleReturn);
+router.get("/order/:id", userAuth, orderController.loadOrderDetails);
 
 // Wallet
 router.get("/wallet", userAuth, walletController.loadWallet);
@@ -142,7 +144,7 @@ router.post("/wallet/recharge/verify", userAuth, walletController.verifyWalletRe
 // Coupons
 router.get("/coupon/available", userAuth, couponController.getAvailableCoupons);
 router.post("/coupon/apply", userAuth, couponController.applyCoupon);
-router.post("/coupon/remove", userAuth, couponController.removeCoupon);
+router.delete("/coupon", userAuth, couponController.removeCoupon);
 
 // Referral
 router.get("/referral", userAuth, referralController.loadReferralPage);

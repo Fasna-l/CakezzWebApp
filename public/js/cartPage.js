@@ -7,8 +7,8 @@ document.addEventListener("click", async (e) => {
 
   /* ---------------- REMOVE ITEM ---------------- */
   if (e.target.classList.contains("remove-btn")) {
-    const res = await fetch("/cart/remove", {
-      method: "POST",
+    const res = await fetch("/cart", {
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId, size })
     });
@@ -44,8 +44,8 @@ document.addEventListener("click", async (e) => {
       qty = Math.max(1, qty - 1);
     }
 
-    const res = await fetch("/cart/update-qty", {
-      method: "POST",
+    const res = await fetch("/cart", {
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId, size, quantity: qty })
     });

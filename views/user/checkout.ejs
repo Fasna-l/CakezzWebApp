@@ -29,7 +29,7 @@
                 </div>
 
                 <div class="addr-actions">
-                  <a href="/checkout/edit-address/<%= addr._id %>" class="btn small pink-outline">Edit</a>
+                  <a href="/checkout/address/<%= addr._id %>/edit" class="btn small pink-outline">Edit</a>
                 </div>
 
                 <% if (addr.isDefault) { %>
@@ -43,7 +43,7 @@
         </div>
 
         <div class="address-cta">
-          <a href="/checkout/add-address" class="btn pink"> Add Address</a>
+          <a href="/checkout/address/new" class="btn pink"> Add Address</a>
         </div>
       </section>
 
@@ -80,7 +80,7 @@
           <div class="price-row total"><span>Total</span><span>₹<%= totals.grandTotal || 0 %></span></div>
         </div>
 
-        <form id="toPersonalize" action="/personalize" method="GET">
+        <form id="toPersonalize" action="/checkout/personalize" method="GET">
           <input type="hidden" name="addressId" id="checkoutAddressId" value="">
           <button type="submit" class="btn personalize-btn">Personalize</button>
         </form>

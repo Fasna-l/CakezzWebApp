@@ -13,6 +13,7 @@ import errorHandler from "./middlewares/errorHandler.js";
 import userContext from "./middlewares/userContext.js";
 import cartCount from "./middlewares/cartCount.js";
 import wishlistCount from "./middlewares/wishlistCount.js";
+import methodOverride from "method-override";
 
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -27,6 +28,7 @@ const app = express();
 
 db();
 
+app.use(methodOverride("_method"));
 app.use(nocache());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

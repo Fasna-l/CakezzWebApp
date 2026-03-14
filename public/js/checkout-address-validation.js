@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const data = Object.fromEntries(new FormData(e.target).entries());
     if (!validateAddressForm(data)) return;
 
-    const res = await fetch("/checkout/add-address", {
+    const res = await fetch("/checkout/address", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
