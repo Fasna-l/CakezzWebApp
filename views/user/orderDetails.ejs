@@ -182,9 +182,11 @@
 
 
           <% if (order.paymentStatus === "Failed") { %>
-            <a href="/checkout/payment?retry=<%= order._id %>" class="btn retry-btn">
-              🔁 Retry Payment
-            </a>
+            <form action="/payment/retry/<%= order._id %>" method="POST" style="display:inline;">
+              <button type="submit" class="btn retry-btn">
+                🔁 Retry Payment
+              </button>
+            </form>
           <% } %>
 
 

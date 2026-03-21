@@ -5,6 +5,9 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { authLogger } from "../../utils/logger.js";
 
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
+
 const pageerror = async (req,res)=>{
     res.render("admin-error")
 }
@@ -34,14 +37,14 @@ const login = async (req,res,next)=>{
                 authLogger.warn(
                     `ADMIN LOGIN FAILED | Email: ${email} | Reason: Invalid Password | IP: ${req.ip}`
                 );
-                res.render("admin-login", { message: "Invalid email or password" });
+                res.render("admin-login", { message: RESPONSE_MESSAGES.ADMIN_INVALID_CREDENTIALS });
             }
         }else{
             authLogger.warn(
                 `ADMIN LOGIN FAILED | Email: ${email} | Reason: Admin Not Found | IP: ${req.ip}`
             );
 
-            res.render("admin-login", { message: "Invalid email or password" });
+            res.render("admin-login", { message: RESPONSE_MESSAGES.ADMIN_INVALID_CREDENTIALS });
         }
     } catch (error) {
         next(error);
@@ -180,8 +183,7 @@ const getSalesChart = async (req,res,next)=>{
             }
         ])
 
-        res.json(sales)
-
+        res.status(HTTP_STATUS.OK).json(sales)
 
     } catch (error) {
         authLogger.error(

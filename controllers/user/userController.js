@@ -14,6 +14,8 @@ import ReferralSettings from "../../models/referralSettingsSchema.js";
 import Banner from "../../models/bannerSchema.js";
 import Order from "../../models/orderSchema.js";
 import { authLogger } from "../../utils/logger.js";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 import { generateOtp } from "../../helpers/otpHelper.js";
 import { sendVerificationEmail } from "../../helpers/emailHelper.js";
@@ -231,7 +233,6 @@ const login = async (req,res,next)=>{
         req.session.user = findUser._id
         authLogger.info(`LOGIN SUCCESS | UserId: ${findUser._id} | Email: ${email} | IP: ${req.ip}`);
         return res.redirect("/")
-        //res.redirect("/");
 
     } catch (error) {
       next(error);
@@ -251,12 +252,12 @@ const signup = async (req,res,next) =>{
     try {
         const {name,email,password,confirmPassword, referralCode} = req.body;
         if(password !== confirmPassword){
-            return res.render("signup",{message:"Passwords do not match"});
+            return res.render("signup",{message:RESPONSE_MESSAGES.PASSWORD_MISMATCH});
         }
         const findUser = await User.findOne({email});
         if(findUser){
             return res.render("signup",{
-                message:"User with this email already exists",
+                message:RESPONSE_MESSAGES.EMAIL_ALREADY_EXISTS,
                 icon: "warning",
             });
         }
@@ -266,7 +267,7 @@ const signup = async (req,res,next) =>{
         if (!emailSent) {
             console.log("Email sending failed");
             return res.render("signup", {
-                message: "Failed to send OTP. Please try again.",
+                message: RESPONSE_MESSAGES.EMAIL_SEND_FAILED,
                 icon: "warning",
             });
         }
@@ -289,17 +290,26 @@ const verifyOtp = async (req, res,next) => {
         const { email, name, password, referralCode} = req.session.userData || {};
 
         if (!email) {
-            return res.status(400).json({ success: false, message: "Session expired. Please signup again." });
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            success: false,
+            message: RESPONSE_MESSAGES.SESSION_EXPIRED
+          });
         }
 
         // Fetch OTP from DB
         const otpRecord = await Otp.findOne({ email });
 
         if (!otpRecord) {
-            return res.json({ success: false, message: "OTP expired or not found. Please resend." });
+          return res.status(HTTP_STATUS.BAD_REQUEST).json({
+            success: false,
+            message: RESPONSE_MESSAGES.OTP_EXPIRED
+          });
         }
         if (otpRecord.otp !== enteredOtp) {
-            return res.json({ success: false, message: "Invalid OTP" });
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+              success: false,
+              message: RESPONSE_MESSAGES.OTP_INVALID
+            });
         }
         //  Save user after OTP match
         const hashedPassword = await securePassword(password);
@@ -342,7 +352,10 @@ const verifyOtp = async (req, res,next) => {
 
       // Remove OTP from DB
       await Otp.deleteOne({ email });
-      res.json({ success: true, redirectUrl: "/login" });
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        redirectUrl: "/login"
+      });
     } catch (error) {
       next(error);
     }
@@ -353,7 +366,10 @@ const resendOtp = async(req,res,next)=>{
 
         const {email} = req.session.userData;
         if(!email){
-            return res.status(400).json({success:false,message:"Email not found in session"})
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+              success:false,
+              message: RESPONSE_MESSAGES.SESSION_EXPIRED
+            });
         }
 
         const otp = generateOtp();
@@ -363,9 +379,15 @@ const resendOtp = async(req,res,next)=>{
         const emailSent = await sendVerificationEmail(email,otp,"Your OTP for Account Verification")
         if(emailSent){
             console.log("Resend OTP:",otp);
-            res.status(200).json({success:true,message:"OTP Resend Successfully"})
+            res.status(HTTP_STATUS.OK).json({
+              success:true,
+              message: RESPONSE_MESSAGES.OTP_RESENT
+            });
         }else{
-            res.status(500).json({success:false,message:"Failed to resend OTP. Please try again"});
+          res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+            success:false,
+            message: RESPONSE_MESSAGES.EMAIL_SEND_FAILED
+          });
         }
     } catch (error) {
       next(error);

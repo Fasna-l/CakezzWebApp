@@ -42,8 +42,8 @@
       <form 
         action="/order/cancel/<%= order._id %>?_method=PATCH<%= itemId ? ('&itemId=' + itemId) : '' %>" 
         method="POST" 
-        class="cancel-form">
-
+        class="cancel-form" novalidate>
+        
         <!--  Hidden input for itemId -->
         <% if (itemId) { %>
           <input type="hidden" name="itemId" value="<%= itemId %>">

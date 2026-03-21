@@ -9,6 +9,6 @@ router.post("/verify-payment", userAuth, paymentController.verifyPayment);
 router.post("/mark-failed", userAuth, paymentController.markPaymentFailed);
 
 // Retry payment
-router.get("/retry/:orderId", userAuth, paymentController.retryPayment);
+router.post("/retry/:orderId", userAuth, paymentController.retryPayment);
 
 export default router;

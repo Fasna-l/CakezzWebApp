@@ -873,3 +873,10 @@
   background: #f16ead;
   color: white;
 }
+.empty-wishlist {
+  grid-column: 1 / -1;   /* take full width of grid */
+  text-align: center;
+  font-size: 18px;
+  color: #888;
+  padding: 60px 0;
+}

@@ -1,5 +1,8 @@
 import CategoryOffer from "../../models/categoryOfferSchema.js";
 import Category from "../../models/categorySchema.js";
+import logger from "../../utils/logger.js";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 const loadAddCategoryOffer = async (req, res, next) => {
   try {
@@ -24,9 +27,9 @@ const addCategoryOffer = async (req, res, next) => {
     });
 
     if (existingOffer) {
-      return res.json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: "An active offer already exists for this category"
+        message: RESPONSE_MESSAGES.CATEGORY_OFFER_ALREADY_EXISTS
       });
     }
 
@@ -42,7 +45,14 @@ const addCategoryOffer = async (req, res, next) => {
       categoryOffer: offer._id
     });
 
-    res.json({ success: true });
+    logger.info(
+      `ADMIN CATEGORY OFFER CREATED | CategoryId: ${categoryId} | OfferId: ${offer._id} | Discount: ${discount}`
+    );
+
+    return res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      message: RESPONSE_MESSAGES.CATEGORY_OFFER_ADDED
+    });
   } catch (error) {
     next(error);
   }
@@ -55,6 +65,7 @@ const loadEditCategoryOffer = async (req, res, next) => {
       .populate("category");
 
     if (!offer) {
+      logger.warn(`CATEGORY OFFER NOT FOUND | OfferId: ${req.params.id}`);
       return res.redirect("/admin/category");
     }
 
@@ -78,7 +89,14 @@ const updateCategoryOffer = async (req, res, next) => {
       discount
     });
 
-    res.json({ success: true });
+    logger.info(
+      `ADMIN CATEGORY OFFER UPDATED | OfferId: ${offerId} | Discount: ${discount}`
+    );
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.CATEGORY_OFFER_UPDATED
+    });
   } catch (error) {
     next(error);
   }
@@ -93,7 +111,14 @@ const deleteCategoryOffer = async (req, res, next) => {
       { $set: { categoryOffer: null } }
     );
 
-    res.json({ success: true });
+    logger.warn(
+      `ADMIN CATEGORY OFFER DELETED | OfferId: ${offerId}`
+    );
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.CATEGORY_OFFER_DELETED
+    });
   } catch (error) {
     next(error);
   }

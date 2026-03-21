@@ -1,0 +1,67 @@
+<%- include('../partials/user/header') %>
+
+
+<h2 style="text-align:center;margin-top:100px;">
+  Retrying Payment...
+</h2>
+
+
+<p style="text-align:center;">
+  Please do not refresh or press back.
+</p>
+
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+
+<script>
+  const options = {
+    key: "<%= key %>",
+    amount: "<%= razorpayOrder.amount %>",
+    currency: "INR",
+    order_id: "<%= razorpayOrder.id %>",
+
+
+    handler: async function (response) {
+      const res = await fetch("/payment/verify-payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_signature: response.razorpay_signature,
+          orderId: "<%= order._id %>"
+        })
+      });
+
+
+      const data = await res.json();
+
+
+      if (data.success) {
+        window.location.href = "/orders/<%= order._id %>/success";
+      } else {
+        window.location.href = "/orders/<%= order._id %>/failure";
+      }
+    },
+
+
+    modal: {
+      ondismiss: async function () {
+        await fetch("/payment/mark-failed", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderId: "<%= order._id %>" })
+        });
+
+        window.location.href = "/orders/<%= order._id %>/failure";
+      }
+    }
+  };
+
+
+  new Razorpay(options).open();
+</script>
+
+
+<%- include('../partials/user/footer') %>

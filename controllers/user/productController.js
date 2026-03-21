@@ -5,6 +5,8 @@ import Cart from "../../models/cartSchema.js";
 import Wishlist from "../../models/wishlistSchema.js";
 import calculateBestOffer from "../../helpers/offerCalculator.js";
 import mongoose from "mongoose";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 // Load Shop Page
 const loadShoppage = async (req, res, next) => {
@@ -197,8 +199,11 @@ const loadReviewPage = async (req, res, next) => {
     const product = await Product.findById(productId);
     const user = req.session.user ? await User.findById(req.session.user) : null;
 
-    if (!product) return res.status(404).send("Product Not Found");
-
+    if (!product) {
+      return res.status(HTTP_STATUS.NOT_FOUND).send(
+        RESPONSE_MESSAGES.PRODUCT_NOT_FOUND
+      );
+    }
     res.render("reviewPage", { product, user }); 
   } catch (error) {
     next(error);

@@ -4,6 +4,8 @@ import User from "../../models/userSchema.js";
 import Wallet from "../../models/walletSchema.js";
 import PDFDocument from "pdfkit";
 import logger from "../../utils/logger.js";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 const loadOrderList = async (req, res, next) => {
   try {
@@ -113,7 +115,7 @@ const cancelOrder = async (req, res, next) => {
       return res.redirect("/order");
     }
 
-    // ❗ Block cancel if order not Pending
+    // Block cancel if order not Pending
     if (order.orderStatus !== "Pending") {
       return res.redirect(`/order/${orderId}`);
     }
@@ -148,7 +150,6 @@ const cancelOrder = async (req, res, next) => {
       // If OK → continue to normal single item cancel logic...
 
       // Calculate refund for this item
-      //refundAmount = item.price * item.quantity;
       refundAmount = calculateRefundWithCoupon(order, item);
       // Restore stock
       const product = await Product.findById(item.productId);
@@ -203,9 +204,7 @@ const cancelOrder = async (req, res, next) => {
         if (it.status !== "Cancelled") {
           const itemRefund = calculateRefundWithCoupon(order, it);
           refundAmount += itemRefund;
-
-          //refundAmount += it.price * it.quantity;
-
+          
         // restore stock
           const product = await Product.findById(it.productId);
           const variant = product.variants.find(v => v.size === it.size);
@@ -215,7 +214,6 @@ const cancelOrder = async (req, res, next) => {
           }
 
           it.refundAmount = itemRefund;
-          //it.refundAmount = it.price * it.quantity;
           it.refundStatus = "Processed";
         }
 
@@ -289,7 +287,9 @@ const submitReturnRequest = async (req, res, next) => {
     const reason = req.body.reason;
 
     if (!reason || reason.trim() === "") {
-      return res.send("Reason is required");
+      return res.status(HTTP_STATUS.BAD_REQUEST).send(
+        RESPONSE_MESSAGES.RETURN_REASON_REQUIRED
+      );
     }
 
     const order = await Order.findById(orderId);
@@ -306,7 +306,9 @@ const submitReturnRequest = async (req, res, next) => {
     const diffInHours = diffInMs / (1000*60*60);
 
     if(diffInHours >2){
-      return res.send("Return Period expired. Returns allowed only within 2 hours of delivery");
+      return res.status(HTTP_STATUS.BAD_REQUEST).send(
+        RESPONSE_MESSAGES.RETURN_PERIOD_EXPIRED
+      );
     }
     // Update order status
     order.orderStatus = "Return Requested";
@@ -534,7 +536,9 @@ const submitSingleReturn = async (req, res, next) => {
     const reason = req.body.reason;
 
     if (!reason || reason.trim() === "") {
-      return res.send("Reason is required");
+      return res.status(HTTP_STATUS.BAD_REQUEST).send(
+        RESPONSE_MESSAGES.RETURN_REASON_REQUIRED
+      );
     }
 
     const order = await Order.findById(orderId);
@@ -554,7 +558,9 @@ const submitSingleReturn = async (req, res, next) => {
     const diffInHours = diffInMs / (1000 * 60 * 60);
 
     if (diffInHours > 2) {
-      return res.send("Return period expired. Returns allowed only within 2 hours of delivery.");
+      return res.status(HTTP_STATUS.BAD_REQUEST).send(
+        RESPONSE_MESSAGES.RETURN_PERIOD_EXPIRED
+      );
     }
 
 

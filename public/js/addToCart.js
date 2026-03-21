@@ -46,7 +46,7 @@ document.addEventListener("click", async function (e) {
       <button 
         data-size="${v.size}"
         ${v.stock <= 0 ? "disabled class='out-stock'" : ""}>
-        ${v.size} ${v.stock <= 0 ? "(Out)" : ""}
+        ${v.size} ${v.stock <= 0 ? "(Out of Stock)" : ""}
       </button>
     `).join("");
 
@@ -75,7 +75,7 @@ document.addEventListener("click", async function (e) {
       <button 
         data-size="${v.size}"
         ${v.stock <= 0 ? "disabled class='out-stock'" : ""}>
-        ${v.size} ${v.stock <= 0 ? "(Out)" : ""}
+        ${v.size} ${v.stock <= 0 ? "(Out of Stock)" : ""}
       </button>
     `).join("");
 

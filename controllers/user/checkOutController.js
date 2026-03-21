@@ -9,6 +9,8 @@ import ReferralSettings from "../../models/referralSettingsSchema.js";
 import calculateBestOffer from "../../helpers/offerCalculator.js";
 import crypto from "crypto";
 import logger from "../../utils/logger.js";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 const validateCheckoutItems = async (req)=>{
   if(!req.session.checkoutItems || req.session.checkoutItems.length === 0) {
@@ -82,7 +84,10 @@ const postAddAddress = async (req, res, next) => {
     });
 
     await addressDoc.save();
-    res.json({ success: true });
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.SUCCESS
+    });
 
   } catch (error) {
     next(error);
@@ -120,8 +125,10 @@ const postEditAddress = async (req, res, next) => {
     Object.assign(addressDoc.addresses.id(addressId), data);
 
     await addressDoc.save();
-    res.json({ success: true });
-
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.SUCCESS
+    });
   } catch (error) {
     next(error);
   }
@@ -225,9 +232,9 @@ const placeOrder = async (req, res, next) => {
     
     //COD limit (1000) 
     if (paymentMethod === "COD" && remainingAmount > 1000) {
-      return res.json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: "Cash on delivery is not available for orders above ₹1000. Please choose another payment method."
+        message: RESPONSE_MESSAGES.COD_LIMIT_EXCEEDED
       });
     }
     
@@ -236,12 +243,12 @@ const placeOrder = async (req, res, next) => {
     if (paymentMethod === "WALLET") {
       wallet = await Wallet.findOne({ userId });
 
-      if (!wallet || wallet.balance <= 0) {
-        return res.json({
-          success: false,
-          message: "No wallet balance. Please choose another payment method."
+    if (!wallet || wallet.balance <= 0) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.WALLET_EMPTY
       });
-    }
+    }  
 
       walletUsed = Math.min(wallet.balance, remainingAmount);
       remainingAmount = remainingAmount - walletUsed;
@@ -434,7 +441,10 @@ const placeOrder = async (req, res, next) => {
     }
 
     // RAZORPAY or PARTIAL WALLET
-    return res.json({ online: true, orderId: order._id });
+    return res.status(HTTP_STATUS.OK).json({
+      online: true,
+      orderId: order._id
+    });
 
   } catch (error) {
     next(error);

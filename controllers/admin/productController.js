@@ -5,6 +5,8 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import logger from "../../utils/logger.js";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 // Fix __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -56,11 +58,12 @@ const getProductAddPage = async (req, res, next) => {
 const addProduct = async (req, res, next) => {
   try {
     const { productName, description, category, variants } = req.body;
-    console.log(req.body);
-
     //  Validation Step
     if (!productName || !description || !category) {
-      return res.status(400).json({ success: false, message: "All fields are required." });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.MISSING_FIELDS
+      });
     }
 
     // Prevent Duplicate Product Name
@@ -68,27 +71,26 @@ const addProduct = async (req, res, next) => {
       productName: { $regex: new RegExp("^" + productName + "$", "i") }
     });
     if (productExists) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: "Product already exists. Choose another name."
+        message: RESPONSE_MESSAGES.PRODUCT_ALREADY_EXISTS
       });
     }
 
     // Validate Category
     const categoryExists = await Category.findById(category);
     if (!categoryExists) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: "Invalid category selected."
+        message: RESPONSE_MESSAGES.INVALID_CATEGORY
       });
     }
 
     //  Validate Images
-    console.log("✅ Received Files from Frontend:", req.files?.length);
     if (!req.files || req.files.length < 3) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: "Upload at least 3 product images."
+        message: RESPONSE_MESSAGES.MIN_PRODUCT_IMAGES
       });
     }
 
@@ -135,7 +137,10 @@ const addProduct = async (req, res, next) => {
     logger.info(
       `ADMIN PRODUCT CREATED | ProductId: ${newProduct._id} | Name: ${productName} | Status: ${newProduct.status}`
     );
-    return res.status(200).json({ success: true });
+    return res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      message: RESPONSE_MESSAGES.PRODUCT_CREATED
+    });
 
   } catch (error) {
       next(error);
@@ -149,7 +154,10 @@ const productBlocked = async (req,res,next)=>{
         logger.warn(
           `ADMIN PRODUCT BLOCKED | ProductId: ${id}`
         );
-        return res.status(200).json({ success: true });
+        return res.status(HTTP_STATUS.OK).json({
+          success: true,
+          message: RESPONSE_MESSAGES.PRODUCT_BLOCKED
+        });
     } catch (error) {
         next(error);
     }
@@ -162,7 +170,10 @@ const productUnBlocked = async (req,res,next)=>{
         logger.info(
           `ADMIN PRODUCT UNBLOCKED | ProductId: ${id}`
         );
-        return res.status(200).json({ success: true });
+        return res.status(HTTP_STATUS.OK).json({
+          success: true,
+          message: RESPONSE_MESSAGES.PRODUCT_UNBLOCKED
+        });
     } catch (error) {
         next(error);
     }
@@ -192,7 +203,10 @@ const editProduct = async (req, res, next) => {
     
     const product = await Product.findById(productId);
     if (!product) {
-      return res.json({ success: false, message: "Product not found" });
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: RESPONSE_MESSAGES.PRODUCT_NOT_FOUND
+      });
     }
 
     // Remove deleted images
@@ -241,7 +255,11 @@ const editProduct = async (req, res, next) => {
     logger.info(
       `ADMIN PRODUCT UPDATED | ProductId: ${productId} | Name: ${product.productName} | Status: ${product.status}`
     );
-    res.json({ success: true, message: "Product updated successfully!" ,redirectUrl: `/admin/products?page=${page}` });
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.PRODUCT_UPDATED,
+      redirectUrl: `/admin/products?page=${page}`
+    });
 
   } catch (error) {
     next(error);
