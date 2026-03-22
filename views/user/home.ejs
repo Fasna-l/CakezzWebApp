@@ -46,14 +46,6 @@
   <% } %>
 
 </section>
-<!-- <section class="hero-section">
-  <div class="container">
-    <div class="hero-banner-container">
-      <img src="/images/banner image.jpg" alt="banner image" class="img-fluid" />
-      <button class="hero-shop-now-btn" onclick="window.location.href='/shop'">Shop Now</button>
-    </div>
-  </div>
-</section> -->
 
 <!-- Cakes Section (Latest Products – 1 kg check) -->
 <section class="cakes-section">
@@ -61,9 +53,11 @@
     <div class="text-center mb-4">
       <h2 class="section-title mb-1">Cakes</h2>
       <p class="section-subtitle mb-3">Dreamy cakes for every occasion</p>
-      <div class="d-flex justify-content-end">
-        <a href="/shop" class="view-all-btn">VIEW ALL</a>
-      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="section-title mb-0">Latest Products</h2>
+      <a href="/shop" class="view-all-btn">VIEW ALL</a>
     </div>
 
     <div class="row">
@@ -89,27 +83,31 @@
             </a>
 
             <div class="cake-card-body">
-              <h5 class="cake-card-title"><%= product.productName %></h5>
+              <h5 class="cake-card-title">
+                <a href="/product/<%= product._id %>" class="product-link">
+                  <%= product.productName %>
+                </a>
+              </h5>
               <div class="price-rating-row">
-  <p class="cake-card-subtitle">
-    Starting from ₹<%= product.offerPercentage
-  ? Math.round(oneKgVariant.price - (oneKgVariant.price * product.offerPercentage) / 100)
-  : oneKgVariant.price
-%>
+              <p class="cake-card-subtitle">
+                Starting from ₹<%= product.offerPercentage
+                                    ? Math.round(oneKgVariant.price - (oneKgVariant.price * product.offerPercentage) / 100)
+                                    : oneKgVariant.price
+                                %>
 
-  </p>
+              </p>
 
-  <% 
-    let avg = 0;
-    if(product.reviews && product.reviews.length){
-      avg = (product.reviews.reduce((a, b) => a + b.rating, 0) / product.reviews.length).toFixed(1);
-    }
-  %>
+              <% 
+                let avg = 0;
+                if(product.reviews && product.reviews.length){
+                  avg = (product.reviews.reduce((a, b) => a + b.rating, 0) / product.reviews.length).toFixed(1);
+                }
+              %>
 
-  <% if(avg > 0){ %>
-    <span class="rating-badgelatestprdct rating-inline">★ <%= avg %></span>
-  <% } %>
-</div>
+              <% if(avg > 0){ %>
+                <span class="rating-badgelatestprdct rating-inline">★ <%= avg %></span>
+              <% } %>
+            </div>
 
               <% if (!oneKgVariant || oneKgVariant.stock <= 0) { %>
                 <p style="color:red; font-weight:600;">Sold Out (1 kg)</p>
@@ -118,13 +116,13 @@
               <button 
                 class="cake-add-to-cart-btn"
                 data-product-id="<%= product._id %>"
-                data-size="1kg"
-                data-qty="1"
-                <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'disabled' : '' %>>
-  
+                data-variants='<%- JSON.stringify(product.variants) %>'
+                data-qty="1">
+
                 <i class="fas fa-shopping-cart"></i>
-                <%= (!oneKgVariant || oneKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
+                  Add to Cart
               </button>
+
 
             </div>
           </div>
@@ -169,18 +167,18 @@
 
               <div class="price-container">
                 ₹<%=
-  threeKgVariant
-    ? Math.max(
-        0,
-        product.offerPercentage
-          ? Math.round(
-              threeKgVariant.price -
-              (threeKgVariant.price * product.offerPercentage) / 100
-            )
-          : threeKgVariant.price
-      )
-    : product.maxPrice || "N/A"
-%>
+                  threeKgVariant
+                    ? Math.max(
+                      0,
+                      product.offerPercentage
+                        ? Math.round(
+                            threeKgVariant.price -
+                            (threeKgVariant.price * product.offerPercentage) / 100
+                          )
+                        : threeKgVariant.price
+                    )
+                    : product.maxPrice || "N/A"
+                %>
 
               </div>
 
@@ -192,15 +190,19 @@
                 <button 
                   class="add-to-cart-btn mb-3"
                   data-product-id="<%= product._id %>"
-                  data-size="3kg"
-                  data-qty="1"
-                  <%= (!threeKgVariant || threeKgVariant.stock <= 0) ? 'disabled' : '' %>>
-  
+                  data-variants='<%- JSON.stringify(product.variants) %>'
+                  data-qty="1">
+
                   <i class="fas fa-shopping-cart"></i>
-                  <%= (!threeKgVariant || threeKgVariant.stock <= 0) ? 'Out of Stock' : 'Add to Cart' %>
+                    Add to Cart
                 </button>
 
-                <h5 class="product-title"><%= product.productName %></h5>
+
+                <h5 class="product-title">
+                  <a href="/product/<%= product._id %>" class="product-link">
+                    <%= product.productName %>
+                  </a>
+                </h5>
                 <% 
                   let avg = 0;
                     if(product.reviews && product.reviews.length){
@@ -235,8 +237,12 @@
     </div>
   </div>
 </section>
-<!-- Small Weight Popup -->
+
+<!-- Small Weight Popup wishlist -->
 <div id="weightPopup" class="weight-popup"></div>
+
+<!-- Add to Cart popup -->
+<div id="cartWeightPopup" class="weight-popup"></div>
 
 <!--==================== END MAIN CONTENT SECTION ====================-->
 <script>

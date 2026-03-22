@@ -72,7 +72,7 @@
             text: data.error || "Error updating category"
           });
         } else {
-          alert(data.error || "Error updating category");
+          showToast(data.error || "Error updating category", "error");
         }
         return;
       }
@@ -100,7 +100,7 @@
           text: err.message || "Something went wrong"
         });
       } else {
-        alert(err.message || "Something went wrong");
+        showToast(err.message || "Something went wrong", "error");
       }
     }
   }

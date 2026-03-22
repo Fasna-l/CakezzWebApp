@@ -178,7 +178,7 @@ function toggleCoupon(couponId) {
     }
   })
   .catch(() => {
-    alert("Failed to update coupon status");
+    showToast("Failed to update coupon status", "error");
   });
 }
 </script>

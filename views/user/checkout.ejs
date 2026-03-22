@@ -108,7 +108,7 @@
       const hasAddr = document.querySelector("input[name='selectedAddress']:checked");
       if(!hasAddr){
         e.preventDefault();
-        alert('Please add/select a delivery address before proceeding.');
+        showToast("Please add/select a delivery address before proceeding.", "warning");
       }
     });
   })();

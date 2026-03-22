@@ -234,7 +234,10 @@ const couponInput = document.getElementById("couponCode");
 
 applyBtn.addEventListener("click", async () => {
   const code = couponInput.value.trim();
-  if (!code) return alert("Enter a coupon code");
+  if (!code) {
+    showToast("Enter a coupon code", "warning");
+    return;
+  }
 
   const res = await fetch("/coupon/apply", {
     method: "POST",
@@ -245,7 +248,7 @@ applyBtn.addEventListener("click", async () => {
   const data = await res.json();
 
   if (!data.success) {
-    alert(data.message);
+    showToast(data.message, "error");
     return;
   }
 
