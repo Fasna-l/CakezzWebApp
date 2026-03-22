@@ -5,6 +5,7 @@ import User from "../../models/userSchema.js";
 import Cart from "../../models/cartSchema.js";
 import Wallet from "../../models/walletSchema.js";
 import Coupon from "../../models/couponSchema.js";
+import ReferralSettings from "../../models/referralSettingsSchema.js";
 import calculateBestOffer from "../../helpers/offerCalculator.js";
 import crypto from "crypto";
 import logger from "../../utils/logger.js";
@@ -332,6 +333,38 @@ const placeOrder = async (req, res, next) => {
     });
 
     await order.save();
+
+    // ================= REFERRAL REWARD FOR REFERRER =================
+
+    const orderCount = await Order.countDocuments({ userId });
+
+    if (orderCount === 1 && user.referredBy) {
+
+      const referrerWallet = await Wallet.findOne({ userId: user.referredBy });
+
+      if (referrerWallet) {
+
+        const settings = await ReferralSettings.findOne();
+
+        const rewardAmount = settings?.referrerReward || 50;
+
+        await referrerWallet.addTransaction({
+          type: "referral",
+          amount: rewardAmount,
+          description: `Referral reward for ${user.name}'s first order`
+        });
+
+        // await referrerWallet.addTransaction({
+        //   type: "referral",
+        //   amount: 50,
+        //   description: `Referral reward for ${user.name}'s first order`
+        // });
+
+        logger.info(
+          `REFERRAL REWARD | Referrer: ${user.referredBy} | Referred User: ${userId} | Amount: ₹${rewardAmount}`
+        );
+      }
+    }
 
     // STOCK DEDUCTION FOR COD & FULL WALLET
     if (

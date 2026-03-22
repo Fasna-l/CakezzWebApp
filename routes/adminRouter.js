@@ -9,6 +9,7 @@ import adminCouponController from "../controllers/admin/adminCouponController.js
 import offerController from "../controllers/admin/offerController.js";
 import categoryOfferController from "../controllers/admin/categoryOfferController.js";
 import salesReportController from "../controllers/admin/salesReportController.js";
+import referralController from "../controllers/admin/referralController.js";
 
 import { userAuth, adminAuth } from "../middlewares/auth.js";
 import multer from "multer";
@@ -89,5 +90,9 @@ router.delete("/category-offer/delete/:id", adminAuth, categoryOfferController.d
 router.get("/sales-report", adminAuth, salesReportController.getSalesReport);
 router.get("/sales-report/pdf", adminAuth, salesReportController.exportSalesReportPDF);
 router.get("/sales-report/excel", adminAuth, salesReportController.exportSalesReportExcel);
+
+//referralpage
+router.get("/referrals", adminAuth, referralController.loadReferralPage);
+router.post("/referral-settings",adminAuth, referralController.updateReferralSettings);
 
 export default router;
