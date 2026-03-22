@@ -404,7 +404,7 @@ const logout = async (req,res,next) =>{
   }
 }
 
-const loadContact = async (req,res)=>{
+const loadContact = async (req,res,next)=>{
     try{
         res.render("contact")
     }catch(error){
