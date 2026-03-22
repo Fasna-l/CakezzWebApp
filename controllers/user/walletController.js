@@ -69,7 +69,13 @@ const createWalletRechargeOrder = async (req, res, next) => {
     if (!amount || amount < 1) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: RESPONSE_MESSAGES.INVALID_REQUEST
+        message: RESPONSE_MESSAGES.WALLET_MIN
+      });
+    }
+    if (amount > 500000) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.WALLET_MAX
       });
     }
 

@@ -1,6 +1,5 @@
 import Order from "../../models/orderSchema.js";
 import Product from "../../models/productSchema.js";
-import User from "../../models/userSchema.js";
 import Wallet from "../../models/walletSchema.js";
 import logger from "../../utils/logger.js";
 
@@ -197,7 +196,11 @@ const updateOrderStatus = async (req, res, next) => {
 
     // when the status set as delivered => set delivery date (because return item is only possible upto 2 hr from the  time of delivered item)
     if(status === "Delivered"){
-      orderToUpdate.deliveryDate = new Date()
+      orderToUpdate.deliveryDate = new Date();
+
+      if (orderToUpdate.paymentMethod === "COD") {
+        orderToUpdate.paymentStatus = "Paid";
+      }
     }
 
     orderToUpdate.items.forEach(item => {

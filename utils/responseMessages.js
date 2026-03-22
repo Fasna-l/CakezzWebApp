@@ -100,6 +100,9 @@ const RESPONSE_MESSAGES = {
   MIN_BANNER_LIMIT: "Minimum 3 banners required",
   BANNER_NOT_FOUND: "Banner not found",
 
+  WALLET_MIN: "Minimum amount is ₹1",
+  WALLET_MAX: "Maximum wallet recharge limit is ₹5,00,000"
+
 };
 
 export default RESPONSE_MESSAGES;

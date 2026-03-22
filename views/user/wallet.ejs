@@ -71,7 +71,7 @@ document.getElementById("addMoneyBtn").addEventListener("click", async () => {
   const amount = document.getElementById("walletAmount").value;
 
   if (!amount || amount <= 0) {
-    showToast("Please enter a valid amount", "warning");
+    showToast("Minimum amount is ₹1", "warning");
     return;
   }
 
@@ -84,7 +84,7 @@ document.getElementById("addMoneyBtn").addEventListener("click", async () => {
 
   const data = await res.json();
   if (!data.success) {
-    showToast("Unable to create payment", "error");
+    showToast(data.message || "Unable to create payment", "error");
     return;
   }
 
