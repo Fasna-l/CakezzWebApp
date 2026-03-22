@@ -83,6 +83,14 @@
   color: white;
 }
 
+.success-buttons form {
+  width: 100%;
+}
+
+.success-buttons form button {
+  width: 100%;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .success-card {

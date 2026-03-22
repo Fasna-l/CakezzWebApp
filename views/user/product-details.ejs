@@ -163,9 +163,6 @@
 
       </div>
 
-      <!-- ✅ Sold Out Message -->
-      <p id="pd-soldout" class="soldout-text" style="display:none;">Sold Out</p>
-
       <!-- Reviews Section -->
 <div class="reviews-section">
   <h5>Customer Reviews</h5>
@@ -246,10 +243,6 @@
           <i class="fa-heart"></i>
         </div>
 
-        <% if (!oneKgVariant || oneKgVariant.stock <= 0) { %>
-          <p class="out-of-stock">Out of stock (1 kg)</p>
-        <% } %>
-
         <button
           class="add-to-cart-btn"
           data-product-id="<%= product._id %>"
@@ -291,7 +284,6 @@
   const priceEl = document.getElementById("pd-price");
   const stockEl = document.getElementById("pd-stock");
   const addBtn = document.getElementById("pd-add-to-cart");
-  const soldOut = document.getElementById("pd-soldout");
   const qtyInput = document.getElementById("pd-qty");
   const variants = JSON.parse(`<%- JSON.stringify(product?.variants || []) %>`);
   const wishlistItems =JSON.parse(`<%- JSON.stringify(wishlistItems || []) %>`);
@@ -309,7 +301,7 @@
     mainImage.style.transform = "scale(1)";
   });
 
-  // ✅ Change Main Image on Thumbnail Click
+  // Change Main Image on Thumbnail Click
   function changeImage(src, element) {
     mainImage.src = src;
     document.querySelectorAll(".thumbnail").forEach(img => img.classList.remove("active-thumb"));
@@ -331,11 +323,9 @@
   stockEl.textContent = `${v.stock} items`;
 
   if (v.stock <= 0) {
-    soldOut.style.display = "block";
     addBtn.disabled = true;
     addBtn.textContent = "OUT OF STOCK";
   } else {
-    soldOut.style.display = "none";
     addBtn.disabled = false;
     addBtn.textContent = "ADD TO CART";
   }

@@ -1,5 +1,7 @@
 import Category from "../../models/categorySchema.js";
 import logger from "../../utils/logger.js";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 const categoryInfo = async (req,res,next)=>{
     try {
@@ -49,7 +51,9 @@ const addCategory = async (req,res,next)=>{
     try {
         const existingCategory = await Category.findOne({categoryName});
         if(existingCategory){
-            return res.status(400).json({error:"Category already exists"})
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+                message: RESPONSE_MESSAGES.CATEGORY_ALREADY_EXISTS
+            });
         }
         const newCategory = new Category({
             categoryName,
@@ -59,12 +63,15 @@ const addCategory = async (req,res,next)=>{
         logger.info(
             `ADMIN CATEGORY CREATED | CategoryId: ${newCategory._id} | Name: ${categoryName}`
         );
-        return res.json({message:"Category added successfully"})
+        return res.status(HTTP_STATUS.CREATED).json({
+            success: true,
+            message: RESPONSE_MESSAGES.CATEGORY_ADDED
+        });
     } catch (error) {
         next(error);
     }
 }
-// PATCH /admin/categories/:id/list
+
 const listCategory = async (req, res,next) => {
     try {
         const { id } = req.params;
@@ -77,13 +84,15 @@ const listCategory = async (req, res,next) => {
         logger.info(
             `ADMIN CATEGORY LISTED | CategoryId: ${id}`
         );
-        return res.status(200).json({ success: true });
+        return res.status(HTTP_STATUS.OK).json({
+            success: true,
+            message: RESPONSE_MESSAGES.CATEGORY_LISTED
+        });
     } catch (error) {
         next(error);
     }
 };
 
-//PATCH /admin/categories/:id/unlist
 const unlistCategory = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -96,7 +105,10 @@ const unlistCategory = async (req, res, next) => {
         logger.warn(
             `ADMIN CATEGORY UNLISTED | CategoryId: ${id}`
         );
-        return res.status(200).json({ success: true });
+        return res.status(HTTP_STATUS.OK).json({
+            success: true,
+            message: RESPONSE_MESSAGES.CATEGORY_UNLISTED
+        });
     } catch (error) {
         next(error);
     }
@@ -120,7 +132,10 @@ const editCategory = async (req,res,next)=>{
         //Check if another category with same name exists
         const existingCategory = await Category.findOne({categoryName:categoryName,_id:{$ne:id}});   //// Exclude current category
         if(existingCategory){
-            return res.status(400).json({success:false,error:"Category name already exists,Please choose another name"});
+            return res.status(HTTP_STATUS.BAD_REQUEST).json({
+                success: false,
+                message: RESPONSE_MESSAGES.CATEGORY_ALREADY_EXISTS
+            });
         }
 
         //Update the category
@@ -133,12 +148,15 @@ const editCategory = async (req,res,next)=>{
             logger.info(
                 `ADMIN CATEGORY UPDATED | CategoryId: ${id} | Name: ${updateCategory.categoryName}`
             );
-            return res.status(200).json({
-            success: true,
-            message: "Category updated successfully!"
-        });
+            return res.status(HTTP_STATUS.OK).json({
+                success: true,
+                message: RESPONSE_MESSAGES.CATEGORY_UPDATED
+            });
         }else {
-            res.status(404).json({success:false,error:"Category not found"})
+            return res.status(HTTP_STATUS.NOT_FOUND).json({
+                success: false,
+                message: RESPONSE_MESSAGES.CATEGORY_NOT_FOUND
+            });
         }
 
     } catch (error) {

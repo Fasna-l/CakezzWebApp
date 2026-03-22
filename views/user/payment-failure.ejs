@@ -21,9 +21,11 @@
     <div class="success-buttons">
       <a href="/order/<%= orderId %>" class="btn view-btn">View Order</a>
       
-      <a href="/checkout/payment?retry=<%= orderId %>" class="btn shop-btn">
-        Retry Payment
-      </a>
+      <form action="/payment/retry/<%= orderId %>" method="POST" style="display:inline;">
+        <button type="submit" class="btn shop-btn">
+          Retry Payment
+        </button>
+      </form>
       <a href="/shop" class="btn shop-btn">Continue Shopping</a> 
     </div>
 

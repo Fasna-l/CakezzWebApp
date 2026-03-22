@@ -1,5 +1,7 @@
 import User from "../../models/userSchema.js";
 import logger from "../../utils/logger.js";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 const customerInfo = async (req,res,next)=>{
     try {
@@ -57,7 +59,10 @@ const customerBlocked = async (req,res,next)=>{
         logger.warn(
             `ADMIN CUSTOMER BLOCKED | CustomerId: ${id}`
         );
-        return res.status(200).json({ success: true });
+        return res.status(HTTP_STATUS.OK).json({
+            success: true,
+            message: RESPONSE_MESSAGES.CUSTOMER_BLOCKED
+        });
     } catch (error) {
         next(error);
     }
@@ -70,7 +75,10 @@ const customerUnBlocked = async (req,res,next)=>{
         logger.info(
             `ADMIN CUSTOMER UNBLOCKED | CustomerId: ${id}`
         );
-        return res.status(200).json({ success: true });
+        return res.status(HTTP_STATUS.OK).json({
+            success: true,
+            message: RESPONSE_MESSAGES.CUSTOMER_UNBLOCKED
+        });
     } catch (error) {
         next(error);
     }

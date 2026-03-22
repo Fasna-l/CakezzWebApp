@@ -4,6 +4,8 @@ import Product from "../../models/productSchema.js";
 import Wishlist from "../../models/wishlistSchema.js";
 import calculateBestOffer from "../../helpers/offerCalculator.js";
 import logger from "../../utils/logger.js";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 
 /* Helper: find variant */
@@ -15,9 +17,9 @@ const addToCart = async (req, res, next) => {
   try {   
 
     if (!req.session.user) {
-      return res.json({
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
         success: false,
-        message: "Please login to continue."
+        message: RESPONSE_MESSAGES.LOGIN_REQUIRED
       });
     }
 
@@ -25,23 +27,38 @@ const addToCart = async (req, res, next) => {
     const { productId, size, quantity } = req.body;
 
     if (!productId || !size) {
-      return res.json({ success: false, message: "Invalid request" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.INVALID_REQUEST
+      });
     }
 
     const qty = Number(quantity) || 1;
     const product = await Product.findById(productId).populate("category");
     if (!product) {
-      return res.json({ success: false, message: "Product not found" });
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: RESPONSE_MESSAGES.PRODUCT_NOT_FOUND
+      });
     }
     if (product.isBlocked || product.category?.isListed === false) {
-      return res.json({ success: false, message: "Product unavailable" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.PRODUCT_UNAVAILABLE
+      });
     }
     const variant = findVariant(product, size);
     if (!variant) {
-      return res.json({ success: false, message: "Invalid size" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.INVALID_SIZE
+      });
     }
     if (variant.stock <= 0) {
-      return res.json({ success: false, message: "Out of stock" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.OUT_OF_STOCK
+      });
     }
 
     // Fetch user cart
@@ -57,17 +74,17 @@ const addToCart = async (req, res, next) => {
     if (existing) { 
       // MAX 5 LIMIT
       if (existing.quantity + qty > 5) {
-        return res.json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
-          message: "Maximum 5 per item allowed."
+          message: RESPONSE_MESSAGES.MAX_LIMIT_REACHED
         });
       }
 
       // STOCK CHECK
       if (existing.quantity + qty > variant.stock) {
-        return res.json({
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
           success: false,
-          message: "Not enough stock"
+          message: RESPONSE_MESSAGES.NOT_ENOUGH_STOCK
         });
       }
 
@@ -89,7 +106,10 @@ const addToCart = async (req, res, next) => {
     );
 
     logger.info(`User ${userId} added product ${productId} (${size}) to cart`);
-    return res.json({ success: true, message: "Added to cart" });
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.ADDED_TO_CART
+    });
   } catch (error) {
     logger.error(error);
     next(error);
@@ -107,26 +127,44 @@ const updateQuantity = async (req, res, next) => {
       });
 
 
-    if (!cart) return res.json({ success: false, message: "Cart not found" });
+    if (!cart) return res.status(HTTP_STATUS.NOT_FOUND).json({
+      success: false,
+      message: RESPONSE_MESSAGES.CART_NOT_FOUND
+    });
 
     const item = cart.items.find(
       (i) => i.product._id.toString() === productId && i.size === size
     );
-    if (!item) return res.json({ success: false, message: "Item not found" });
+    if (!item) return res.status(HTTP_STATUS.NOT_FOUND).json({
+      success: false,
+      message: RESPONSE_MESSAGES.ITEM_NOT_FOUND
+    });
 
     const variant = findVariant(item.product, size);
-    if (!variant) return res.json({ success: false, message: "Invalid size" });
+    if (!variant) return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      success: false,
+      message: RESPONSE_MESSAGES.INVALID_SIZE
+    });
 
     if(item.product.isBlocked || item.product.category?.isListed === false){
-      return res.json({success:false, message:"Product unavailable"});
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.PRODUCT_UNAVAILABLE
+      });
     }
 
     if(variant.stock <= 0){
-      return res.json({success:false,message:"Out of stock"});
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.OUT_OF_STOCK
+      });
     }
 
     if (quantity > variant.stock && quantity > item.quantity) {
-      return res.json({ success: false, message: "Not enough stock" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.NOT_ENOUGH_STOCK
+      });
     }
 
     item.quantity = quantity;
@@ -189,7 +227,11 @@ const removeCartItem = async (req, res, next) => {
     );
 
     if (result.modifiedCount === 0) {
-      return res.json({ success: false, message: "Item not found" });
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: RESPONSE_MESSAGES.ITEM_NOT_FOUND
+      });
+
     }
 
     logger.info(`User ${userId} removed product ${productId} (${size}) from cart`);

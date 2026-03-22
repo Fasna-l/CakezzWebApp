@@ -1,6 +1,8 @@
 import Wishlist from "../../models/wishlistSchema.js";
 import Product from "../../models/productSchema.js";
 import calculateBestOffer from "../../helpers/offerCalculator.js";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 const loadWishlist = async (req, res, next) => {
   try {
@@ -68,7 +70,10 @@ const loadWishlist = async (req, res, next) => {
 const toggleWishlist = async (req, res, next) => {
   try {
     if (!req.session.user) {
-      return res.json({ success: false, message: "Please login to continue" });
+      return res.status(HTTP_STATUS.UNAUTHORIZED).json({
+        success: false,
+        message: RESPONSE_MESSAGES.LOGIN_REQUIRED
+      });
     }
 
     const { productId, size } = req.body;
@@ -76,7 +81,10 @@ const toggleWishlist = async (req, res, next) => {
 
     const product = await Product.findById(productId);
     if (!product || product.isBlocked) {
-      return res.json({ success: false, message: "Product unavailable" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.PRODUCT_UNAVAILABLE
+      });
     }
 
     let wishlist = await Wishlist.findOne({ user: userId });
@@ -92,27 +100,19 @@ const toggleWishlist = async (req, res, next) => {
       );
 
       await wishlist.save();
-
-      //const count = wishlist.items.length;
-      
-      return res.json({
+      return res.status(HTTP_STATUS.OK).json({
         success: true,
-        message: "Removed from wishlist",
-        isAdded: false,
-        //wishlistCount: count
+        message: RESPONSE_MESSAGES.WISHLIST_REMOVED,
+        isAdded: false
       });
     } else {
       wishlist.items.push({ product: productId, size });
       
       await wishlist.save();
-      
-      //const count = wishlist.items.length;
-      
-      return res.json({
+      return res.status(HTTP_STATUS.OK).json({
         success: true,
-        message: "Added to wishlist",
-        isAdded: true,
-        //wishlistCount: count
+        message: RESPONSE_MESSAGES.WISHLIST_ADDED,
+        isAdded: true
       });
     }
   } catch (error) {
@@ -131,21 +131,26 @@ const removeFromWishlist = async (req, res, next) => {
       { $pull: { items: { product: productId, size } } }
     );
 
-    res.json({ success: true });
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.WISHLIST_REMOVED
+    });
   } catch(error) {
     next(error)
   }
 };
 
-//WISHLIST COUNT (LIKE CART)
+//WISHLIST COUNT
 const wishlistCount = async (req, res, next) => {
   try {
     if (!req.session.user) {
-      return res.json({ count: 0 });
+      return res.status(HTTP_STATUS.OK).json({ count: 0 });
     }
 
     const wishlist = await Wishlist.findOne({ user: req.session.user });
-    res.json({ count: wishlist ? wishlist.items.length : 0 });
+    res.status(HTTP_STATUS.OK).json({
+      count: wishlist ? wishlist.items.length : 0
+    });
   } catch (error) {
     next(error);
   }

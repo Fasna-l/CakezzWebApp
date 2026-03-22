@@ -1,5 +1,8 @@
 import Offer from "../../models/offerSchema.js";
 import Product from "../../models/productSchema.js";
+import logger from "../../utils/logger.js";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 const loadAddOffer = async (req, res, next) => {
   try {
@@ -19,9 +22,9 @@ const addOffer = async (req, res, next) => {
     const { offerName, discount, expiryDate, description, productId } = req.body;
 
     if (!offerName || !discount || !expiryDate || !productId) {
-      return res.status(400).json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: "Required fields are missing",
+        message: RESPONSE_MESSAGES.MISSING_FIELDS
       });
     }
     // 1.Create offer
@@ -37,9 +40,13 @@ const addOffer = async (req, res, next) => {
       productOffer: offer._id,
     });
 
-    res.status(201).json({
+    logger.info(
+      `ADMIN PRODUCT OFFER CREATED | ProductId: ${productId} | OfferId: ${offer._id} | Discount: ${discount}`
+    );
+
+    return res.status(HTTP_STATUS.CREATED).json({
       success: true,
-      message: "Offer created & assigned to product",
+      message: RESPONSE_MESSAGES.OFFER_CREATED
     });
   } catch (error) {
     next(error);
@@ -75,15 +82,19 @@ const updateOffer = async (req, res, next) => {
     );
 
     if (!updated) {
-      return res.status(404).json({
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
-        message: "Offer not found",
+        message: RESPONSE_MESSAGES.OFFER_NOT_FOUND
       });
     }
 
-    res.json({
+    logger.info(
+      `ADMIN PRODUCT OFFER UPDATED | OfferId: ${offerId} | Discount: ${discount}`
+    );
+
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
-      message: "Offer updated successfully",
+      message: RESPONSE_MESSAGES.OFFER_UPDATED
     });
   } catch (error) {
     next(error);
@@ -96,7 +107,10 @@ const deleteOffer = async (req, res, next) => {
     // Remove offer
     const offer = await Offer.findByIdAndDelete(offerId);
     if (!offer) {
-      return res.status(404).json({ success: false });
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: RESPONSE_MESSAGES.OFFER_NOT_FOUND
+      });
     }
     // Remove offer reference from products
     await Product.updateMany(
@@ -104,7 +118,14 @@ const deleteOffer = async (req, res, next) => {
       { $set: { productOffer: null } }
     );
 
-    res.json({ success: true });
+    logger.warn(
+      `ADMIN PRODUCT OFFER DELETED | OfferId: ${offerId}`
+    );
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.OFFER_DELETED
+    });
   } catch (error) {
     next(error);
   }

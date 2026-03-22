@@ -4,9 +4,7 @@ const popup = document.getElementById("weightPopup");
 
 document.addEventListener("click", async (e) => {
 
-  /* =========================================
-     REMOVE FROM WISHLIST PAGE
-  ========================================= */
+  /*REMOVE FROM WISHLIST PAGE */
 
   const removeBtn = e.target.closest(".remove-from-wishlist");
 
@@ -41,9 +39,7 @@ document.addEventListener("click", async (e) => {
   }
 
 
-  /* =========================================
-     ADD TO CART FROM WISHLIST PAGE
-  ========================================= */
+  /*ADD TO CART FROM WISHLIST PAGE*/
 
   const addToCartBtn = e.target.closest(".add-to-cart-btn.from-wishlist");
 
@@ -92,9 +88,7 @@ document.addEventListener("click", async (e) => {
     return;
   }
 
-  /* =========================================
-   PRODUCT DETAILS PAGE WISHLIST
-========================================= */
+  /*PRODUCT DETAILS PAGE WISHLIST */
 
 const pdHeart = e.target.closest("#pd-wishlist");
 
@@ -158,9 +152,7 @@ if (pdHeart) {
   return;
 }
 
-  /* =========================================
-     HEART CLICK (HOME / SHOP)
-  ========================================= */
+  /*HEART CLICK (HOME / SHOP) */
 
   const heart = e.target.closest(".wishlist-icon");
 
@@ -189,10 +181,8 @@ if (pdHeart) {
     popup.style.left = window.scrollX + rect.left + "px";
 
     popup.innerHTML = wishlistVariants.map(v => `
-      <button 
-        data-size="${v.size}"
-        ${v.stock <= 0 ? "disabled class='out-stock'" : ""}>
-        ${v.size} ${v.stock <= 0 ? "(Out)" : ""}
+      <button data-size="${v.size}">
+        ${v.size}
       </button>
     `).join("");
 
@@ -202,9 +192,7 @@ if (pdHeart) {
   }
 
 
-  /* =========================================
-     WEIGHT SELECT FROM POPUP
-  ========================================= */
+  /* WEIGHT SELECT FROM POPUP */
 
   const weightBtn = e.target.closest("#weightPopup button");
 
@@ -215,7 +203,6 @@ if (pdHeart) {
     try {
 
       const res = await fetch("/wishlist",{
-      //const res = await fetch("/wishlist/toggle", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -253,9 +240,7 @@ if (pdHeart) {
   }
 
 
-  /* =========================================
-     CLICK OUTSIDE CLOSE POPUP
-  ========================================= */
+  /*CLICK OUTSIDE CLOSE POPUP */
 
   if (
     popup &&
@@ -270,9 +255,7 @@ if (pdHeart) {
 });
 
 
-/* =========================================
-   UPDATE HEADER COUNT
-========================================= */
+/*UPDATE HEADER COUNT */
 
 async function updateWishlistCount() {
 

@@ -1,5 +1,8 @@
 import Coupon from "../../models/couponSchema.js";
 import Cart from "../../models/cartSchema.js";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
+
 
 // GET AVAILABLE COUPONS (payment.ejs)
 const getAvailableCoupons = async (req, res, next) => {
@@ -15,7 +18,11 @@ const getAvailableCoupons = async (req, res, next) => {
     { assignedUser: userId }     // referral coupons
   ]
     }).select("code description discountValue minPurchaseAmount maxDiscountAmount");
-    res.json({ success: true, coupons });
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      coupons
+    });
+
   } catch (error) {
     next(error);
   }
@@ -27,11 +34,17 @@ const applyCoupon = async (req, res, next) => {
     const userId = req.session.user;
 
     if (!couponCode) {
-      return res.json({ success: false, message: "Coupon code is required" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.COUPON_REQUIRED
+      });
     }
     // Prevent double apply
     if (req.session.appliedCoupon) {
-      return res.json({ success: false, message: "Coupon already applied" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.COUPON_ALREADY_APPLIED
+      });
     }
 
     const coupon = await Coupon.findOne({
@@ -40,33 +53,52 @@ const applyCoupon = async (req, res, next) => {
     });
 
     if (!coupon) {
-      return res.json({ success: false, message: "Invalid coupon" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.INVALID_COUPON
+      });
     }
     // Validate assigned-user referral coupon
     if (coupon.assignedUser && coupon.assignedUser.toString() !== userId.toString()) {
-      return res.json({ success: false, message: "This coupon is not assigned to you" });
+      return res.status(HTTP_STATUS.FORBIDDEN).json({
+        success: false,
+        message: RESPONSE_MESSAGES.COUPON_NOT_ASSIGNED
+      });
     }
 
     const now = new Date();
     if (coupon.startDate > now || coupon.expiryDate < now) {
-      return res.json({ success: false, message: "Coupon not valid right now" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.COUPON_NOT_VALID
+      });
     }
     // ==== USAGE LIMIT CHECKS ====
     const userUsage = coupon.usersUsed.find(u => u.user.toString() === userId.toString());
     // Global usage limit (null = infinite)
     if (coupon.usageLimit !== null && coupon.usedCount >= coupon.usageLimit) {
-      return res.json({ success: false, message: "Coupon usage limit reached" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.COUPON_USAGE_LIMIT
+      });
     }
     // Per-user usage limit (null = infinite)
     if (coupon.perUserLimit !== null && userUsage && userUsage.count >= coupon.perUserLimit) {
-      return res.json({ success: false, message: "You have already used this coupon" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.COUPON_ALREADY_USED
+      });
     }
     // ===== CART VALIDATION BASED ON OFFER PRICE =====
     const checkoutItems = req.session.checkoutItems || [];
     const totals = req.session.checkoutTotals || {};
 
     if (!checkoutItems.length) {
-      return res.json({ success: false, message: "Cart is empty" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.CART_EMPTY
+      });
+
     }
 
     // Calculate subtotal from final (offer) price
@@ -77,13 +109,12 @@ const applyCoupon = async (req, res, next) => {
 
     // Validate coupon minimum purchase amount
     if (subTotal < coupon.minPurchaseAmount) {
-      return res.json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: `Minimum purchase amount is ₹${coupon.minPurchaseAmount}`
       });
     }
     // === Discount Calculation ===
-    //let discount = Math.floor((subTotal * coupon.discountValue) / 100);
     let discount = 0;
     if(coupon.discountType === "percentage"){
       discount = Math.floor((subTotal * coupon.discountValue) / 100);
@@ -111,7 +142,7 @@ const applyCoupon = async (req, res, next) => {
       minPurchaseAmount: coupon.minPurchaseAmount
     };
 
-    return res.json({
+    return res.status(HTTP_STATUS.OK).json({
       success: true,
       discount,
       grandTotal: totals.grandTotal,
@@ -128,7 +159,9 @@ const applyCoupon = async (req, res, next) => {
 const removeCoupon = async (req, res, next) => {
   try {
     if (!req.session.appliedCoupon) {
-      return res.json({ success: false });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false
+      });
     }
     const totals = req.session.checkoutTotals;
     delete totals.discount;
@@ -136,7 +169,9 @@ const removeCoupon = async (req, res, next) => {
       totals.subTotal + totals.shipping + totals.tax;
     req.session.checkoutTotals = totals;
     delete req.session.appliedCoupon;
-    res.json({ success: true });
+    res.status(HTTP_STATUS.OK).json({
+      success: true
+    });
   } catch (error) {
     next(error);
   }

@@ -2,6 +2,9 @@ import Banner from "../../models/bannerSchema.js";
 import fs from "fs";
 import path from "path";
 
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
+
 const loadBannerPage = async (req, res, next) => {
   try {
     const banners = await Banner.find().sort({ createdAt: -1 });
@@ -20,18 +23,18 @@ const addBanner = async (req, res, next) => {
   try {
 
     if (!req.file) {
-      return res.json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: "Please upload a banner image"
+        message: RESPONSE_MESSAGES.BANNER_IMAGE_REQUIRED
       });
     }
 
     const bannerCount = await Banner.countDocuments();
 
     if (bannerCount >= 10) {
-      return res.json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: "Maximum 10 banners allowed"
+        message: RESPONSE_MESSAGES.MAX_BANNER_LIMIT
       });
     }
 
@@ -53,7 +56,10 @@ const addBanner = async (req, res, next) => {
 
     await newBanner.save();
 
-    res.json({ success: true });
+    res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      message: RESPONSE_MESSAGES.SUCCESS
+    });
 
   } catch (error) {
     next(error);
@@ -68,18 +74,18 @@ const deleteBanner = async (req, res, next) => {
     const bannerCount = await Banner.countDocuments();
 
     if (bannerCount <= 3) {
-      return res.json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
-        message: "Minimum 3 banners required"
+        message: RESPONSE_MESSAGES.MIN_BANNER_LIMIT
       });
     }
 
     const banner = await Banner.findById(id);
 
     if (!banner) {
-      return res.json({
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
-        message: "Banner not found"
+        message: RESPONSE_MESSAGES.BANNER_NOT_FOUND
       });
     }
 
@@ -91,7 +97,10 @@ const deleteBanner = async (req, res, next) => {
 
     await Banner.findByIdAndDelete(id);
 
-    res.json({ success: true });
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.SUCCESS
+    });
 
   } catch (error) {
     next(error);

@@ -46,7 +46,7 @@
 </div>
 
 
-      <form id="returnForm" action="/order/<%= order._id %>/item/<%= item._id %>/return" method="POST" class="return-form">
+      <form id="returnForm" action="/order/<%= order._id %>/item/<%= item._id %>/return" method="POST" class="return-form" novalidate>
 
         <label for="reason">Return Reason <span class="required">*</span></label>
         <textarea

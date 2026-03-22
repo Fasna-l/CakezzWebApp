@@ -1,6 +1,7 @@
 import User from "../../models/userSchema.js";
 import ReferralSettings from "../../models/referralSettingsSchema.js";
 import Wallet from "../../models/walletSchema.js";
+import logger from "../../utils/logger.js";
 
 const loadReferralPage = async (req, res, next) => {
   try {
@@ -110,6 +111,10 @@ const updateReferralSettings = async (req,res,next)=>{
     settings.refereeReward = Number(refereeReward);
 
     await settings.save();
+
+    logger.info(
+      `ADMIN UPDATED REFERRAL SETTINGS | ReferrerReward: ${referrerReward} | RefereeReward: ${refereeReward}`
+    );
 
     res.redirect("/admin/referrals");
 

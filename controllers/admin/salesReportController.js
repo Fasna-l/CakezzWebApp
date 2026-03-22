@@ -1,6 +1,9 @@
 import Order from "../../models/orderSchema.js";
 import PDFDocument from "pdfkit";
 import ExcelJS from "exceljs";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
+import logger from "../../utils/logger.js";
 
 //DATE RANGE HELPER
 const getDateRange = (range, startDate, endDate) => {
@@ -19,7 +22,7 @@ const getDateRange = (range, startDate, endDate) => {
   return { from, to };
 };
 
-const getSalesReport = async (req, res) => {
+const getSalesReport = async (req, res, next) => {
   try {
     const { page = 1, search, range, startDate, endDate, status } = req.query;
     const limit = 10;
@@ -49,6 +52,10 @@ const getSalesReport = async (req, res) => {
     const orders = await Order.find(filter).sort({ orderDate: -1 }).skip(skip).limit(limit).lean();
     const totalPages = Math.ceil(totalOrders / limit);
 
+    logger.info(
+      `ADMIN VIEW SALES REPORT | Page: ${page} | Range: ${range || "custom"}`
+    );
+
     res.render("sales-report", {
       sales: orders,
       currentPage: Number(page),
@@ -61,8 +68,10 @@ const getSalesReport = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).send("Failed to load sales report");
+    next(error);
+    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).send(
+      RESPONSE_MESSAGES.SALES_REPORT_LOAD_FAILED
+    );
   }
 };
 
@@ -109,6 +118,9 @@ const exportSalesReportExcel = async (req, res) => {
 
   res.setHeader("Content-Type","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
   res.setHeader("Content-Disposition","attachment; filename=sales-report.xlsx");
+  logger.info(
+    `ADMIN EXPORT SALES REPORT EXCEL | Range: ${range || "custom"}`
+  );
   await workbook.xlsx.write(res);
   res.end();
 };
@@ -137,6 +149,10 @@ const exportSalesReportPDF = async (req, res) => {
 
 
   const orders = await Order.find(filter).sort({ orderDate: -1 }).lean();  // pdf shows latest data first
+
+  logger.info(
+    `ADMIN EXPORT SALES REPORT PDF | Range: ${range || "custom"}`
+  );
 
   const doc = new PDFDocument({ size: "A4", margin: 40 });
   res.setHeader("Content-Type", "application/pdf");

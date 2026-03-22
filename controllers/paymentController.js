@@ -5,6 +5,8 @@ import Cart from "../models/cartSchema.js";
 import Wallet from "../models/walletSchema.js";
 import crypto from "crypto";
 import logger from "../utils/logger.js";
+import HTTP_STATUS from "../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../utils/responseMessages.js";
 
 //create Razorpay order 
 const createRazorpayOrder = async (req, res, next) => {
@@ -13,7 +15,10 @@ const createRazorpayOrder = async (req, res, next) => {
 
     const order = await Order.findById(orderId);
     if (!order) {
-      return res.status(404).json({ success: false, message: "Order not found" });
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: RESPONSE_MESSAGES.ORDER_NOT_FOUND
+      });
     }
 
     const options = {
@@ -30,8 +35,8 @@ const createRazorpayOrder = async (req, res, next) => {
     logger.info(
       `RAZORPAY ORDER CREATED | UserId: ${order.userId} | OrderId: ${order._id} | Amount: ${order.payableAmount}`
     );
-    
-    res.json({
+
+    res.status(HTTP_STATUS.OK).json({
       success: true,
       key: process.env.RAZORPAY_KEY_ID,
       razorpayOrder,
@@ -57,7 +62,12 @@ const verifyPayment = async (req, res, next) => {
       .digest("hex");
 
     const order = await Order.findById(orderId);
-    if (!order) return res.json({ success: false });
+    if (!order) {
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: RESPONSE_MESSAGES.ORDER_NOT_FOUND
+      });
+    }
 
     if (expectedSign !== razorpay_signature) {
       logger.error(
@@ -67,7 +77,11 @@ const verifyPayment = async (req, res, next) => {
       order.paymentStatus = "Failed";
       order.orderStatus = "Payment Failed";
       await order.save();
-      return res.json({ success: false });
+
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.INVALID_REQUEST
+      });
     }
 
     //STOCK DEDUCTION AFTER SUCCESS
@@ -101,8 +115,11 @@ const verifyPayment = async (req, res, next) => {
     req.session.checkoutItems = [];
     req.session.checkoutTotals = null;
 
-    return res.json({ success: true });
-
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.SUCCESS
+    });
+    
   } catch (error) {
     next(error);
   }
@@ -121,7 +138,10 @@ const markPaymentFailed = async (req, res, next) => {
       `PAYMENT FAILED | OrderId: ${orderId}`
     );
 
-    res.json({ success: true });
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.SUCCESS
+    });
     
   } catch (error) {
     next(error);
@@ -142,8 +162,8 @@ const retryPayment = async (req, res, next) => {
       );
       return retryRazorpay(order, res);
     }
-    // If nothing pending (edge case)
-    return res.redirect(`/checkout/success/${order._id}`);
+    
+    return res.redirect(`/orders/${order._id}/success`);
   } catch (error) {
     next(error);
   }

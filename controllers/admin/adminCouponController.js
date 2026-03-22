@@ -1,5 +1,7 @@
 import Coupon from "../../models/couponSchema.js";
 import logger from "../../utils/logger.js";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 const listCoupons = async (req, res, next) => {
   try {
@@ -52,19 +54,27 @@ const createCoupon = async (req, res, next) => {
     } = req.body;
 
     if (!code || !name || !description || !discountValue || !expiryDate) {
-      return res.status(400).json({ message: "Missing required fields" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: RESPONSE_MESSAGES.MISSING_FIELDS
+      });
     }
 
     const exists = await Coupon.findOne({ code: code.toUpperCase() });
     if (exists) {
-      return res.status(400).json({ message: "Coupon code already exists" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: RESPONSE_MESSAGES.COUPON_ALREADY_EXISTS
+      });
     }
 
     if(discountValue < 1){
-      return res.status(400).json({message:"Invalid discount value"})
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: RESPONSE_MESSAGES.INVALID_DISCOUNT_VALUE
+      });
     }
     if(discountType === "percentage" && discountValue >100){
-      return res.status(400).json({message:"Percentage cannot exceed 100%"})
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: RESPONSE_MESSAGES.INVALID_PERCENTAGE
+      });
     }
 
     if (usageLimit === "" || usageLimit === undefined) {
@@ -89,7 +99,10 @@ const createCoupon = async (req, res, next) => {
       `ADMIN COUPON CREATED | Code: ${newCoupon.code} | Type: ${newCoupon.discountType} | Value: ${newCoupon.discountValue}`
     );
 
-    res.status(201).json({ success: true });
+    res.status(HTTP_STATUS.CREATED).json({
+      success: true,
+      message: RESPONSE_MESSAGES.SUCCESS
+    });
   } catch (error) {
     next(error);
   }
@@ -120,11 +133,15 @@ const updateCoupon = async (req, res, next) => {
     } = req.body;
 
     if (discountValue < 1) {
-      return res.status(400).json({ message: "Invalid discount value" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: RESPONSE_MESSAGES.INVALID_DISCOUNT_VALUE
+      });
     }
 
     if (discountType === "percentage" && discountValue > 100) {
-      return res.status(400).json({ message: "Percentage cannot exceed 100%" });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        message: RESPONSE_MESSAGES.INVALID_PERCENTAGE
+      });
     }
 
     if (usageLimit === "" || usageLimit === undefined) {
@@ -149,7 +166,10 @@ const updateCoupon = async (req, res, next) => {
       `ADMIN COUPON UPDATED | Code: ${updatedCoupon.code} | Type: ${updatedCoupon.discountType} | Value: ${updatedCoupon.discountValue}`
     );
 
-    res.status(200).json({ success: true });
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.SUCCESS
+    });
   } catch (error) {
     next(error);
   }
@@ -158,7 +178,11 @@ const updateCoupon = async (req, res, next) => {
 const toggleCoupon = async (req, res, next) => {
   try {
     const coupon = await Coupon.findById(req.params.id);
-    if (!coupon) return res.status(404).json({ success: false });
+    if (!coupon) 
+      return res.status(HTTP_STATUS.NOT_FOUND).json({
+        success: false,
+        message: RESPONSE_MESSAGES.COUPON_NOT_FOUND
+      });
 
     coupon.isActive = !coupon.isActive;
     await coupon.save();
@@ -167,7 +191,11 @@ const toggleCoupon = async (req, res, next) => {
       `ADMIN COUPON TOGGLED | Code: ${coupon.code} | Active: ${coupon.isActive}`
     );
 
-    res.json({ success: true, isActive: coupon.isActive });
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.SUCCESS,
+      isActive: coupon.isActive
+    });
   } catch (error) {
     next(error);
   }
@@ -181,7 +209,11 @@ const deleteCoupon = async (req, res, next) => {
         `ADMIN COUPON DELETED | Code: ${deletedCoupon.code}`
       );
     }
-    res.json({ success: true });
+    
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.SUCCESS
+    });
   } catch (error) {
     next(error);
   }

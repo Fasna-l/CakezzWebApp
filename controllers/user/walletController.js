@@ -2,6 +2,8 @@ import Wallet from "../../models/walletSchema.js";
 import User from "../../models/userSchema.js";
 import razorpay from "../../config/razorpay.js";
 import crypto from "crypto";
+import HTTP_STATUS from "../../utils/httpStatus.js";
+import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
 const loadWallet = async (req, res, next) => {
   try {
@@ -65,7 +67,10 @@ const createWalletRechargeOrder = async (req, res, next) => {
     const { amount } = req.body;
 
     if (!amount || amount < 1) {
-      return res.status(400).json({ success: false });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.INVALID_REQUEST
+      });
     }
 
     const razorpayOrder = await razorpay.orders.create({
@@ -74,7 +79,7 @@ const createWalletRechargeOrder = async (req, res, next) => {
       receipt: `wallet_${Date.now()}`
     });
 
-    res.json({
+    res.status(HTTP_STATUS.OK).json({
       success: true,
       razorpayOrder,
       key: process.env.RAZORPAY_KEY_ID
@@ -101,13 +106,19 @@ const verifyWalletRecharge = async (req, res, next) => {
       .digest("hex");
 
     if (expectedSign !== razorpay_signature) {
-      return res.status(400).json({ success: false });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.INVALID_REQUEST
+      });
     }
 
     const wallet = await Wallet.findOne({ userId: req.session.user });
 
     if (!wallet) {
-        return res.status(404).json({ success: false });
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.INVALID_REQUEST
+      });
     }
     await wallet.addTransaction({
       type: "deposit",
@@ -115,7 +126,10 @@ const verifyWalletRecharge = async (req, res, next) => {
       description: "Wallet recharge"
     });
 
-    res.json({ success: true });
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.SUCCESS
+    });
   } catch (error) {
     next(error);
   }
