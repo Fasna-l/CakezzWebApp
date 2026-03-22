@@ -1,12 +1,13 @@
-const Address = require("../../models/addressSchema");
-const Product = require("../../models/productSchema");
-const Order = require("../../models/orderSchema");
-const User = require("../../models/userSchema");
-const Cart = require("../../models/cartSchema");
-const Wallet = require("../../models/walletSchema");
-const Coupon = require("../../models/couponSchema");
-const calculateBestOffer = require("../../helpers/offerCalculator");
-const crypto = require("crypto");
+import Address from "../../models/addressSchema.js";
+import Product from "../../models/productSchema.js";
+import Order from "../../models/orderSchema.js";
+import User from "../../models/userSchema.js";
+import Cart from "../../models/cartSchema.js";
+import Wallet from "../../models/walletSchema.js";
+import Coupon from "../../models/couponSchema.js";
+import calculateBestOffer from "../../helpers/offerCalculator.js";
+import crypto from "crypto";
+import logger from "../../utils/logger.js";
 
 const validateCheckoutItems = async (req)=>{
   if(!req.session.checkoutItems || req.session.checkoutItems.length === 0) {
@@ -186,6 +187,10 @@ const getPaymentPage = async (req, res, next) => {
 
     const appliedCoupon = req.session.appliedCoupon || null;
 
+    logger.info(
+      `User ${userId} proceeded to checkout. Grand Total: ${totals.grandTotal || 0}`
+    );
+    
     res.render("payment", {
       user,
       checkoutItems: req.session.checkoutItems || [],
@@ -328,6 +333,26 @@ const placeOrder = async (req, res, next) => {
 
     await order.save();
 
+    // STOCK DEDUCTION FOR COD & FULL WALLET
+    if (
+      paymentMethod === "COD" ||
+      (paymentMethod === "WALLET" && remainingAmount === 0)
+    ) {
+      for (let item of order.items) {
+        const product = await Product.findById(item.productId);
+        const variant = product.variants.find(v => v.size === item.size);
+
+        if (variant) {
+          variant.stock -= item.quantity;
+          await product.save();
+        }
+      }
+    }
+
+    logger.info(
+      `ORDER PLACED | UserId: ${userId} | OrderId: ${order._id} | Amount: ${order.totalAmount} | Payment: ${paymentMethod}`
+    );
+
     // Update coupon usage
     if (couponSession) {
       const coupon = await Coupon.findById(couponSession.couponId);
@@ -355,6 +380,16 @@ const placeOrder = async (req, res, next) => {
 
     // CLEAR SESSION ONLY FOR COD or WALLET FULL
     if (paymentMethod === "COD" || (paymentMethod === "WALLET" && remainingAmount === 0)) {
+    logger.info(
+      `PAYMENT SUCCESS | UserId: ${userId} | OrderId: ${order._id} | Method: ${paymentMethod} | Amount: ${order.totalAmount}`
+    );
+
+  // CLEAR CART FROM DATABASE
+    await Cart.updateOne(
+      { user: userId },
+      { $set: { items: [] } }
+    );
+
       req.session.checkoutItems = [];
       req.session.checkoutTotals = null;
       return res.redirect(`/checkout/success/${order._id}`);
@@ -374,7 +409,7 @@ const getSuccessPage = async (req, res, next) => {
     const user = userId ? await User.findById(userId).lean() : null;
 
     const order = await Order.findById(req.params.orderId);
-
+    
     if (!order) {
       return res.redirect("/order");
     }
@@ -450,7 +485,7 @@ const loadPaymentFailurePage = async (req, res, next) => {
 };
 
 
-module.exports = {
+export default {
   getCheckout,
   postAddAddress,
   getEditAddress,
@@ -460,5 +495,5 @@ module.exports = {
   placeOrder,
   getSuccessPage,
   getPersonalizePage,
-  loadPaymentFailurePage 
+  loadPaymentFailurePage
 };

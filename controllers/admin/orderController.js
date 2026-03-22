@@ -1,7 +1,8 @@
-const Order = require("../../models/orderSchema");
-const Product = require("../../models/productSchema");
-const User = require("../../models/userSchema");
-const Wallet = require("../../models/walletSchema");
+import Order from "../../models/orderSchema.js";
+import Product from "../../models/productSchema.js";
+import User from "../../models/userSchema.js";
+import Wallet from "../../models/walletSchema.js";
+import logger from "../../utils/logger.js";
 
 const loadOrderList = async (req, res, next) => {
   try {
@@ -213,6 +214,10 @@ const updateOrderStatus = async (req, res, next) => {
 
     await orderToUpdate.save();
 
+    logger.info(
+      `ADMIN STATUS UPDATE | OrderId: ${orderId} | OldStatus: ${oldStatus} | NewStatus: ${status}`
+    );
+
     // Reload updated order for rendering
     const updatedOrder = await Order.findById(orderId).populate("userId").lean();
 
@@ -253,6 +258,10 @@ const cancelOrder = async (req, res, next) => {
 
     recalculateOrderTotals(order);
     await order.save();
+
+    logger.warn(
+      `ADMIN CANCELLED ORDER | OrderId: ${orderId} | Amount: ${order.totalAmount}`
+    );
 
     res.redirect("/admin/orders");
 
@@ -323,6 +332,10 @@ const approveReturnItem = async (req, res, next) => {
     recalculateOrderTotals(order);
     await order.save();
 
+    logger.info(
+      `ADMIN APPROVED ITEM RETURN | OrderId: ${orderId} | Item: ${item.productName} | Refund: ${item.refundAmount}`
+    );
+
     return res.redirect(`/admin/order-details/${orderId}`);
 
   } catch (error) {
@@ -355,6 +368,10 @@ const rejectReturnItem = async (req, res, next) => {
 
     recalculateOrderTotals(order);
     await order.save();
+
+    logger.warn(
+      `ADMIN REJECTED ITEM RETURN | OrderId: ${orderId} | Item: ${item.productName}`
+    );
 
     return res.redirect(`/admin/order-details/${orderId}`);
 
@@ -491,6 +508,10 @@ const rejectWholeReturn = async (req, res, next) => {
     recalculateOrderTotals(order);
     await order.save();
 
+    logger.warn(
+      `ADMIN REJECTED FULL RETURN | OrderId: ${orderId}`
+    );
+
     res.redirect(`/admin/order-details/${orderId}`);
   } catch (error) {
     next(error);
@@ -559,6 +580,9 @@ const approveWholeReturn = async (req, res ,next) => {
 
     recalculateOrderTotals(order);
     await order.save();
+    logger.info(
+      `ADMIN APPROVED FULL RETURN | OrderId: ${orderId} | TotalRefund: ${totalRefund}`
+    );
 
     res.redirect(`/admin/order-details/${orderId}`);
 
@@ -609,35 +633,6 @@ function recalculateOrderTotals(order) {
   order.totalAmount =
     newSubTotal + taxAmount + shippingCharge - newCouponDiscount;
 }
-// function recalculateOrderTotals(order) {
-
-//   const validItems = order.items.filter(item => {
-//     if (item.status === "Cancelled") return false;
-//     if (item.status === "Returned") return false;
-
-//     if (
-//       item.status === "Return Requested" &&
-//       item.returnStatus === "Approved"
-//     ) return false;
-
-//     //if (item.returnStatus === "Rejected") return false;
-
-//     return true;
-//   });
-
-//   const subTotal = validItems.reduce((sum, item) => {
-//     return sum + item.price * item.quantity;
-//   }, 0);
-
-//   const taxAmount = Math.round(subTotal * 0.05);
-//   const shippingCharge = subTotal > 0 ? 50 : 0;
-//   const offerDiscount = order.offerDiscount || 0;
-
-//   order.subTotal = subTotal;
-//   order.taxAmount = taxAmount;
-//   order.shippingCharge = shippingCharge;
-//   order.totalAmount = subTotal + taxAmount + shippingCharge - offerDiscount;
-// }
 
 function calculateRefundWithCoupon(order,item){
   //No coupon => Full refund (When there is no coupon applied)
@@ -665,7 +660,7 @@ function calculateRefundWithCoupon(order,item){
   return Math.round(refundAmount)
 }
 
-module.exports = {
+export default {
   loadOrderList,
   loadOrderDetails,
   updateOrderStatus,
@@ -674,5 +669,5 @@ module.exports = {
   rejectReturnItem,
   loadReturnRequests,
   rejectWholeReturn,
-  approveWholeReturn
+  approveWholeReturn,
 };

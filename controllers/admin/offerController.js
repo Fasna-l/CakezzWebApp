@@ -1,5 +1,5 @@
-const Offer = require("../../models/offerSchema");
-const Product = require("../../models/productSchema");
+import Offer from "../../models/offerSchema.js";
+import Product from "../../models/productSchema.js";
 
 const loadAddOffer = async (req, res, next) => {
   try {
@@ -109,7 +109,7 @@ const deleteOffer = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   loadAddOffer,
   addOffer,
   loadEditOffer,

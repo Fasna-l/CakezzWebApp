@@ -1,4 +1,4 @@
-const Cart = require("../models/cartSchema");
+import Cart from "../models/cartSchema.js";
 
 const cartCount = async (req, res, next) => {
   try {
@@ -9,6 +9,7 @@ const cartCount = async (req, res, next) => {
 
     const cart = await Cart.findOne({ user: req.session.user });
     res.locals.cartCount = cart ? cart.items.length : 0;
+
     next();
   } catch (error) {
     console.log("cartCount middleware error:", error);
@@ -17,4 +18,4 @@ const cartCount = async (req, res, next) => {
   }
 };
 
-module.exports = cartCount;
+export default cartCount;

@@ -1,8 +1,9 @@
-const User = require("../../models/userSchema");
-const Cart = require("../../models/cartSchema");
-const Product = require("../../models/productSchema");
-const Wishlist = require("../../models/wishlistSchema");
-const calculateBestOffer = require("../../helpers/offerCalculator");
+import User from "../../models/userSchema.js";
+import Cart from "../../models/cartSchema.js";
+import Product from "../../models/productSchema.js";
+import Wishlist from "../../models/wishlistSchema.js";
+import calculateBestOffer from "../../helpers/offerCalculator.js";
+import logger from "../../utils/logger.js";
 
 
 /* Helper: find variant */
@@ -84,11 +85,13 @@ const addToCart = async (req, res, next) => {
     await cart.save();
     await Wishlist.updateOne(
       { user: userId },
-      { $pull: { items: { product: productId } } }
+      { $pull: { items: { product: productId, size: size } } }
     );
 
+    logger.info(`User ${userId} added product ${productId} (${size}) to cart`);
     return res.json({ success: true, message: "Added to cart" });
   } catch (error) {
+    logger.error(error);
     next(error);
   }
 };
@@ -129,6 +132,8 @@ const updateQuantity = async (req, res, next) => {
     item.quantity = quantity;
     await cart.save();
 
+    logger.info(`User ${userId} updated product ${productId} (${size}) quantity to ${quantity}`);
+
     //AUTO REMOVE COUPON IF CART CHANGES
     if (req.session.appliedCoupon) {
       delete req.session.appliedCoupon;
@@ -168,6 +173,7 @@ const updateQuantity = async (req, res, next) => {
       summary: { subtotal, tax, shipping, total }
     });
   } catch (error) {
+    logger.error(error);
     next(error);
   }
 };
@@ -185,6 +191,8 @@ const removeCartItem = async (req, res, next) => {
     if (result.modifiedCount === 0) {
       return res.json({ success: false, message: "Item not found" });
     }
+
+    logger.info(`User ${userId} removed product ${productId} (${size}) from cart`);
 
     //AUTO REMOVE COUPON IF CART CHANGES
     if (req.session.appliedCoupon) {
@@ -233,6 +241,7 @@ return res.json({
 });
 
   } catch (error) {
+    logger.error(error);
     next(error);
   }
 };
@@ -246,9 +255,10 @@ const proceedToCheckout = async (req, res, next) => {
         populate: { path: "category" }
       });
 
-    console.log("cart:"+cart)
+    //console.log("cart:"+cart)
 
     if (!cart || cart.items.length === 0) {
+      logger.warn(`User ${userId} attempted checkout with empty cart`);
       return res.redirect("/cart");
     }
 
@@ -302,6 +312,8 @@ const proceedToCheckout = async (req, res, next) => {
     const tax = Math.round(subTotal * 0.05);
     const grandTotal = subTotal + shipping + tax;
 
+    logger.info(`User ${userId} proceeded to checkout. Grand Total: ${grandTotal}`);
+
     // SAVE TO SESSION
     req.session.checkoutItems = checkoutItems;
     req.session.checkoutTotals = {
@@ -314,6 +326,7 @@ const proceedToCheckout = async (req, res, next) => {
     res.redirect("/checkout");
 
   } catch (error) {
+    logger.error(error);
     next(error);
   }
 };
@@ -391,12 +404,13 @@ const getCartPage = async (req, res, next) => {
     });
     req.session.checkoutError = null;
   } catch (error) {
+    logger.error(error);
     next(error);
   }
 };
 
 
-module.exports = {
+export default {
   addToCart,
   updateQuantity,
   removeCartItem,

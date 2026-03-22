@@ -183,3 +183,42 @@
   opacity: 0.8;
 }
 
+/* Empty Cart Styling(if you need the previous style please remove the block below) */
+.empty-cart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+  min-height: 300px;
+
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: rgba(0,0,0,0.08) 0 4px 12px;
+  border: 1px solid #eaeaea;
+}
+
+.empty-cart p {
+  font-size: 20px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.btn-shop {
+  display: inline-block;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #ff4d6d, #e23a59);
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-shop:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}

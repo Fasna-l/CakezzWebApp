@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const walletSchema = new Schema(
@@ -92,4 +92,4 @@ walletSchema.methods.addTransaction = async function (transactionData) {
 
 const Wallet = mongoose.model("Wallet",walletSchema);
 
-module.exports = Wallet;
+export default Wallet;

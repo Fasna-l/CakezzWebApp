@@ -1,5 +1,7 @@
-const nodemailer = require("nodemailer");
-const env = require("dotenv").config();
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 //send Email with OTP
 const sendVerificationEmail = async (email,otp, subject)=>{
@@ -34,4 +36,4 @@ const sendVerificationEmail = async (email,otp, subject)=>{
     }
 }
 
-module.exports = { sendVerificationEmail };
+export { sendVerificationEmail };

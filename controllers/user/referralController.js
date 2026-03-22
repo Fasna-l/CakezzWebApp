@@ -1,4 +1,4 @@
-const User = require("../../models/userSchema");
+import User from "../../models/userSchema.js";
 
 const generateReferralCode = () =>
   Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -23,6 +23,6 @@ const loadReferralPage = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   loadReferralPage
 };

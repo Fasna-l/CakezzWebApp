@@ -1,7 +1,7 @@
-const Wallet = require("../../models/walletSchema");
-const User = require("../../models/userSchema"); 
-const razorpay = require("../../config/razorpay");
-const crypto = require("crypto");
+import Wallet from "../../models/walletSchema.js";
+import User from "../../models/userSchema.js";
+import razorpay from "../../config/razorpay.js";
+import crypto from "crypto";
 
 const loadWallet = async (req, res, next) => {
   try {
@@ -121,7 +121,7 @@ const verifyWalletRecharge = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   loadWallet,
   loadWalletHistory,
   createWalletRechargeOrder,

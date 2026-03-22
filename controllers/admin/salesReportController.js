@@ -1,6 +1,6 @@
-const Order = require("../../models/orderSchema");
-const PDFDocument = require("pdfkit");
-const ExcelJS = require("exceljs");
+import Order from "../../models/orderSchema.js";
+import PDFDocument from "pdfkit";
+import ExcelJS from "exceljs";
 
 //DATE RANGE HELPER
 const getDateRange = (range, startDate, endDate) => {
@@ -250,10 +250,9 @@ function formatDate(date) {
   return `${day}/${month}/${year}`;
 }
 
-module.exports = {
+export default {
   getSalesReport,
   exportSalesReportExcel,
   exportSalesReportPDF
 };
-
 

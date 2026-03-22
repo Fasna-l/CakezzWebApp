@@ -1,4 +1,5 @@
-const Category = require("../../models/categorySchema");
+import Category from "../../models/categorySchema.js";
+import logger from "../../utils/logger.js";
 
 const categoryInfo = async (req,res,next)=>{
     try {
@@ -55,6 +56,9 @@ const addCategory = async (req,res,next)=>{
             description,
         })
         await newCategory.save();
+        logger.info(
+            `ADMIN CATEGORY CREATED | CategoryId: ${newCategory._id} | Name: ${categoryName}`
+        );
         return res.json({message:"Category added successfully"})
     } catch (error) {
         next(error);
@@ -70,6 +74,9 @@ const listCategory = async (req, res,next) => {
             { $set: { isListed: true } }
         );
 
+        logger.info(
+            `ADMIN CATEGORY LISTED | CategoryId: ${id}`
+        );
         return res.status(200).json({ success: true });
     } catch (error) {
         next(error);
@@ -77,7 +84,7 @@ const listCategory = async (req, res,next) => {
 };
 
 //PATCH /admin/categories/:id/unlist
-const unlistCategory = async (req, re, next) => {
+const unlistCategory = async (req, res, next) => {
     try {
         const { id } = req.params;
 
@@ -86,6 +93,9 @@ const unlistCategory = async (req, re, next) => {
             { $set: { isListed: false } }
         );
 
+        logger.warn(
+            `ADMIN CATEGORY UNLISTED | CategoryId: ${id}`
+        );
         return res.status(200).json({ success: true });
     } catch (error) {
         next(error);
@@ -120,6 +130,9 @@ const editCategory = async (req,res,next)=>{
         },{ new: true })
 
         if(updateCategory){
+            logger.info(
+                `ADMIN CATEGORY UPDATED | CategoryId: ${id} | Name: ${updateCategory.categoryName}`
+            );
             return res.status(200).json({
             success: true,
             message: "Category updated successfully!"
@@ -133,12 +146,12 @@ const editCategory = async (req,res,next)=>{
     }
 }
 
-module.exports = {
-    categoryInfo,
-    loadAddCategoryPage,
-    addCategory,
-    listCategory,
-    unlistCategory,
-    getEditCategory,
-    editCategory
-}
+export default {
+  categoryInfo,
+  loadAddCategoryPage,
+  addCategory,
+  listCategory,
+  unlistCategory,
+  getEditCategory,
+  editCategory,
+};

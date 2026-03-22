@@ -1,4 +1,4 @@
-const Wishlist = require("../models/wishlistSchema");
+import Wishlist from "../models/wishlistSchema.js";
 
 const wishlistCount = async (req, res, next) => {
   try {
@@ -9,6 +9,7 @@ const wishlistCount = async (req, res, next) => {
 
     const wishlist = await Wishlist.findOne({ user: req.session.user });
     res.locals.wishlistCount = wishlist ? wishlist.items.length : 0;
+
     next();
   } catch (error) {
     res.locals.wishlistCount = 0;
@@ -16,4 +17,4 @@ const wishlistCount = async (req, res, next) => {
   }
 };
 
-module.exports = wishlistCount;
+export default wishlistCount;

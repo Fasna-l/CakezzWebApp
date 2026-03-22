@@ -1,4 +1,4 @@
-const User = require("../models/userSchema");
+import User from "../models/userSchema.js";
 
 const userContext = async (req, res, next) => {
   try {
@@ -15,4 +15,4 @@ const userContext = async (req, res, next) => {
   }
 };
 
-module.exports = userContext;
+export default userContext;
