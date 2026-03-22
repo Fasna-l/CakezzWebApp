@@ -302,8 +302,8 @@ async function submitProductForm(event) {
 
   //  Add deleted images if needed later
   try {
-    const response = await fetch(`/admin/edit-product/<%= product._id %>`, {
-      method: "POST",
+    const response = await fetch(`/admin/products/<%= product._id %>`, {
+      method: "PATCH",
       body: formData
     });
 
@@ -317,7 +317,6 @@ async function submitProductForm(event) {
         showConfirmButton: false
       }).then(() => {
         window.location.href = result.redirectUrl;
-        //window.location.href = "/admin/products";
       });
     } else {
       Swal.fire({

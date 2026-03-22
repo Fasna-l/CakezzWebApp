@@ -70,7 +70,8 @@ const loadEditCategoryOffer = async (req, res, next) => {
 
 const updateCategoryOffer = async (req, res, next) => {
   try {
-    const { offerId, startDate, endDate, discount } = req.body;
+    const { startDate, endDate, discount } = req.body;
+    const offerId = req.params.id;
     await CategoryOffer.findByIdAndUpdate(offerId, {
       startDate,
       endDate,

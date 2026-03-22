@@ -113,7 +113,6 @@
         if (!validateForm()) return;
 
         const data = {
-            offerId: offerId.value,
             offerName: offerName.value,
             expiryDate: expiryDate.value,
             discount: discount.value,
@@ -121,8 +120,8 @@
             productId: productId.value
         };
 
-        fetch("/admin/offer/update", {
-            method: "POST",
+        fetch(`/admin/offers/${offerId.value}`, {
+            method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(data)
         })
@@ -155,7 +154,7 @@
                 fetch(`/admin/offer/delete/${offerId.value}`, {
                     method: "DELETE"
                 }).then(() => {
-                    window.location.href = "/admin/offers";
+                    window.location.href = "/admin/products";
                 });
             }
         });

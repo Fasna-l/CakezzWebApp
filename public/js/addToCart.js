@@ -124,7 +124,8 @@ async function addItemToCart(productId, size, quantity) {
 
   try {
 
-    const res = await fetch("/add-to-cart", {
+    const res = await fetch("/cart", {
+    //const res = await fetch("/add-to-cart", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId, size, quantity })

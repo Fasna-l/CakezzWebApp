@@ -65,7 +65,9 @@
                 <a href="/order" class="dropdown-menu-item">My Orders</a>
                 <a href="/address" class="dropdown-menu-item">My Address Book</a>
                 <a href="/wallet" class="dropdown-menu-item">My Wallet</a>
-                <a href="/logout" class="dropdown-menu-item">Logout</a>
+                <form action="/logout" method="POST" style="margin:0;">
+                  <button type="submit" class="dropdown-menu-item logout-btn">Logout</button>
+                </form>
               </div>
               <!--Show when no user is logged in -->
               <% } else { %>
@@ -85,7 +87,6 @@
             onclick="window.location.href='/wishlist'">
 
             <i class="fas fa-heart"></i>
-            <!-- <span id="wishlist-count">0</span> -->
             <span id="wishlist-count"><%= wishlistCount || 0 %></span> 
           </div>
 

@@ -179,6 +179,10 @@ const sendEmailChangeOtp = async (req, res, next) => {
 const verifyEmailChangeOtp = async (req, res, next) => {
   try {
     const { otp } = req.body;
+
+    if (!otp || otp.trim() === "") {
+      return res.json({ success: false, message: "OTP is required" });
+    }
     const userId = req.session.user;
     const newEmail = req.session.newEmail;
 

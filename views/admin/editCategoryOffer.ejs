@@ -70,11 +70,10 @@
     e.preventDefault();
     if (!validateForm()) return;
 
-    fetch("/admin/category-offer/update", {
-      method: "POST",
+    fetch(`/admin/category-offers/${offerId}`, {
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        offerId,
         categoryId: category.value,
         startDate: startDate.value,
         endDate: endDate.value,
@@ -82,7 +81,9 @@
       })
     })
     .then(() => Swal.fire("Updated!", "", "success"))
-    .then(() => location.reload());
+    .then(() => {
+      window.location.href = "/admin/category";
+    });
   }
 
   function validateForm() {

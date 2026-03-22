@@ -77,7 +77,6 @@
               Remove
             </button>
           </div>
-        <!-- </form> -->
 
         <!-- PRICE BOX -->
         <div class="price-box">
@@ -100,7 +99,7 @@
         </div>
 
         <!-- Place Order -->
-        <form id="placeOrderForm" method="POST" action="/checkout/place-order">
+        <form id="placeOrderForm" method="POST" action="/orders">
           <input type="hidden" name="selectedPayment" id="selectedPayment">
 
           <button type="submit" class="btn place-order-btn">
@@ -129,20 +128,29 @@ document.querySelectorAll(".copy-btn").forEach(btn => {
 });
 
 // Payment method selection
+
 const radios = document.querySelectorAll("input[name='paymentMethod']");
 const hidden = document.getElementById("selectedPayment");
+
+// Restore saved payment method after refresh
+const savedMethod = localStorage.getItem("selectedPaymentMethod");
+if (savedMethod) {
+  const radio = document.querySelector(`input[value="${savedMethod}"]`);
+  if (radio) radio.checked = true;
+}
 
 function updateMethod() {
   const checked = document.querySelector("input[name='paymentMethod']:checked");
   hidden.value = checked.value;
+
+  // Save method so coupon refresh won't reset it
+  localStorage.setItem("selectedPaymentMethod", checked.value);
 }
+
 updateMethod();
 
 radios.forEach(r => r.addEventListener("change", updateMethod));
-
-
 //place order submit (razorpay)
-
 const placeOrderForm = document.getElementById("placeOrderForm");
 
 placeOrderForm.addEventListener("submit", async function (e) {
@@ -150,7 +158,7 @@ placeOrderForm.addEventListener("submit", async function (e) {
 
   const paymentMethod = hidden.value;
 
-  const response = await fetch("/checkout/place-order", {
+  const response = await fetch("/orders", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ selectedPayment: paymentMethod })
@@ -203,9 +211,10 @@ placeOrderForm.addEventListener("submit", async function (e) {
       const verifyData = await verifyRes.json();
 
       if (verifyData.success) {
-        window.location.href = `/checkout/success/${data.orderId}`;
+        localStorage.removeItem("selectedPaymentMethod");
+        window.location.href = `/orders/${data.orderId}/success`;
       } else {
-        window.location.href = `/order-failure/${data.orderId}`;
+        window.location.href = `/orders/${data.orderId}/failure`;
       }
     },
     //FAILURE HANDLER
@@ -217,7 +226,7 @@ placeOrderForm.addEventListener("submit", async function (e) {
           body: JSON.stringify({ orderId: data.orderId })
         });
         // User clicked FAILURE / closed popup / bank rejected
-        window.location.href = `/order-failure/${data.orderId}`;
+        window.location.href = `/orders/${data.orderId}/failure`;
       }
     }
   };
@@ -252,12 +261,20 @@ applyBtn.addEventListener("click", async () => {
     return;
   }
 
-  // Reload page to reflect updated totals
-  location.reload();
+  // If percentage coupon reached max discount
+  if (data.discountType === "percentage" && data.maxDiscount && data.discount === data.maxDiscount) {
+    showToast(`Coupon applied! Maximum discount reached (₹${data.maxDiscount})`, "success");
+  } else {
+    showToast(`Coupon applied! You saved ₹${data.discount}`, "success");
+  }
+
+  setTimeout(() => {
+    location.reload();
+  }, 1200);
 });
 
 removeBtn.addEventListener("click", async () => {
-  await fetch("/coupon/remove", { method: "POST" });
+  await fetch("/coupon", { method: "DELETE" });
   location.reload();
 });
 </script>
@@ -272,5 +289,58 @@ removeBtn.addEventListener("click", async () => {
   applyBtn.style.display = "none";
 </script>
 <% } %>
+<script>
 
+const params = new URLSearchParams(window.location.search);
+const retryOrderId = params.get("retry");
+
+if (retryOrderId) {
+
+  document.getElementById("placeOrderForm").style.display = "none";
+  fetch("/payment/create-razorpay-order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId: retryOrderId })
+  })
+  .then(res => res.json())
+  .then(rpData => {
+
+    const options = {
+      key: rpData.key,
+      amount: rpData.razorpayOrder.amount,
+      currency: "INR",
+      order_id: rpData.razorpayOrder.id,
+
+      handler: async function (response) {
+
+        const verifyRes = await fetch("/payment/verify-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            orderId: retryOrderId
+          })
+        });
+
+        const verifyData = await verifyRes.json();
+
+        if (verifyData.success) {
+          window.location.href = `/orders/${retryOrderId}/success`;
+        } else {
+          window.location.href = `/orders/${retryOrderId}/failure`;
+        }
+
+      }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+
+  });
+
+}
+
+</script>
 <%- include('../partials/user/footer') %>

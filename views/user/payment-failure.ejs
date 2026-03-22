@@ -20,7 +20,8 @@
     <!-- Actions --> 
     <div class="success-buttons">
       <a href="/order/<%= orderId %>" class="btn view-btn">View Order</a>
-      <a href="/payment/retry/<%= orderId %>" class="btn shop-btn">
+      
+      <a href="/checkout/payment?retry=<%= orderId %>" class="btn shop-btn">
         Retry Payment
       </a>
       <a href="/shop" class="btn shop-btn">Continue Shopping</a> 

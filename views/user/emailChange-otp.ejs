@@ -98,7 +98,7 @@ function verifyOtp() {
 
   // If validation passes — continue to AJAX
   $.ajax({
-    type: "POST",
+    type: "PATCH",
     url: "/verify-email-change-otp",
     data: { otp },
     success: function (response) {
@@ -130,7 +130,7 @@ function resendOTP() {
       if (response.success) {
         Swal.fire("OTP Resent", response.message, "success");
         document.getElementById("otp").disabled = false;
-        startTimer(); // ✅ Restart the countdown after resend
+        startTimer(); // Restart the countdown after resend
       } else {
         Swal.fire("Error", response.message, "error");
       }

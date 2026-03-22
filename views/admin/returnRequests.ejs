@@ -71,15 +71,12 @@
                             <td>
                                 <% if (isFullOrderReturn) { %>
 
-                                    <a href="/admin/order/<%= first.orderDbId %>/approve-whole-return"
-                                        class="return-action-btn btn-approve">
-                                        Approve All
-                                    </a>
-
-                                    <a href="/admin/order/<%= first.orderDbId %>/reject-whole-return"
-                                        class="return-action-btn btn-reject">
-                                        Reject All
-                                    </a>
+                                    <form action="/admin/orders/<%= first.orderDbId %>/approve-return?_method=PATCH" method="POST">
+                                        <button class="return-action-btn btn-approve">Approve All</button>
+                                    </form>
+                                    <form action="/admin/orders/<%= first.orderDbId %>/reject-return?_method=PATCH" method="POST">
+                                        <button class="return-action-btn btn-reject">Reject All</button>
+                                    </form> 
 
                                 <% } %>
 
@@ -106,15 +103,12 @@
 
                             <td>
                                 <% if (!isFullOrderReturn) { %>
-                                    <a href="/admin/order/<%= first.orderDbId %>/item/<%= item.item._id %>/approve-return"
-                                        class="return-action-btn btn-approve">
-                                        Approve
-                                    </a>
-
-                                    <a href="/admin/order/<%= first.orderDbId %>/item/<%= item.item._id %>/reject-return"
-                                        class="return-action-btn btn-reject">
-                                        Reject
-                                    </a>
+                                    <form action="/admin/orders/<%= first.orderDbId %>/items/<%= item.item._id %>/approve-return?_method=PATCH" method="POST">
+                                        <button class="return-action-btn btn-approve">Approve</button>
+                                    </form>
+                                    <form action="/admin/orders/<%= first.orderDbId %>/items/<%= item.item._id %>/reject-return?_method=PATCH" method="POST">
+                                        <button class="return-action-btn btn-reject">Reject</button>
+                                    </form>
                                 <% } %>
                             </td>
                         </tr>

@@ -17,8 +17,8 @@ document.addEventListener("click", async (e) => {
 
     try {
 
-      await fetch("/wishlist/remove", {
-        method: "POST",
+      await fetch("/wishlist", {
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, size })
       });
@@ -55,7 +55,7 @@ document.addEventListener("click", async (e) => {
 
     try {
 
-      const res = await fetch("/add-to-cart", {
+      const res = await fetch("/cart", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, size, quantity: qty })
@@ -75,13 +75,14 @@ document.addEventListener("click", async (e) => {
         countEl.textContent = Math.max(0, Number(countEl.textContent) - 1);
       }
 
-      await fetch("/wishlist/remove", {
-        method: "POST",
+      await fetch("/wishlist", {
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, size })
       });
 
       updateWishlistCount();
+      updateCartCount();
       showToast("Added to cart");
 
     } catch (err) {
@@ -113,8 +114,7 @@ if (pdHeart) {
   const size = activeWeight.dataset.size;
 
   try {
-
-    const res = await fetch("/wishlist/toggle", {
+    const res = await fetch("/wishlist", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ productId, size })
@@ -214,7 +214,8 @@ if (pdHeart) {
 
     try {
 
-      const res = await fetch("/wishlist/toggle", {
+      const res = await fetch("/wishlist",{
+      //const res = await fetch("/wishlist/toggle", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -277,7 +278,7 @@ async function updateWishlistCount() {
 
   try {
 
-    const res = await fetch("/wishlist-count");
+    const res = await fetch("/wishlist/count");
     const data = await res.json();
 
     const el = document.getElementById("wishlist-count");

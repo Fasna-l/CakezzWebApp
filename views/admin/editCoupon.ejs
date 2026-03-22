@@ -161,8 +161,8 @@ function handleFormSubmit(event) {
     expiryDate: expiry
   };
 
-  fetch(`/admin/coupons/edit/${couponId.value}`, {
-    method: "POST",
+  fetch(`/admin/coupons/${couponId.value}`, {
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   })

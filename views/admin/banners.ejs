@@ -93,7 +93,7 @@ document.getElementById("bannerForm").addEventListener("submit", async function(
 
   const formData = new FormData(this)
 
-  const res = await fetch("/admin/banners/add",{
+  const res = await fetch("/admin/banners",{
     method:"POST",
     body:formData
   })
@@ -122,42 +122,6 @@ document.getElementById("bannerForm").addEventListener("submit", async function(
   }
 
 })
-// document.getElementById("bannerForm").addEventListener("submit", async function(e){
-
-//   e.preventDefault()
-
-//   const formData = new FormData(this)
-
-//   const res = await fetch("/admin/banners/add",{
-//     method:"POST",
-//     body:formData
-//   })
-
-//   const data = await res.json()
-
-//   if(data.success){
-
-//     Swal.fire({
-//       icon:'success',
-//       title:'Banner Added',
-//       timer:1200,
-//       showConfirmButton:false
-//     }).then(()=>{
-//       location.reload()
-//     })
-
-//   }else{
-
-//     Swal.fire({
-//       icon:'error',
-//       title:'Error',
-//       text:data.message
-//     })
-
-//   }
-
-// })
-
 
 async function deleteBanner(id){
 
@@ -171,7 +135,7 @@ async function deleteBanner(id){
 
   if(!confirmDelete.isConfirmed) return
 
-  const res = await fetch(`/admin/banners/delete/${id}`,{
+  const res = await fetch(`/admin/banners/${id}`,{
     method:"DELETE"
   })
 

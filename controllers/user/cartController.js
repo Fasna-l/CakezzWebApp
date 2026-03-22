@@ -10,7 +10,7 @@ import logger from "../../utils/logger.js";
 function findVariant(product, size) {
   return product.variants.find(v => v.size === size);
 }
-
+ 
 const addToCart = async (req, res, next) => {
   try {   
 
@@ -255,8 +255,6 @@ const proceedToCheckout = async (req, res, next) => {
         populate: { path: "category" }
       });
 
-    //console.log("cart:"+cart)
-
     if (!cart || cart.items.length === 0) {
       logger.warn(`User ${userId} attempted checkout with empty cart`);
       return res.redirect("/cart");
@@ -307,7 +305,6 @@ const proceedToCheckout = async (req, res, next) => {
       subTotal += ci.price * ci.quantity;
     });
 
-    //const shipping = subTotal > 500 ? 0 : 50;
     const shipping = 50;
     const tax = Math.round(subTotal * 0.05);
     const grandTotal = subTotal + shipping + tax;

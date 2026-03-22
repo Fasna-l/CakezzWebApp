@@ -237,9 +237,11 @@ const placeOrder = async (req, res, next) => {
       wallet = await Wallet.findOne({ userId });
 
       if (!wallet || wallet.balance <= 0) {
-        req.session.checkoutError = "Insufficient wallet balance";
-        return res.redirect("/checkout/payment");
-      }
+        return res.json({
+          success: false,
+          message: "No wallet balance. Please choose another payment method."
+      });
+    }
 
       walletUsed = Math.min(wallet.balance, remainingAmount);
       remainingAmount = remainingAmount - walletUsed;
@@ -428,7 +430,7 @@ const placeOrder = async (req, res, next) => {
 
       req.session.checkoutItems = [];
       req.session.checkoutTotals = null;
-      return res.redirect(`/checkout/success/${order._id}`);
+      return res.redirect(`/orders/${order._id}/success`);
     }
 
     // RAZORPAY or PARTIAL WALLET

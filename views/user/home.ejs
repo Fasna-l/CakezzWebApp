@@ -109,10 +109,6 @@
               <% } %>
             </div>
 
-              <% if (!oneKgVariant || oneKgVariant.stock <= 0) { %>
-                <p style="color:red; font-weight:600;">Sold Out (1 kg)</p>
-              <% } %>
-
               <button 
                 class="cake-add-to-cart-btn"
                 data-product-id="<%= product._id %>"
@@ -181,10 +177,6 @@
                 %>
 
               </div>
-
-              <% if (!threeKgVariant || threeKgVariant.stock <= 0) { %>
-                <p style="color:red; font-weight:600;">Sold Out (3 kg)</p>
-              <% } %>
 
               <div class="product-card-body">
                 <button 

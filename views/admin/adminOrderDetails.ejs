@@ -91,7 +91,7 @@
             );
         %>
 
-        <form action="/admin/order/update-status/<%= order._id %>" method="POST" class="status-form">
+        <form action="/admin/orders/<%= order._id %>/status?_method=PATCH" method="POST" class="status-form">
 
           <% if (hasReturnCompleted) { %>
 
@@ -115,13 +115,13 @@
               </select>
               <button type="submit" class="btn-primary">Update</button>
             <% } %>
-          </form>
+        </form>
       </div>
 
       <!-- ==================== CANCEL ORDER ==================== -->
       <% if (order.orderStatus !== "Cancelled" && order.orderStatus !== "Delivered") { %>
       <div class="button-section">
-        <form action="/admin/order/cancel/<%= order._id %>" method="POST">
+        <form action="/admin/orders/<%= order._id %>/cancel?_method=PATCH" method="POST"></form>
           <button class="btn-cancel">Cancel Order</button>
         </form>
       </div>
