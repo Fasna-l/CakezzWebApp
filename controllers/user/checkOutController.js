@@ -7,7 +7,6 @@ import Wallet from "../../models/walletSchema.js";
 import Coupon from "../../models/couponSchema.js";
 import ReferralSettings from "../../models/referralSettingsSchema.js";
 import calculateBestOffer from "../../helpers/offerCalculator.js";
-import crypto from "crypto";
 import logger from "../../utils/logger.js";
 import HTTP_STATUS from "../../utils/httpStatus.js";
 import RESPONSE_MESSAGES from "../../utils/responseMessages.js";

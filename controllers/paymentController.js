@@ -2,7 +2,6 @@ import razorpay from "../config/razorpay.js";
 import Order from "../models/orderSchema.js";
 import Product from "../models/productSchema.js";
 import Cart from "../models/cartSchema.js";
-import Wallet from "../models/walletSchema.js";
 import crypto from "crypto";
 import logger from "../utils/logger.js";
 import HTTP_STATUS from "../utils/httpStatus.js";

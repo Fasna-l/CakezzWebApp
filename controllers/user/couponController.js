@@ -1,5 +1,4 @@
 import Coupon from "../../models/couponSchema.js";
-import Cart from "../../models/cartSchema.js";
 import HTTP_STATUS from "../../utils/httpStatus.js";
 import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 

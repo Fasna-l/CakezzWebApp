@@ -1,7 +1,5 @@
 import User from "../../models/userSchema.js";
 import Order from "../../models/orderSchema.js";
-import Product from "../../models/productSchema.js";
-import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import { authLogger } from "../../utils/logger.js";
 
