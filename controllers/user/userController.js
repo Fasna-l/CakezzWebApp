@@ -14,6 +14,7 @@ import Otp from "../../models/otpSchema.js";
 import Wallet from "../../models/walletSchema.js";
 import Wishlist from "../../models/wishlistSchema.js";
 import ReferralSettings from "../../models/referralSettingsSchema.js";
+import Banner from "../../models/bannerSchema.js";
 import Coupon from "../../models/couponSchema.js"; // moved from inside function
 import { authLogger } from "../../utils/logger.js";
 
@@ -145,12 +146,16 @@ const loadHomepage = async (req, res, next) => {
         : [];
     }
 
+    // Get banners
+    const banners = await Banner.find().sort({ createdAt: -1 });
+
     return res.render("home", {
       user: userData,
       latestProducts,
       bestProducts,
       cartCount,
-      wishlistProductIds
+      wishlistProductIds,
+      banners
     });
   } catch (error) {
     next(error);
@@ -358,6 +363,22 @@ const logout = async (req,res,next) =>{
   }
 }
 
+const loadContact = async (req,res)=>{
+    try{
+        res.render("contact")
+    }catch(error){
+        next(error)
+    }
+}
+
+const loadAbout = async (req,res,next)=>{
+  try{
+      res.render("about")
+  }catch(error){
+      next(error)
+  }
+}
+
 export default {
   loadHomepage,
   pageNotFound,
@@ -369,4 +390,6 @@ export default {
   loadLogin,
   login,
   logout,
+  loadContact,
+  loadAbout
 };

@@ -1,0 +1,118 @@
+.about-container{
+    width:90%;
+    max-width:1200px;
+    margin:100px auto;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* MAIN CONTAINER */
+
+.about-container{
+    width:90%;
+    max-width:1200px;
+    margin:100px auto;
+}
+
+/* HERO SECTION */
+
+.about-hero{
+    text-align:center;
+    margin-bottom:60px;
+}
+
+.about-hero h1{
+    font-family:'Playfair Display', serif;
+    font-size:42px;
+    font-weight:700;
+    letter-spacing:1px;
+}
+
+.about-hero p{
+    color:#777;
+    margin-top:10px;
+    font-size:18px;
+}
+
+/* STORY SECTION */
+
+.about-section{
+    display:flex;
+    gap:40px;
+    align-items:center;
+    margin-bottom:60px;
+    flex-wrap:wrap;
+}
+
+.about-text{
+    flex:1;
+}
+
+.about-text h2{
+    font-family:'Playfair Display', serif;
+    font-size:30px;
+    margin-bottom:15px;
+}
+
+.about-text p{
+    color:#555;
+    line-height:1.8;
+    margin-bottom:15px;
+    font-size:16px;
+}
+
+/* IMAGE */
+
+.about-image{
+    flex:1;
+}
+
+.about-image img{
+    width:100%;
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* FEATURES SECTION */
+
+.about-features{
+    display:flex;
+    gap:30px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+
+.feature-card{
+    width:300px;
+    text-align:center;
+    padding:30px;
+    background:#fff;
+    border-radius:15px;
+    border:2px solid rgb(182,180,180);
+    box-shadow:0 6px 20px rgba(0,0,0,0.1);
+    transition:all .3s ease;
+}
+
+.feature-card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 12px 25px rgba(0,0,0,0.15);
+}
+
+/* ICON */
+
+.feature-card i{
+    font-size:40px;
+    color:#eb579e;
+    margin-bottom:15px;
+}
+
+/* TEXT */
+
+.feature-card h3{
+    font-family:'Playfair Display', serif;
+    margin-bottom:10px;
+}
+
+.feature-card p{
+    color:#666;
+    font-size:15px;
+}

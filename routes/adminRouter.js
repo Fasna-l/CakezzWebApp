@@ -10,6 +10,7 @@ import offerController from "../controllers/admin/offerController.js";
 import categoryOfferController from "../controllers/admin/categoryOfferController.js";
 import salesReportController from "../controllers/admin/salesReportController.js";
 import referralController from "../controllers/admin/referralController.js";
+import bannerController from "../controllers/admin/bannerController.js";
 
 import { userAuth, adminAuth } from "../middlewares/auth.js";
 import multer from "multer";
@@ -94,5 +95,23 @@ router.get("/sales-report/excel", adminAuth, salesReportController.exportSalesRe
 //referralpage
 router.get("/referrals", adminAuth, referralController.loadReferralPage);
 router.post("/referral-settings",adminAuth, referralController.updateReferralSettings);
+
+//banner image
+// Banner Management
+
+router.get("/banners", adminAuth, bannerController.loadBannerPage);
+
+router.post(
+  "/banners/add",
+  adminAuth,
+  uploads.single("bannerImage"),
+  bannerController.addBanner
+);
+
+router.delete(
+  "/banners/delete/:id",
+  adminAuth,
+  bannerController.deleteBanner
+);
 
 export default router;

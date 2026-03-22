@@ -10,13 +10,50 @@
 
 <!-- Hero Section-->
 <section class="hero-section">
+
+  <% if(banners && banners.length > 0){ %>
+
+  <div class="swiper bannerSwiper">
+    <div class="swiper-wrapper">
+
+      <% banners.forEach(banner => { %>
+
+        <div class="swiper-slide">
+          <a href="/shop">
+            <img 
+              src="/uploads/banner/<%= banner.bannerImage %>" 
+              class="hero-banner-img"
+            >
+          </a>
+        </div>
+
+      <% }) %>
+
+    </div>
+
+    <div class="swiper-pagination banner-pagination"></div>
+
+  </div>
+
+  <% } else { %>
+
+  <div class="hero-banner-container">
+    <a href="/shop">
+      <img src="/images/banner image.jpg" class="hero-banner-img">
+    </a>
+  </div>
+
+  <% } %>
+
+</section>
+<!-- <section class="hero-section">
   <div class="container">
     <div class="hero-banner-container">
       <img src="/images/banner image.jpg" alt="banner image" class="img-fluid" />
       <button class="hero-shop-now-btn" onclick="window.location.href='/shop'">Shop Now</button>
     </div>
   </div>
-</section>
+</section> -->
 
 <!-- Cakes Section (Latest Products – 1 kg check) -->
 <section class="cakes-section">
@@ -212,5 +249,20 @@
     breakpoints: { 1024: { slidesPerView: 4 }, 768: { slidesPerView: 2 }, 480: { slidesPerView: 1 } }
   });
 </script>
+<script>
+var bannerSwiper = new Swiper(".bannerSwiper", {
+  loop: true,
+  speed: 800,
 
+  autoplay: {
+    delay: 4000,   // 4 seconds
+    disableOnInteraction: false
+  },
+
+  pagination: {
+    el: ".banner-pagination",
+    clickable: true
+  }
+});
+</script>
 <%- include('../partials/user/footer') %>
