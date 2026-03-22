@@ -156,21 +156,21 @@ placeOrderForm.addEventListener("submit", async function (e) {
     body: JSON.stringify({ selectedPayment: paymentMethod })
   });
 
-  // HANDLE BACKEND REDIRECTS (COD + WALLET FULL PAYMENT)
+  // HANDLE REDIRECT (COD SUCCESS / WALLET SUCCESS)
   if (response.redirected) {
     window.location.href = response.url;
     return;
   }
 
+  const data = await response.json();
 
-  // COD FLOW → redirect
-  if (paymentMethod === "COD") {
-    window.location.href = response.url;
+  // COD LIMIT ERROR
+  if (data.success === false) {
+    showToast(data.message, "error");
     return;
   }
 
   // ONLINE PAYMENT FLOW
-  const data = await response.json();
   if (!data.online) return;
 
   // Create Razorpay order
@@ -269,6 +269,5 @@ removeBtn.addEventListener("click", async () => {
   applyBtn.style.display = "none";
 </script>
 <% } %>
-
 
 <%- include('../partials/user/footer') %>

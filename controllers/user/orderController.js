@@ -168,16 +168,6 @@ const cancelOrder = async (req, res, next) => {
 
       order.markModified("items");
       recalculateOrderTotals(order);
-
-      // item.status = "Cancelled";
-      // item.cancellationReason = reason || "No reason provided";
-      // item.cancelledAt = new Date();
-
-      // item.refundAmount = refundAmount;
-      // item.refundStatus = "Processed";
-      // // Required because items is nested
-      // order.markModified("items");
-
       // Check if ALL items are cancelled
       const allCancelled = order.items.every(it => it.status === "Cancelled");
 
