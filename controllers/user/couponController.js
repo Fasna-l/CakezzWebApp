@@ -13,9 +13,9 @@ const getAvailableCoupons = async (req, res, next) => {
       startDate: { $lte: now },
       expiryDate: { $gte: now },
       $or: [
-    { assignedUser: null },      // global coupons
-    { assignedUser: userId }     // referral coupons
-  ]
+        { assignedUser: null },      // global coupons
+        { assignedUser: userId }     // referral coupons
+      ]
     }).select("code description discountValue minPurchaseAmount maxDiscountAmount");
     res.status(HTTP_STATUS.OK).json({
       success: true,
@@ -115,16 +115,16 @@ const applyCoupon = async (req, res, next) => {
     }
     // === Discount Calculation ===
     let discount = 0;
-    if(coupon.discountType === "percentage"){
+    if (coupon.discountType === "percentage") {
       discount = Math.floor((subTotal * coupon.discountValue) / 100);
 
       // Apply max discount cap (if exists)
       if (coupon.maxDiscountAmount !== null) {
         discount = Math.min(discount, coupon.maxDiscountAmount);
       }
-    }else if(coupon.discountType === "flat"){
+    } else if (coupon.discountType === "flat") {
       discount = coupon.discountValue
-    }  
+    }
     // Prevent negative or beyond subtotal
     discount = Math.min(discount, subTotal);
 

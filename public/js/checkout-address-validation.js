@@ -69,13 +69,13 @@ document.addEventListener('DOMContentLoaded', function () {
       });
 
     } else {
-        Swal.fire({
+      Swal.fire({
         icon: "error",
         title: "Something went wrong",
         text: result.message || "Failed to add address.",
       });
     }
 
-    });
-
   });
+
+});

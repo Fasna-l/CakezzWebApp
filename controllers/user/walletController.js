@@ -15,7 +15,7 @@ const loadWallet = async (req, res, next) => {
 
     const user = await User.findById(userId);
 
-    res.render("wallet", { wallet,user });
+    res.render("wallet", { wallet, user });
   } catch (error) {
     next(error);
   }
@@ -48,13 +48,13 @@ const loadWalletHistory = async (req, res, next) => {
       skip,
       skip + limit
     );
-    
-    res.render("wallet-history", { 
-        wallet,
-        user,
-        transactions: paginatedTransactions,
-        currentPage: page,
-        totalPages
+
+    res.render("wallet-history", {
+      wallet,
+      user,
+      transactions: paginatedTransactions,
+      currentPage: page,
+      totalPages
     });
   } catch (error) {
     next(error);

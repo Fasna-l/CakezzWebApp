@@ -141,7 +141,7 @@
   transition: all 0.3s ease;
   text-decoration: none;
   display: inline-block;
-  border:1px solid gray;
+  border: 1px solid gray;
 }
 
 .edit-btn {
@@ -172,8 +172,8 @@
 /* Add Address Form Section */
 .add-address-section {
   flex: 0.55;
-  border:2px solid rgb(206, 205, 205);
-  padding:5px 5px 5px 5px;
+  border: 2px solid rgb(206, 205, 205);
+  padding: 5px 5px 5px 5px;
   border-radius: 15px;
   background-color: rgb(255, 248, 249);
 }
@@ -267,11 +267,11 @@
   transform: translateY(0);
 }
 
-.cancel-btn{
+.cancel-btn {
   border-radius: 8px;
   background-color: white;
-  border:2px solid gray;
-  padding:2px 2px 2px 2px;
+  border: 2px solid gray;
+  padding: 2px 2px 2px 2px;
 }
 
 /* address select area */
@@ -400,13 +400,15 @@
   color: #444;
 }
 
-input, select {
+input,
+select {
   width: 100%;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 0.9rem;
 }
+
 .form-group select {
   padding: 12px 16px;
   border: 2px solid #e0e0e0;
@@ -415,7 +417,8 @@ input, select {
   color: #333;
   transition: all 0.3s ease;
   background-color: #f9f9f9;
-  appearance: none; /* Removes default dropdown arrow */
+  appearance: none;
+  /* Removes default dropdown arrow */
   -webkit-appearance: none;
   -moz-appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' fill='%23999' viewBox='0 0 24 24'><path d='M7 10l5 5 5-5z'/></svg>");
@@ -466,15 +469,16 @@ input, select {
   padding: 8px 8px;
   border-radius: 8px;
   cursor: pointer;
-  height:40px;
-  margin-top:10px
+  height: 40px;
+  margin-top: 10px
 }
 
-.error-message{
+.error-message {
   color: #ff4d4d;
   font-size: 0.75rem;
   display: none;
 }
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .address-main-content {

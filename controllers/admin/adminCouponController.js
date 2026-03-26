@@ -66,12 +66,12 @@ const createCoupon = async (req, res, next) => {
       });
     }
 
-    if(discountValue < 1){
+    if (discountValue < 1) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         message: RESPONSE_MESSAGES.INVALID_DISCOUNT_VALUE
       });
     }
-    if(discountType === "percentage" && discountValue >100){
+    if (discountType === "percentage" && discountValue > 100) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         message: RESPONSE_MESSAGES.INVALID_PERCENTAGE
       });
@@ -92,7 +92,7 @@ const createCoupon = async (req, res, next) => {
       maxDiscountAmount: discountType === "percentage" ? maxDiscountAmount || null : null,
       expiryDate,
       usageLimit,
-      perUserLimit:1
+      perUserLimit: 1
     });
 
     logger.info(
@@ -159,7 +159,7 @@ const updateCoupon = async (req, res, next) => {
       description,
       expiryDate,
       usageLimit,
-      perUserLimit:1
+      perUserLimit: 1
     }, { new: true });
 
     logger.info(
@@ -178,7 +178,7 @@ const updateCoupon = async (req, res, next) => {
 const toggleCoupon = async (req, res, next) => {
   try {
     const coupon = await Coupon.findById(req.params.id);
-    if (!coupon) 
+    if (!coupon)
       return res.status(HTTP_STATUS.NOT_FOUND).json({
         success: false,
         message: RESPONSE_MESSAGES.COUPON_NOT_FOUND
@@ -209,7 +209,7 @@ const deleteCoupon = async (req, res, next) => {
         `ADMIN COUPON DELETED | Code: ${deletedCoupon.code}`
       );
     }
-    
+
     res.status(HTTP_STATUS.OK).json({
       success: true,
       message: RESPONSE_MESSAGES.SUCCESS

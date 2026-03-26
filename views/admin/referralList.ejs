@@ -1,175 +1,174 @@
 <%- include('../partials/admin/header') %>
 
-<link rel="stylesheet" href="/css/admin-style/category.css">
+  <link rel="stylesheet" href="/css/admin-style/category.css">
 
-<div class="dashboard-container">
-  <div class="dashboard-wrapper">
+  <div class="dashboard-container">
+    <div class="dashboard-wrapper">
 
-<%- include('../partials/admin/sidebar') %>
+      <%- include('../partials/admin/sidebar') %>
 
-<!-- Main Content -->
-<div class="categories-container">
+        <!-- Main Content -->
+        <div class="categories-container">
 
-  <!-- Page Title -->
-  <div class="page-title">
-    <h2>Referral Tracking</h2>
+          <!-- Page Title -->
+          <div class="page-title">
+            <h2>Referral Tracking</h2>
 
-    <form action="/admin/referral-settings?_method=PATCH" method="POST" class="referral-settings">
-    <!-- <form action="/admin/referral-settings" method="POST" class="referral-settings"> -->
-      <div class="setting-group">
-        <label>Referrer Amount</label>
-        <input 
-          type="number" 
-          name="referrerReward"
-          value="<%= settings.referrerReward %>"
-          min="0"
-          required
-        >
-      </div>
+            <form action="/admin/referral-settings?_method=PATCH" method="POST" class="referral-settings">
+              <!-- <form action="/admin/referral-settings" method="POST" class="referral-settings"> -->
+              <div class="setting-group">
+                <label>Referrer Amount</label>
+                <input type="number" name="referrerReward" value="<%= settings.referrerReward %>" min="0" required>
+              </div>
 
-      <div class="setting-group">
-        <label>Referee Amount</label>
-        <input 
-          type="number"
-          name="refereeReward"
-          value="<%= settings.refereeReward %>"
-          min="0"
-          required
-        >
-      </div>
+              <div class="setting-group">
+                <label>Referee Amount</label>
+                <input type="number" name="refereeReward" value="<%= settings.refereeReward %>" min="0" required>
+              </div>
 
-      <button class="btn-edit-setting" type="submit">Update</button>
+              <button class="btn-edit-setting" type="submit">Update</button>
 
-    </form>
+            </form>
+          </div>
+
+
+          <!-- Table -->
+          <div class="table-wrapper">
+            <table class="categories-table">
+
+              <thead>
+                <tr>
+                  <th>Sl No</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Referral Code</th>
+                  <th>Total Referrals</th>
+                  <th>Total Given</th>
+                  <th>Total Earned</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+
+              <tbody>
+
+                <% if (referrals && referrals.length> 0) { %>
+
+                  <% referrals.forEach((user,index)=>{ %>
+                    <tr>
+
+                      <td>
+                        <%= (currentPage - 1) * 5 + index + 1 %>
+                      </td>
+
+                      <td>
+                        <strong>
+                          <%= user.name %>
+                        </strong>
+                      </td>
+
+                      <td>
+                        <%= user.email %>
+                      </td>
+
+                      <td class="referral-code">
+                        <%= user.referralCode %>
+                      </td>
+
+                      <td>
+                        <span class="referral-count">
+                          <%= user.referredCount %>
+                        </span>
+                      </td>
+
+                      <td>
+                        ₹ <%= user.totalGiven %>
+                      </td>
+
+                      <td>
+                        ₹ <%= user.totalEarned %>
+                      </td>
+
+                      <td>
+                        <%= user.createdOn %>
+                      </td>
+
+                    </tr>
+                    <% }) %>
+
+                      <% } else { %>
+
+                        <tr>
+                          <td colspan="7" style="text-align:center;">
+                            No referral data found
+                          </td>
+                        </tr>
+
+                        <% } %>
+
+              </tbody>
+
+            </table>
+          </div>
+
+
+          <!-- Pagination -->
+          <div class="pagination-container">
+
+            <% if (currentPage> 1) { %>
+              <a href="/admin/referrals?page=<%= currentPage - 1 %>" class="pagination-link prev">« Prev</a>
+              <% } else { %>
+                <span class="pagination-link disabled">« Prev</span>
+                <% } %>
+
+                  <% const startPage=Math.max(1, currentPage - 2); const endPage=Math.min(totalPages, currentPage + 2);
+                    %>
+
+                    <% if (startPage> 1) { %>
+                      <a href="/admin/referrals?page=1" class="pagination-link">1</a>
+                      <% if (startPage> 2) { %>
+                        <span class="pagination-link disabled">...</span>
+                        <% } %>
+                          <% } %>
+
+                            <% for (let i=startPage; i <=endPage; i++) { %>
+
+                              <% if (i===currentPage) { %>
+                                <span class="pagination-link current">
+                                  <%= i %>
+                                </span>
+                                <% } else { %>
+                                  <a href="/admin/referrals?page=<%= i %>" class="pagination-link">
+                                    <%= i %>
+                                  </a>
+                                  <% } %>
+
+                                    <% } %>
+
+                                      <% if (endPage < totalPages) { %>
+                                        <% if (endPage < totalPages - 1) { %>
+                                          <span class="pagination-link disabled">...</span>
+                                          <% } %>
+                                            <a href="/admin/referrals?page=<%= totalPages %>" class="pagination-link">
+                                              <%= totalPages %>
+                                            </a>
+                                            <% } %>
+
+                                              <% if (currentPage < totalPages) { %>
+                                                <a href="/admin/referrals?page=<%= currentPage + 1 %>"
+                                                  class="pagination-link next">Next »</a>
+                                                <% } else { %>
+                                                  <span class="pagination-link disabled">Next »</span>
+                                                  <% } %>
+
+          </div>
+
+          <p style="text-align:center;color:#aaa;font-size:13px;margin-top:8px;">
+            Page <%= currentPage %> of <%= totalPages %>
+          </p>
+
+        </div>
+
+    </div>
   </div>
 
-
-  <!-- Table -->
-  <div class="table-wrapper">
-    <table class="categories-table">
-
-      <thead>
-        <tr>
-          <th>Sl No</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Referral Code</th>
-          <th>Total Referrals</th>
-          <th>Total Given</th>
-          <th>Total Earned</th>
-          <th>Joined</th>
-        </tr>
-      </thead>
-
-      <tbody>
-
-      <% if (referrals && referrals.length > 0) { %>
-
-        <% referrals.forEach((user,index)=>{ %>
-        <tr>
-
-          <td><%= (currentPage - 1) * 5 + index + 1 %></td>
-
-          <td>
-            <strong><%= user.name %></strong>
-          </td>
-
-          <td><%= user.email %></td>
-
-          <td class="referral-code">
-            <%= user.referralCode %>
-          </td>
-
-          <td>
-            <span class="referral-count">
-                <%= user.referredCount %>
-            </span>
-          </td>
-
-          <td>
-            ₹ <%= user.totalGiven %>
-          </td>
-
-          <td>
-            ₹ <%= user.totalEarned %>
-          </td>
-
-          <td>
-            <%= user.createdOn %>
-          </td>
-
-        </tr>
-        <% }) %>
-
-      <% } else { %>
-
-        <tr>
-          <td colspan="7" style="text-align:center;">
-            No referral data found
-          </td>
-        </tr>
-
-      <% } %>
-
-      </tbody>
-
-    </table>
-  </div>
-
-
-  <!-- Pagination -->
-  <div class="pagination-container">
-
-    <% if (currentPage > 1) { %>
-      <a href="/admin/referrals?page=<%= currentPage - 1 %>" class="pagination-link prev">« Prev</a>
-    <% } else { %>
-      <span class="pagination-link disabled">« Prev</span>
-    <% } %>
-
-    <% 
-    const startPage = Math.max(1, currentPage - 2);
-    const endPage = Math.min(totalPages, currentPage + 2);
-    %>
-
-    <% if (startPage > 1) { %>
-      <a href="/admin/referrals?page=1" class="pagination-link">1</a>
-      <% if (startPage > 2) { %>
-        <span class="pagination-link disabled">...</span>
-      <% } %>
-    <% } %>
-
-    <% for (let i = startPage; i <= endPage; i++) { %>
-
-      <% if (i === currentPage) { %>
-        <span class="pagination-link current"><%= i %></span>
-      <% } else { %>
-        <a href="/admin/referrals?page=<%= i %>" class="pagination-link"><%= i %></a>
-      <% } %>
-
-    <% } %>
-
-    <% if (endPage < totalPages) { %>
-      <% if (endPage < totalPages - 1) { %>
-        <span class="pagination-link disabled">...</span>
-      <% } %>
-      <a href="/admin/referrals?page=<%= totalPages %>" class="pagination-link"><%= totalPages %></a>
-    <% } %>
-
-    <% if (currentPage < totalPages) { %>
-      <a href="/admin/referrals?page=<%= currentPage + 1 %>" class="pagination-link next">Next »</a>
-    <% } else { %>
-      <span class="pagination-link disabled">Next »</span>
-    <% } %>
-
-  </div>
-
-  <p style="text-align:center;color:#aaa;font-size:13px;margin-top:8px;">
-    Page <%= currentPage %> of <%= totalPages %>
-  </p>
-
-</div>
-
-  </div>
-</div>
-
-<%- include('../partials/admin/footer') %>
+  <%- include('../partials/admin/footer') %>

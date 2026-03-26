@@ -1,155 +1,128 @@
 <%- include('../partials/admin/header') %>
-<link rel="stylesheet" href="/css/admin-style/addCategory.css">
+    <link rel="stylesheet" href="/css/admin-style/addCategory.css">
 
-<div class="dashboard-container">
-    <div class="dashboard-wrapper">
-        <%- include('../partials/admin/sidebar') %>
-        
-        <!-- Main Content -->
-        <div class="add-category-container">
-            <h1 class="page-title">Add Offer</h1>
-            
-            <!-- Add Offer Form Card -->
-            <div class="form-card">
-                <form 
-                    class="add-category-form" 
-                    action="/admin/offer/add" 
-                    method="post" 
-                    onsubmit="return handleFormSubmit(event)" 
-                    novalidate
-                >
-                 <input type="hidden" id="productId" value="<%= productId %>">
-                    <!-- Offer Name -->
-                    <div class="form-group">
-                        <label for="offerName">Offer Name :</label>
-                        <input 
-                            type="text" 
-                            id="offerName" 
-                            name="offerName"
-                            placeholder="Enter offer name"
-                            required
-                        >
-                        <div id="offerName-error" class="error-message"></div>
+    <div class="dashboard-container">
+        <div class="dashboard-wrapper">
+            <%- include('../partials/admin/sidebar') %>
+
+                <!-- Main Content -->
+                <div class="add-category-container">
+                    <h1 class="page-title">Add Offer</h1>
+
+                    <!-- Add Offer Form Card -->
+                    <div class="form-card">
+                        <form class="add-category-form" action="/admin/offer/add" method="post"
+                            onsubmit="return handleFormSubmit(event)" novalidate>
+                            <input type="hidden" id="productId" value="<%= productId %>">
+                            <!-- Offer Name -->
+                            <div class="form-group">
+                                <label for="offerName">Offer Name :</label>
+                                <input type="text" id="offerName" name="offerName" placeholder="Enter offer name"
+                                    required>
+                                <div id="offerName-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Expiry Date -->
+                            <div class="form-group">
+                                <label for="expiryDate">Expiry Date :</label>
+                                <input type="date" id="expiryDate" name="expiryDate" required>
+                                <div id="expiryDate-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Discount -->
+                            <div class="form-group">
+                                <label for="discount">Discount (%) :</label>
+                                <input type="number" id="discount" name="discount"
+                                    placeholder="Enter discount percentage" min="1" max="90" required>
+                                <div id="discount-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="form-group">
+                                <label for="description">Description :</label>
+                                <input type="text" id="description" name="description" placeholder="Enter description">
+                                <div id="description-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Save Button -->
+                            <button type="submit" class="btn-add">Save</button>
+                        </form>
                     </div>
-
-                    <!-- Expiry Date -->
-                    <div class="form-group">
-                        <label for="expiryDate">Expiry Date :</label>
-                        <input 
-                            type="date" 
-                            id="expiryDate" 
-                            name="expiryDate"
-                            required
-                        >
-                        <div id="expiryDate-error" class="error-message"></div>
-                    </div>
-
-                    <!-- Discount -->
-                    <div class="form-group">
-                        <label for="discount">Discount (%) :</label>
-                        <input 
-                            type="number" 
-                            id="discount" 
-                            name="discount"
-                            placeholder="Enter discount percentage"
-                            min="1"
-                            max="90"
-                            required
-                        >
-                        <div id="discount-error" class="error-message"></div>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="form-group">
-                        <label for="description">Description :</label>
-                        <input 
-                            type="text" 
-                            id="description" 
-                            name="description"
-                            placeholder="Enter description"
-                        >
-                        <div id="description-error" class="error-message"></div>
-                    </div>
-
-                    <!-- Save Button -->
-                    <button type="submit" class="btn-add">Save</button>
-                </form>
-            </div>
+                </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
-<script>
-    function handleFormSubmit(event) {
-        event.preventDefault();
-        if (!validateForm()) return;
+    <script>
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            if (!validateForm()) return;
 
-        const data = {
-            offerName: document.getElementById("offerName").value,
-            expiryDate: document.getElementById("expiryDate").value,
-            discount: document.getElementById("discount").value,
-            description: document.getElementById("description").value,
-            productId: document.getElementById("productId").value
-        };
+            const data = {
+                offerName: document.getElementById("offerName").value,
+                expiryDate: document.getElementById("expiryDate").value,
+                discount: document.getElementById("discount").value,
+                description: document.getElementById("description").value,
+                productId: document.getElementById("productId").value
+            };
 
-        fetch("/admin/offer/add", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        })
-        .then(res => res.json())
-        .then(() => {
-            Swal.fire({
-                icon: "success",
-                title: "Offer Added!",
-                timer: 1500,
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = "/admin/products";
+            fetch("/admin/offer/add", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            })
+                .then(res => res.json())
+                .then(() => {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Offer Added!",
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = "/admin/products";
+                    });
+                })
+                .catch(() => {
+                    Swal.fire("Error", "Failed to add offer", "error");
+                });
+        }
+
+        function validateForm() {
+            clearErrors();
+            let valid = true;
+
+            if (!offerName.value.trim()) {
+                showError("offerName-error", "Offer name required");
+                valid = false;
+            }
+
+            if (!expiryDate.value) {
+                showError("expiryDate-error", "Expiry date required");
+                valid = false;
+            }
+
+            if (discount.value < 1 || discount.value > 90) {
+                showError("discount-error", "Discount must be 1–90%");
+                valid = false;
+            }
+
+            return valid;
+        }
+
+        function showError(id, msg) {
+            const el = document.getElementById(id);
+            el.innerText = msg;
+            el.style.display = "block";
+        }
+
+        function clearErrors() {
+            document.querySelectorAll(".error-message").forEach(e => {
+                e.innerText = "";
+                e.style.display = "none";
             });
-        })
-        .catch(() => {
-            Swal.fire("Error", "Failed to add offer", "error");
-        });
-    }
-
-    function validateForm() {
-        clearErrors();
-        let valid = true;
-
-        if (!offerName.value.trim()) {
-            showError("offerName-error", "Offer name required");
-            valid = false;
         }
+    </script>
 
-        if (!expiryDate.value) {
-            showError("expiryDate-error", "Expiry date required");
-            valid = false;
-        }
-
-        if (discount.value < 1 || discount.value > 90) {
-            showError("discount-error", "Discount must be 1–90%");
-            valid = false;
-        }
-
-        return valid;
-    }
-
-    function showError(id, msg) {
-        const el = document.getElementById(id);
-        el.innerText = msg;
-        el.style.display = "block";
-    }
-
-    function clearErrors() {
-        document.querySelectorAll(".error-message").forEach(e => {
-            e.innerText = "";
-            e.style.display = "none";
-        });
-    }
-</script>
-
-<%- include('../partials/admin/footer') %>
+    <%- include('../partials/admin/footer') %>

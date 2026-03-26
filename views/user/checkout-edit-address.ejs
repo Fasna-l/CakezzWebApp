@@ -1,142 +1,145 @@
 <%- include('../partials/user/header') %>
-<link rel="stylesheet" href="/css/user-style/checkout-edit-address.css">
+  <link rel="stylesheet" href="/css/user-style/checkout-edit-address.css">
 
-<div class="page-wrap">
-  <div class="container checkout-edit-page">
+  <div class="page-wrap">
+    <div class="container checkout-edit-page">
 
-    <h1 class="page-title">Checkout</h1>
+      <h1 class="page-title">Checkout</h1>
 
-    <div class="checkout-grid">
+      <div class="checkout-grid">
 
-      <!-- LEFT: Edit Address Form -->
-      <section class="card address-form-card">
-        <h2 class="card-title">Edit Address</h2>
+        <!-- LEFT: Edit Address Form -->
+        <section class="card address-form-card">
+          <h2 class="card-title">Edit Address</h2>
 
-        <form id="editAddressForm" method="POST" action="/checkout/address/<%= address._id %>" novalidate>
+          <form id="editAddressForm" method="POST" action="/checkout/address/<%= address._id %>" novalidate>
 
-          <!-- Phone -->
-          <div class="form-group">
-            <label>Phone</label>
-            <input type="tel" name="phone" id="phone" value="<%= address.phone %>" required>
-            <span class="error-message" id="phoneError"></span>
-          </div>
-
-          <!-- Street -->
-          <div class="form-group">
-            <label>Street Address</label>
-            <input type="text" name="streetAddress" id="streetAddress" value="<%= address.streetAddress %>" required>
-            <span class="error-message" id="streetAddressError"></span>
-          </div>
-
-          <!-- City & District -->
-          <div class="form-row">
+            <!-- Phone -->
             <div class="form-group">
-              <label>City</label>
-              <input type="text" name="city" id="city" value="<%= address.city %>" required>
-              <span class="error-message" id="cityError"></span>
+              <label>Phone</label>
+              <input type="tel" name="phone" id="phone" value="<%= address.phone %>" required>
+              <span class="error-message" id="phoneError"></span>
             </div>
 
+            <!-- Street -->
             <div class="form-group">
-              <label>District</label>
-              <select name="district" id="district" required>
-                <option value="">Select District</option>
-                <% const d = address.district?.toLowerCase(); %>
-
-                <% [
-                  "Thiruvananthapuram","Kollam","Pathanamthitta","Alappuzha",
-                  "Kottayam","Idukki","Ernakulam","Thrissur","Palakkad",
-                  "Malappuram","Kozhikode","Wayanad","Kannur","Kasaragod"
-                ].forEach(dist => { %>
-
-                  <option value="<%= dist %>" <%= d === dist.toLowerCase() ? "selected" : "" %>>
-                    <%= dist %>
-                  </option>
-
-                <% }) %>
-              </select>
-              <span class="error-message" id="districtError"></span>
-            </div>
-          </div>
-
-          <!-- Pincode & State -->
-          <div class="form-row">
-            <div class="form-group">
-              <label>Pincode</label>
-              <input type="text" name="pincode" id="pincode" value="<%= address.pincode %>" required>
-              <span class="error-message" id="pincodeError"></span>
+              <label>Street Address</label>
+              <input type="text" name="streetAddress" id="streetAddress" value="<%= address.streetAddress %>" required>
+              <span class="error-message" id="streetAddressError"></span>
             </div>
 
-            <div class="form-group">
-              <label>State</label>
-              <input type="text" name="state" id="state" value="<%= address.state %>" required>
-              <span class="error-message" id="stateError"></span>
-            </div>
-          </div>
-
-          <!-- Landmark -->
-          <div class="form-group">
-            <label>Landmark (Optional)</label>
-            <input type="text" name="landmark" id="landmark" value="<%= address.landmark %>">
-            <span class="error-message" id="landmarkError"></span>
-          </div>
-
-          <!-- Address Type -->
-          <div class="form-group">
-            <label>Address Type</label>
-            <select name="addressType" id="addressType">
-              <option value="Home" <%= address.addressType === 'Home' ? 'selected' : '' %>>Home</option>
-              <option value="Work" <%= address.addressType === 'Work' ? 'selected' : '' %>>Work</option>
-              <option value="Other" <%= address.addressType === 'Other' ? 'selected' : '' %>>Other</option>
-            </select>
-          </div>
-
-          <!-- Submit -->
-          <button type="submit" class="btn save-btn">Save Address</button>
-          <a href="/checkout" class="btn cancel-btn">Cancel</a>
-        </form>
-      </section>
-
-      <!-- RIGHT: Order Summary -->
-      <aside class="card summary-card">
-        <h2 class="card-title">Your Order</h2>
-
-        <div class="cart-item">
-
-            <% if (checkoutItems && checkoutItems.length > 0) { %>
-
-              <% checkoutItems.forEach(item => { %>
-              <div class="cart-row">
-                <img src="/uploads/product/<%= item.product.image %>" class="cart-thumb">
-                 
-                  <div class="cart-meta">
-                    <div class="cart-name"><%= item.product.name %></div>
-                    <div class="cart-qty">Qty: <%= item.quantity %></div>
-                  </div>
+            <!-- City & District -->
+            <div class="form-row">
+              <div class="form-group">
+                <label>City</label>
+                <input type="text" name="city" id="city" value="<%= address.city %>" required>
+                <span class="error-message" id="cityError"></span>
               </div>
-              <% }) %>
 
-            <% } else { %>
+              <div class="form-group">
+                <label>District</label>
+                <select name="district" id="district" required>
+                  <option value="">Select District</option>
+                  <% const d=address.district?.toLowerCase(); %>
 
-            <p class="empty-msg">Your cart is empty.</p>
+                    <% [ "Thiruvananthapuram" ,"Kollam","Pathanamthitta","Alappuzha", "Kottayam"
+                      ,"Idukki","Ernakulam","Thrissur","Palakkad", "Malappuram"
+                      ,"Kozhikode","Wayanad","Kannur","Kasaragod" ].forEach(dist=> { %>
 
-            <% } %>
+                      <option value="<%= dist %>" <%=d===dist.toLowerCase() ? "selected" : "" %>>
+                        <%= dist %>
+                      </option>
 
-        </div>
+                      <% }) %>
+                </select>
+                <span class="error-message" id="districtError"></span>
+              </div>
+            </div>
+
+            <!-- Pincode & State -->
+            <div class="form-row">
+              <div class="form-group">
+                <label>Pincode</label>
+                <input type="text" name="pincode" id="pincode" value="<%= address.pincode %>" required>
+                <span class="error-message" id="pincodeError"></span>
+              </div>
+
+              <div class="form-group">
+                <label>State</label>
+                <input type="text" name="state" id="state" value="<%= address.state %>" required>
+                <span class="error-message" id="stateError"></span>
+              </div>
+            </div>
+
+            <!-- Landmark -->
+            <div class="form-group">
+              <label>Landmark (Optional)</label>
+              <input type="text" name="landmark" id="landmark" value="<%= address.landmark %>">
+              <span class="error-message" id="landmarkError"></span>
+            </div>
+
+            <!-- Address Type -->
+            <div class="form-group">
+              <label>Address Type</label>
+              <select name="addressType" id="addressType">
+                <option value="Home" <%=address.addressType==='Home' ? 'selected' : '' %>>Home</option>
+                <option value="Work" <%=address.addressType==='Work' ? 'selected' : '' %>>Work</option>
+                <option value="Other" <%=address.addressType==='Other' ? 'selected' : '' %>>Other</option>
+              </select>
+            </div>
+
+            <!-- Submit -->
+            <button type="submit" class="btn save-btn">Save Address</button>
+            <a href="/checkout" class="btn cancel-btn">Cancel</a>
+          </form>
+        </section>
+
+        <!-- RIGHT: Order Summary -->
+        <aside class="card summary-card">
+          <h2 class="card-title">Your Order</h2>
+
+          <div class="cart-item">
+
+            <% if (checkoutItems && checkoutItems.length> 0) { %>
+
+              <% checkoutItems.forEach(item=> { %>
+                <div class="cart-row">
+                  <img src="/uploads/product/<%= item.product.image %>" class="cart-thumb">
+
+                  <div class="cart-meta">
+                    <div class="cart-name">
+                      <%= item.product.name %>
+                    </div>
+                    <div class="cart-qty">Qty: <%= item.quantity %>
+                    </div>
+                  </div>
+                </div>
+                <% }) %>
+
+                  <% } else { %>
+
+                    <p class="empty-msg">Your cart is empty.</p>
+
+                    <% } %>
+
+          </div>
 
 
-        <div class="price-box">
-          <div class="price-row"><span>Subtotal :</span><span>₹<%= totals.subTotal %></span></div>
-          <div class="price-row"><span>Shipping</span><span><%= totals.shipping === 0 ? 'Free' : '₹' + totals.shipping %></span></div>
-          <div class="price-row"><span>Tax:</span><span>₹<%= totals.tax %></span></div>
-          <hr class="price-divider" />
-          <div class="price-row total"><span>Total</span><span>₹<%= totals.grandTotal %></span></div>
-        </div>
-      </aside>
+          <div class="price-box">
+            <div class="price-row"><span>Subtotal :</span><span>₹<%= totals.subTotal %></span></div>
+            <div class="price-row"><span>Shipping</span><span>
+                <%= totals.shipping===0 ? 'Free' : '₹' + totals.shipping %>
+              </span></div>
+            <div class="price-row"><span>Tax:</span><span>₹<%= totals.tax %></span></div>
+            <hr class="price-divider" />
+            <div class="price-row total"><span>Total</span><span>₹<%= totals.grandTotal %></span></div>
+          </div>
+        </aside>
 
+      </div>
     </div>
   </div>
-</div>
 
-<script src="/js/checkout-edit-validate.js"></script>
+  <script src="/js/checkout-edit-validate.js"></script>
 
-<%- include('../partials/user/footer') %>
+  <%- include('../partials/user/footer') %>

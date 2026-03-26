@@ -1,170 +1,164 @@
 <%- include('../partials/admin/header') %>
-<link rel="stylesheet" href="/css/admin-style/addProducts.css">
+  <link rel="stylesheet" href="/css/admin-style/addProducts.css">
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<div class="dashboard-container">
-  <div class="dashboard-wrapper">
+  <div class="dashboard-container">
+    <div class="dashboard-wrapper">
 
-    <%- include('../partials/admin/sidebar') %>
+      <%- include('../partials/admin/sidebar') %>
 
-    <div class="edit-product-container">
+        <div class="edit-product-container">
 
-      <h2 class="page-title">Banner Management</h2>
+          <h2 class="page-title">Banner Management</h2>
 
-      <!-- Upload Banner -->
-      <form id="bannerForm" enctype="multipart/form-data" class="edit-product-form">
+          <!-- Upload Banner -->
+          <form id="bannerForm" enctype="multipart/form-data" class="edit-product-form">
 
-        <div class="form-group">
-          <label>Upload Banner Image</label>
-          <input type="file" name="bannerImage" id="bannerImage" accept="image/*">
-        </div>
+            <div class="form-group">
+              <label>Upload Banner Image</label>
+              <input type="file" name="bannerImage" id="bannerImage" accept="image/*">
+            </div>
 
-        <button type="submit" class="btn-submit">
-          Upload Banner
-        </button>
-
-      </form>
-
-      <hr style="margin:30px 0">
-
-      <!-- Existing Banners -->
-      <h3 class="section-title">Existing Banners</h3>
-
-      <div class="banner-grid">
-
-        <% if(banners.length === 0){ %>
-          <p>No banners added yet.</p>
-        <% } %>
-
-        <% banners.forEach(banner => { %>
-
-          <div class="banner-card">
-
-            <img
-              src="/uploads/banner/<%= banner.bannerImage %>"
-              class="banner-image"
-            >
-
-            <button
-              onclick="deleteBanner('<%= banner._id %>')"
-              class="banner-delete-btn"
-            >
-              ✕
+            <button type="submit" class="btn-submit">
+              Upload Banner
             </button>
+
+          </form>
+
+          <hr style="margin:30px 0">
+
+          <!-- Existing Banners -->
+          <h3 class="section-title">Existing Banners</h3>
+
+          <div class="banner-grid">
+
+            <% if(banners.length===0){ %>
+              <p>No banners added yet.</p>
+              <% } %>
+
+                <% banners.forEach(banner=> { %>
+
+                  <div class="banner-card">
+
+                    <img src="/uploads/banner/<%= banner.bannerImage %>" class="banner-image">
+
+                    <button onclick="deleteBanner('<%= banner._id %>')" class="banner-delete-btn">
+                      ✕
+                    </button>
+
+                  </div>
+
+                  <% }) %>
 
           </div>
 
-        <% }) %>
-
-      </div>
+        </div>
 
     </div>
-
   </div>
-</div>
 
 
-<script>
-document.getElementById("bannerForm").addEventListener("submit", async function(e){
+  <script>
+    document.getElementById("bannerForm").addEventListener("submit", async function (e) {
 
-  e.preventDefault()
+      e.preventDefault()
 
-  const bannerInput = document.getElementById("bannerImage")
-  const bannerCount = JSON.parse(`<%- JSON.stringify(bannerCount) %>`)
+      const bannerInput = document.getElementById("bannerImage")
+      const bannerCount = JSON.parse(`<%- JSON.stringify(bannerCount) %>`)
 
-  if(!bannerInput.files.length){
-    Swal.fire({
-      icon:'error',
-      title:'Error',
-      text:'Please select a banner image'
-    })
-    return
-  }
+      if (!bannerInput.files.length) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Please select a banner image'
+        })
+        return
+      }
 
-  if(bannerCount >= 10){
-    Swal.fire({
-      icon:'warning',
-      title:'Maximum limit reached',
-      text:'You can only upload 10 banners'
-    })
-    return
-  }
+      if (bannerCount >= 10) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Maximum limit reached',
+          text: 'You can only upload 10 banners'
+        })
+        return
+      }
 
-  const formData = new FormData(this)
+      const formData = new FormData(this)
 
-  const res = await fetch("/admin/banners",{
-    method:"POST",
-    body:formData
-  })
+      const res = await fetch("/admin/banners", {
+        method: "POST",
+        body: formData
+      })
 
-  const data = await res.json()
+      const data = await res.json()
 
-  if(data.success){
+      if (data.success) {
 
-    Swal.fire({
-      icon:'success',
-      title:'Banner Added',
-      timer:1200,
-      showConfirmButton:false
-    }).then(()=>{
-      location.reload()
-    })
+        Swal.fire({
+          icon: 'success',
+          title: 'Banner Added',
+          timer: 1200,
+          showConfirmButton: false
+        }).then(() => {
+          location.reload()
+        })
 
-  }else{
+      } else {
 
-    Swal.fire({
-      icon:'error',
-      title:'Error',
-      text:data.message
-    })
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: data.message
+        })
 
-  }
+      }
 
-})
-
-async function deleteBanner(id){
-
-  const confirmDelete = await Swal.fire({
-    title: "Delete this banner?",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    confirmButtonText: "Delete"
-  })
-
-  if(!confirmDelete.isConfirmed) return
-
-  const res = await fetch(`/admin/banners/${id}`,{
-    method:"DELETE"
-  })
-
-  const data = await res.json()
-
-  if(data.success){
-
-    Swal.fire({
-      icon:'success',
-      title:'Banner Deleted',
-      timer:1200,
-      showConfirmButton:false
-    }).then(()=>{
-      location.reload()
     })
 
-  }else{
+    async function deleteBanner(id) {
 
-    Swal.fire({
-      icon:'error',
-      title:'Error',
-      text:data.message
-    })
+      const confirmDelete = await Swal.fire({
+        title: "Delete this banner?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Delete"
+      })
 
-  }
+      if (!confirmDelete.isConfirmed) return
 
-}
+      const res = await fetch(`/admin/banners/${id}`, {
+        method: "DELETE"
+      })
 
-</script>
+      const data = await res.json()
+
+      if (data.success) {
+
+        Swal.fire({
+          icon: 'success',
+          title: 'Banner Deleted',
+          timer: 1200,
+          showConfirmButton: false
+        }).then(() => {
+          location.reload()
+        })
+
+      } else {
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: data.message
+        })
+
+      }
+
+    }
+
+  </script>
 
 
-<%- include('../partials/admin/footer') %>
+  <%- include('../partials/admin/footer') %>

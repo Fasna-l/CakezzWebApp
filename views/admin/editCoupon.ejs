@@ -1,217 +1,214 @@
 <%- include('../partials/admin/header') %>
-<link rel="stylesheet" href="/css/admin-style/addCategory.css">
-<link rel="stylesheet" href="/css/admin-style/couponbutton.css">
+  <link rel="stylesheet" href="/css/admin-style/addCategory.css">
+  <link rel="stylesheet" href="/css/admin-style/couponbutton.css">
 
-<div class="dashboard-container">
-  <div class="dashboard-wrapper">
-    <%- include('../partials/admin/sidebar') %>
+  <div class="dashboard-container">
+    <div class="dashboard-wrapper">
+      <%- include('../partials/admin/sidebar') %>
 
-    <div class="add-category-container">
-      <h1 class="page-title">Edit Coupon</h1>
+        <div class="add-category-container">
+          <h1 class="page-title">Edit Coupon</h1>
 
-      <div class="form-card">
-        <form class="add-category-form" onsubmit="return handleFormSubmit(event)" novalidate>
+          <div class="form-card">
+            <form class="add-category-form" onsubmit="return handleFormSubmit(event)" novalidate>
 
-          <input type="hidden" id="couponId" value="<%= coupon._id %>">
+              <input type="hidden" id="couponId" value="<%= coupon._id %>">
 
-          <div class="form-group">
-            <label>Coupon Name :</label>
-            <input type="text" id="couponName" value="<%= coupon.name %>">
-            <div id="couponName-error" class="error-message"></div>
+              <div class="form-group">
+                <label>Coupon Name :</label>
+                <input type="text" id="couponName" value="<%= coupon.name %>">
+                <div id="couponName-error" class="error-message"></div>
+              </div>
+
+              <div class="form-group">
+                <label>Coupon Code :</label>
+                <input type="text" id="couponCode" value="<%= coupon.code %>" readonly>
+              </div>
+
+              <div class="form-group">
+                <label>Discount Type :</label>
+                <select id="discountType">
+                  <option value="percentage" <%=coupon.discountType==='percentage' ? 'selected' : '' %>>
+                    Percentage (%)
+                  </option>
+                  <option value="flat" <%=coupon.discountType==='flat' ? 'selected' : '' %>>
+                    Flat (₹)
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Discount :</label>
+                <input type="number" id="couponAmount" value="<%= coupon.discountValue %>">
+                <div id="couponAmount-error" class="error-message"></div>
+              </div>
+
+              <div class="form-group" id="maxDiscountGroup">
+                <label>Max Discount :</label>
+                <input type="number" id="maxDiscount" value="<%= coupon.maxDiscountAmount || '' %>">
+              </div>
+
+              <div class="form-group">
+                <label>Min Purchase :</label>
+                <input type="number" id="minPurchase" value="<%= coupon.minPurchaseAmount || 0 %>">
+              </div>
+
+              <div class="form-group">
+                <label>Description :</label>
+                <input type="text" id="description" value="<%= coupon.description %>">
+                <div id="description-error" class="error-message"></div>
+              </div>
+
+              <div class="form-group">
+                <label>Usage Limit :</label>
+                <input type="number" id="usageLimit" value="<%= coupon.usageLimit || '' %>">
+              </div>
+
+              <div class="form-group">
+                <label>Expiry Date :</label>
+                <input type="date" id="expiryDate" value="<%= coupon.expiryDate.toISOString().split('T')[0] %>">
+                <div id="expiryDate-error" class="error-message"></div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn-delete" onclick="deleteCoupon()">Delete</button>
+                <button type="submit" class="btn-update">Update</button>
+              </div>
+
+            </form>
           </div>
-
-          <div class="form-group">
-            <label>Coupon Code :</label>
-            <input type="text" id="couponCode" value="<%= coupon.code %>" readonly>
-          </div>
-
-          <div class="form-group">
-            <label>Discount Type :</label>
-            <select id="discountType">
-              <option value="percentage" <%= coupon.discountType === 'percentage' ? 'selected' : '' %>>
-                Percentage (%)
-              </option>
-              <option value="flat" <%= coupon.discountType === 'flat' ? 'selected' : '' %>>
-                Flat (₹)
-              </option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Discount :</label>
-            <input type="number" id="couponAmount" value="<%= coupon.discountValue %>">
-            <div id="couponAmount-error" class="error-message"></div>
-          </div>
-
-          <div class="form-group" id="maxDiscountGroup">
-            <label>Max Discount :</label>
-            <input type="number" id="maxDiscount" value="<%= coupon.maxDiscountAmount || '' %>">
-          </div>
-
-          <div class="form-group">
-            <label>Min Purchase :</label>
-            <input type="number" id="minPurchase" value="<%= coupon.minPurchaseAmount || 0 %>">
-          </div>
-
-          <div class="form-group">
-            <label>Description :</label>
-            <input type="text" id="description" value="<%= coupon.description %>">
-            <div id="description-error" class="error-message"></div>
-          </div>
-
-          <div class="form-group">
-            <label>Usage Limit :</label>
-            <input type="number" id="usageLimit" value="<%= coupon.usageLimit || '' %>">
-          </div>
-
-          <div class="form-group">
-            <label>Expiry Date :</label>
-            <input
-              type="date"
-              id="expiryDate"
-              value="<%= coupon.expiryDate.toISOString().split('T')[0] %>">
-            <div id="expiryDate-error" class="error-message"></div>
-          </div>
-
-          <div class="form-actions">
-            <button type="button" class="btn-delete" onclick="deleteCoupon()">Delete</button>
-            <button type="submit" class="btn-update">Update</button>
-          </div>
-
-        </form>
-      </div>
+        </div>
     </div>
   </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-const couponId = document.getElementById("couponId");
-const couponName = document.getElementById("couponName");
-const couponAmount = document.getElementById("couponAmount");
-const maxDiscount = document.getElementById("maxDiscount");
-const minPurchase = document.getElementById("minPurchase");
-const description = document.getElementById("description");
-const usageLimit = document.getElementById("usageLimit");
-const expiryDate = document.getElementById("expiryDate");
-const discountType = document.getElementById("discountType");
-const maxDiscountGroup = document.getElementById("maxDiscountGroup");
+  <script>
+    const couponId = document.getElementById("couponId");
+    const couponName = document.getElementById("couponName");
+    const couponAmount = document.getElementById("couponAmount");
+    const maxDiscount = document.getElementById("maxDiscount");
+    const minPurchase = document.getElementById("minPurchase");
+    const description = document.getElementById("description");
+    const usageLimit = document.getElementById("usageLimit");
+    const expiryDate = document.getElementById("expiryDate");
+    const discountType = document.getElementById("discountType");
+    const maxDiscountGroup = document.getElementById("maxDiscountGroup");
 
-function toggleMaxDiscount() {
-  if (discountType.value === "flat") {
-    maxDiscountGroup.style.display = "none";
-    maxDiscount.value = "";
-  } else {
-    maxDiscountGroup.style.display = "flex";
-  }
-}
-
-discountType.addEventListener("change", toggleMaxDiscount);
-window.addEventListener("load", toggleMaxDiscount);
-
-function handleFormSubmit(event) {
-  event.preventDefault();
-  clearErrors();
-
-  const name = couponName.value.trim();
-  const discount = Number(couponAmount.value);
-  const expiry = expiryDate.value;
-
-  let isValid = true;
-
-  if (!name) {
-    show("couponName-error", "Coupon name is required");
-    isValid = false;
-  }
-
-  if (!discount || discount < 1) {
-    show("couponAmount-error", "Invalid discount value");
-    isValid = false;
-  }
-
-  if (discountType.value === "percentage" && discount > 100) {
-    show("couponAmount-error", "Percentage cannot exceed 100");
-    isValid = false;
-  }
-
-  if (!description.value.trim()) {
-    show("description-error", "Description is required");
-    isValid = false;
-  }
-
-  if (!expiry) {
-    show("expiryDate-error", "Expiry date is required");
-    isValid = false;
-  } else if (new Date(expiry) <= new Date()) {
-    show("expiryDate-error", "Expiry date must be in the future");
-    isValid = false;
-  }
-
-  if (!isValid) return;
-
-  const data = {
-    name,
-    discountType: discountType.value,
-    discountValue: discount,
-    maxDiscountAmount: discountType.value === "percentage" ? maxDiscount.value || null : null,
-    minPurchaseAmount: minPurchase.value || 0,
-    description: description.value.trim(),
-    usageLimit: usageLimit.value || null,
-    expiryDate: expiry
-  };
-
-  fetch(`/admin/coupons/${couponId.value}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  })
-  .then(res => {
-    if (!res.ok) throw new Error("Update failed");
-    return res.json();
-  })
-  .then(() => {
-    Swal.fire({
-      icon: "success",
-      title: "Coupon Updated Successfully",
-      timer: 1500,
-      showConfirmButton: false
-    }).then(() => {
-      window.location.href = "/admin/coupons";
-    });
-  })
-  .catch(err => {
-    Swal.fire("Error", err.message, "error");
-  });
-}
-
-function deleteCoupon() {
-  Swal.fire({
-    title: "Delete this coupon?",
-    text: "This action cannot be undone",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33"
-  }).then(result => {
-    if (result.isConfirmed) {
-      fetch(`/admin/coupons/${couponId.value}`, { method: "DELETE" })
-        .then(() => window.location.href = "/admin/coupons");
+    function toggleMaxDiscount() {
+      if (discountType.value === "flat") {
+        maxDiscountGroup.style.display = "none";
+        maxDiscount.value = "";
+      } else {
+        maxDiscountGroup.style.display = "flex";
+      }
     }
-  });
-}
 
-function show(id, message) {
-  const el = document.getElementById(id);
-  el.innerText = message;
-  el.style.display = "block";
-}
+    discountType.addEventListener("change", toggleMaxDiscount);
+    window.addEventListener("load", toggleMaxDiscount);
 
-function clearErrors() {
-  document.querySelectorAll(".error-message").forEach(e => {
-    e.innerText = "";
-    e.style.display = "none";
-  });
-}
-</script>
+    function handleFormSubmit(event) {
+      event.preventDefault();
+      clearErrors();
 
-<%- include('../partials/admin/footer') %>
+      const name = couponName.value.trim();
+      const discount = Number(couponAmount.value);
+      const expiry = expiryDate.value;
+
+      let isValid = true;
+
+      if (!name) {
+        show("couponName-error", "Coupon name is required");
+        isValid = false;
+      }
+
+      if (!discount || discount < 1) {
+        show("couponAmount-error", "Invalid discount value");
+        isValid = false;
+      }
+
+      if (discountType.value === "percentage" && discount > 100) {
+        show("couponAmount-error", "Percentage cannot exceed 100");
+        isValid = false;
+      }
+
+      if (!description.value.trim()) {
+        show("description-error", "Description is required");
+        isValid = false;
+      }
+
+      if (!expiry) {
+        show("expiryDate-error", "Expiry date is required");
+        isValid = false;
+      } else if (new Date(expiry) <= new Date()) {
+        show("expiryDate-error", "Expiry date must be in the future");
+        isValid = false;
+      }
+
+      if (!isValid) return;
+
+      const data = {
+        name,
+        discountType: discountType.value,
+        discountValue: discount,
+        maxDiscountAmount: discountType.value === "percentage" ? maxDiscount.value || null : null,
+        minPurchaseAmount: minPurchase.value || 0,
+        description: description.value.trim(),
+        usageLimit: usageLimit.value || null,
+        expiryDate: expiry
+      };
+
+      fetch(`/admin/coupons/${couponId.value}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+        .then(res => {
+          if (!res.ok) throw new Error("Update failed");
+          return res.json();
+        })
+        .then(() => {
+          Swal.fire({
+            icon: "success",
+            title: "Coupon Updated Successfully",
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => {
+            window.location.href = "/admin/coupons";
+          });
+        })
+        .catch(err => {
+          Swal.fire("Error", err.message, "error");
+        });
+    }
+
+    function deleteCoupon() {
+      Swal.fire({
+        title: "Delete this coupon?",
+        text: "This action cannot be undone",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33"
+      }).then(result => {
+        if (result.isConfirmed) {
+          fetch(`/admin/coupons/${couponId.value}`, { method: "DELETE" })
+            .then(() => window.location.href = "/admin/coupons");
+        }
+      });
+    }
+
+    function show(id, message) {
+      const el = document.getElementById(id);
+      el.innerText = message;
+      el.style.display = "block";
+    }
+
+    function clearErrors() {
+      document.querySelectorAll(".error-message").forEach(e => {
+        e.innerText = "";
+        e.style.display = "none";
+      });
+    }
+  </script>
+
+  <%- include('../partials/admin/footer') %>

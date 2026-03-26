@@ -98,7 +98,7 @@ const updateProfile = async (req, res, next) => {
     }
 
     // Handle email change (OTP later)
-    if(!user.isGoogleUser){
+    if (!user.isGoogleUser) {
       if (email !== user.email) {
         req.session.tempProfileData = {
           userId,
@@ -112,7 +112,7 @@ const updateProfile = async (req, res, next) => {
         updateData.email = email;
       }
     }
-    
+
 
     //  Save to database
     await User.findByIdAndUpdate(userId, updateData);
@@ -123,7 +123,7 @@ const updateProfile = async (req, res, next) => {
     next(error);
   }
 };
-  
+
 // ================= EMAIL CHANGE FLOW =================
 // Load Email Change Page
 const loadEmailChangePage = async (req, res, next) => {
@@ -133,7 +133,7 @@ const loadEmailChangePage = async (req, res, next) => {
       return res.redirect("/account");
     }
 
-    res.render("email-change", {user, message: "" });
+    res.render("email-change", { user, message: "" });
   } catch (error) {
     next(error);
   }
@@ -150,7 +150,7 @@ const sendEmailChangeOtp = async (req, res, next) => {
       return res.render("email-change", { user, message: RESPONSE_MESSAGES.GOOGLE_EMAIL_CHANGE_NOT_ALLOWED });
     }
 
-    if (!user) return res.render("email-change", { user:null, message: RESPONSE_MESSAGES.USER_NOT_FOUND });
+    if (!user) return res.render("email-change", { user: null, message: RESPONSE_MESSAGES.USER_NOT_FOUND });
     if (user.email !== oldEmail) {
       return res.render("email-change", { user, message: RESPONSE_MESSAGES.EMAIL_MISMATCH });
     }
@@ -171,7 +171,7 @@ const sendEmailChangeOtp = async (req, res, next) => {
 
     req.session.newEmail = newEmail;
     console.log("Email Change OTP:", otp);
-    res.render("emailChange-otp",{user});
+    res.render("emailChange-otp", { user });
   } catch (error) {
     next(error);
   }
@@ -206,11 +206,11 @@ const verifyEmailChangeOtp = async (req, res, next) => {
     const otpRecord = await Otp.findOne({ email: newEmail });
 
     if (!otpRecord)
-       return res.status(HTTP_STATUS.BAD_REQUEST).json({
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: RESPONSE_MESSAGES.OTP_EXPIRED
       });
-    if (otpRecord.otp !== otp) 
+    if (otpRecord.otp !== otp)
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: RESPONSE_MESSAGES.OTP_INVALID
@@ -255,47 +255,47 @@ const resendEmailChangeOtp = async (req, res, next) => {
   }
 };
 
-const getForgotPassPage = async (req,res,next)=>{
-    try {
-        res.render("forgot-password")
-    } catch (error) {
-      next(error);
-    }
+const getForgotPassPage = async (req, res, next) => {
+  try {
+    res.render("forgot-password")
+  } catch (error) {
+    next(error);
+  }
 }
 
-const forgotEmailValid = async (req,res,next)=>{
-    try {
-        const {email} = req.body;
-        const findUser = await User.findOne({email:email});
-        if(findUser){
-            const otp = generateOtp();
-            const emailSent = await sendVerificationEmail(email,otp,"Your OTP for Password Reset");
-            if(emailSent){
-                // OTP in Database
-                await Otp.deleteOne({email});
-                await Otp.create({email,otp});
+const forgotEmailValid = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const findUser = await User.findOne({ email: email });
+    if (findUser) {
+      const otp = generateOtp();
+      const emailSent = await sendVerificationEmail(email, otp, "Your OTP for Password Reset");
+      if (emailSent) {
+        // OTP in Database
+        await Otp.deleteOne({ email });
+        await Otp.create({ email, otp });
 
-                req.session.email = email  
+        req.session.email = email
 
-                res.render("forgotPass-otp");
-                console.log("OTP:",otp)
-            }else{
-                res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-                  success:false,
-                  message: RESPONSE_MESSAGES.SERVER_ERROR
-                });
-            }
-        }else{
-            res.render("forgot-password",{
-                message:RESPONSE_MESSAGES.USER_NOT_FOUND
-            });
-        }
-    } catch (error) {
-      next(error);
+        res.render("forgotPass-otp");
+        console.log("OTP:", otp)
+      } else {
+        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+          success: false,
+          message: RESPONSE_MESSAGES.SERVER_ERROR
+        });
+      }
+    } else {
+      res.render("forgot-password", {
+        message: RESPONSE_MESSAGES.USER_NOT_FOUND
+      });
     }
+  } catch (error) {
+    next(error);
+  }
 }
 
-const verifyForgotPassOtp = async (req, res,next) => {
+const verifyForgotPassOtp = async (req, res, next) => {
   try {
     const enteredOtp = req.body.otp;
     const email = req.session.email;
@@ -333,65 +333,65 @@ const verifyForgotPassOtp = async (req, res,next) => {
   }
 };
 
-const getResetPassPage = async (req,res,next)=>{
-    try {
-        res.render("reset-password");
-    } catch (error) {
-      next(error);
-    }
+const getResetPassPage = async (req, res, next) => {
+  try {
+    res.render("reset-password");
+  } catch (error) {
+    next(error);
+  }
 }
 
-const resendOtp = async (req,res,next)=>{
-    try {
-        //access email from the session
-        const email = req.session.email;
-        console.log(email)
-        if (!email) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({
-              success: false,
-              message: RESPONSE_MESSAGES.SESSION_EXPIRED
-            });
-        }
-        const otp = generateOtp();
-        // OTP in DB
-        await Otp.deleteOne({email});
-        await Otp.create({email,otp})
-        
-        console.log("Resending OTP to email:",email);
-        const emailSent = await sendVerificationEmail(email,otp,"OTP for Password Reset");
-        if(emailSent){
-            console.log("Resend-OTP:",otp);
-            res.status(HTTP_STATUS.OK).json({
-              success:true,
-              message: RESPONSE_MESSAGES.OTP_RESENT
-            });
-        }
-    } catch (error) {
-      next(error);
+const resendOtp = async (req, res, next) => {
+  try {
+    //access email from the session
+    const email = req.session.email;
+    console.log(email)
+    if (!email) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.SESSION_EXPIRED
+      });
     }
+    const otp = generateOtp();
+    // OTP in DB
+    await Otp.deleteOne({ email });
+    await Otp.create({ email, otp })
+
+    console.log("Resending OTP to email:", email);
+    const emailSent = await sendVerificationEmail(email, otp, "OTP for Password Reset");
+    if (emailSent) {
+      console.log("Resend-OTP:", otp);
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: RESPONSE_MESSAGES.OTP_RESENT
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 }
 
-const postNewPassword = async (req,res,next)=>{
-    try {
-        const {password, confirmPassword} = req.body;
-        const email = req.session.email;
-        if(password === confirmPassword){
-            const passwordHash = await securePassword(password);
-            await User.updateOne(
-                {email:email},
-                {$set:{password:passwordHash}}
-            )
-            res.redirect("/login");
-        }else{
-            res.render("reset-password",{message: RESPONSE_MESSAGES.PASSWORD_MISMATCH})
-        } 
-    } catch (error) {
-      next(error);
+const postNewPassword = async (req, res, next) => {
+  try {
+    const { password, confirmPassword } = req.body;
+    const email = req.session.email;
+    if (password === confirmPassword) {
+      const passwordHash = await securePassword(password);
+      await User.updateOne(
+        { email: email },
+        { $set: { password: passwordHash } }
+      )
+      res.redirect("/login");
+    } else {
+      res.render("reset-password", { message: RESPONSE_MESSAGES.PASSWORD_MISMATCH })
     }
+  } catch (error) {
+    next(error);
+  }
 }
 
 //change Password
-const getChangePasswordPage = async (req, res,next) => {
+const getChangePasswordPage = async (req, res, next) => {
   try {
     const userId = req.session.user; // currently an ID
     const user = await User.findById(userId);
@@ -399,14 +399,14 @@ const getChangePasswordPage = async (req, res,next) => {
     if (!user || user.isGoogleUser) {
       return res.redirect("/account");
     }
-    res.render("password",{user});
+    res.render("password", { user });
   } catch (error) {
     next(error);
   }
 };
 
 const postChangePassword = async (req, res, next) => {
-  try { 
+  try {
     const { oldpassword, newpassword, Confirmpassword } = req.body;
     const userId = req.session.user;
 
@@ -414,7 +414,7 @@ const postChangePassword = async (req, res, next) => {
       return res.redirect("/login");
     }
 
-    const user = await User.findById(userId); 
+    const user = await User.findById(userId);
 
     if (user.isGoogleUser) {
       return res.redirect("/account");
@@ -444,7 +444,7 @@ const postChangePassword = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
-  } 
+  }
 };
 
 export default {

@@ -26,7 +26,7 @@ const addressSchema = new mongoose.Schema({
       },
       district: {
         type: String,
-        required:true
+        required: true
       },
       pincode: {
         type: String,

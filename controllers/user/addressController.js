@@ -30,7 +30,7 @@ const addAddress = async (req, res, next) => {
       addressType,
     } = req.body;
 
-    if ( !phone || !streetAddress || !city || !state || !pincode || !district )
+    if (!phone || !streetAddress || !city || !state || !pincode || !district)
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: RESPONSE_MESSAGES.MISSING_FIELDS
@@ -64,7 +64,7 @@ const loadEditAddress = async (req, res, next) => {
     const addressDoc = await Address.findOne({ user: userId });
     const address = addressDoc.addresses.find((addr) => addr._id.toString() === id);
     if (!address) return res.redirect("/address");
-    res.render("editAddress", { user,address });
+    res.render("editAddress", { user, address });
   } catch (error) {
     next(error);
   }

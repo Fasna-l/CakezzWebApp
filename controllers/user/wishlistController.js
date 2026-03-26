@@ -107,7 +107,7 @@ const toggleWishlist = async (req, res, next) => {
       });
     } else {
       wishlist.items.push({ product: productId, size });
-      
+
       await wishlist.save();
       return res.status(HTTP_STATUS.OK).json({
         success: true,
@@ -124,7 +124,7 @@ const toggleWishlist = async (req, res, next) => {
 const removeFromWishlist = async (req, res, next) => {
   try {
     const userId = req.session.user;
-    const { productId,size } = req.body;
+    const { productId, size } = req.body;
 
     await Wishlist.updateOne(
       { user: userId },
@@ -135,7 +135,7 @@ const removeFromWishlist = async (req, res, next) => {
       success: true,
       message: RESPONSE_MESSAGES.WISHLIST_REMOVED
     });
-  } catch(error) {
+  } catch (error) {
     next(error)
   }
 };

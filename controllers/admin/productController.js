@@ -40,7 +40,7 @@ const productinfo = async (req, res, next) => {
       search
     });
   } catch (error) {
-      next(error);
+    next(error);
   }
 };
 
@@ -115,13 +115,13 @@ const addProduct = async (req, res, next) => {
     //  Format Variants (1kg, 2kg, 3kg)
     const formattedVariants = variants
       ? Object.values(variants).map((v, idx) => ({
-          size: ["1kg", "2kg", "3kg"][idx],
-          stock: Number(v.stock) || 0,
-          price: Number(v.price) || 0
-        }))
+        size: ["1kg", "2kg", "3kg"][idx],
+        stock: Number(v.stock) || 0,
+        price: Number(v.price) || 0
+      }))
       : [];
 
-        const totalStock = formattedVariants.reduce((sum, v) => sum + (v.stock || 0), 0);
+    const totalStock = formattedVariants.reduce((sum, v) => sum + (v.stock || 0), 0);
 
     //  Save Product to MongoDB
     const newProduct = new Product({
@@ -143,56 +143,56 @@ const addProduct = async (req, res, next) => {
     });
 
   } catch (error) {
-      next(error);
+    next(error);
   }
 };
 
-const productBlocked = async (req,res,next)=>{
-    try {
-        let id = req.params.id;
-        await Product.updateOne({_id:id},{$set:{isBlocked:true}});
-        logger.warn(
-          `ADMIN PRODUCT BLOCKED | ProductId: ${id}`
-        );
-        return res.status(HTTP_STATUS.OK).json({
-          success: true,
-          message: RESPONSE_MESSAGES.PRODUCT_BLOCKED
-        });
-    } catch (error) {
-        next(error);
-    }
-}  
-
-const productUnBlocked = async (req,res,next)=>{
-    try {
-        const id = req.params.id;
-        await Product.updateOne({_id:id},{$set:{isBlocked:false}});
-        logger.info(
-          `ADMIN PRODUCT UNBLOCKED | ProductId: ${id}`
-        );
-        return res.status(HTTP_STATUS.OK).json({
-          success: true,
-          message: RESPONSE_MESSAGES.PRODUCT_UNBLOCKED
-        });
-    } catch (error) {
-        next(error);
-    }
+const productBlocked = async (req, res, next) => {
+  try {
+    let id = req.params.id;
+    await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
+    logger.warn(
+      `ADMIN PRODUCT BLOCKED | ProductId: ${id}`
+    );
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.PRODUCT_BLOCKED
+    });
+  } catch (error) {
+    next(error);
+  }
 }
 
-const getEditProduct = async (req,res, next)=>{
-    try {
-        const id = req.query.id;
-        const page = req.query.page || 1;
-        const product = await Product.findOne({_id:id});
-        const category = await Category.find({});
-        res.render("editProduct",{
-            product:product,
-            cat:category,
-            page
-        })
-    } catch (error) {
-      next(error);  
-    }
+const productUnBlocked = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    await Product.updateOne({ _id: id }, { $set: { isBlocked: false } });
+    logger.info(
+      `ADMIN PRODUCT UNBLOCKED | ProductId: ${id}`
+    );
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: RESPONSE_MESSAGES.PRODUCT_UNBLOCKED
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+const getEditProduct = async (req, res, next) => {
+  try {
+    const id = req.query.id;
+    const page = req.query.page || 1;
+    const product = await Product.findOne({ _id: id });
+    const category = await Category.find({});
+    res.render("editProduct", {
+      product: product,
+      cat: category,
+      page
+    })
+  } catch (error) {
+    next(error);
+  }
 }
 
 const editProduct = async (req, res, next) => {
@@ -200,7 +200,7 @@ const editProduct = async (req, res, next) => {
     const productId = req.params.id;
     const page = req.body.page || 1;
     const { productName, description, category, variants, removedImages } = req.body;
-    
+
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(HTTP_STATUS.NOT_FOUND).json({
@@ -219,7 +219,7 @@ const editProduct = async (req, res, next) => {
         const imageName = imgPath.split("/uploads/product/")[1]; // get only filename
         product.productImage = product.productImage.filter(img => img !== imageName);
 
-    });
+      });
     }
 
     // Add new uploaded or cropped images
@@ -241,12 +241,12 @@ const editProduct = async (req, res, next) => {
     product.description = description;
     product.category = category;
     product.variants = variants
-        ? Object.values(variants).map((v, idx) => ({
-            size: ["1kg", "2kg", "3kg"][idx],
-            stock: Number(v.stock) || 0,
-            price: Number(v.price) || 0
-        }))
-    : product.variants;
+      ? Object.values(variants).map((v, idx) => ({
+        size: ["1kg", "2kg", "3kg"][idx],
+        stock: Number(v.stock) || 0,
+        price: Number(v.price) || 0
+      }))
+      : product.variants;
 
     const updatedStock = product.variants.reduce((sum, v) => sum + (v.stock || 0), 0);
     product.status = updatedStock > 0 ? "Available" : "Out_of_stock";

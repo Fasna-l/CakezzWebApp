@@ -1,117 +1,127 @@
 <%- include('../partials/user/header') %>
-<link rel="stylesheet" href="/css/user-style/checkout.css">
+  <link rel="stylesheet" href="/css/user-style/checkout.css">
 
-<div class="page-wrap">
-  <div class="container checkout-page">
+  <div class="page-wrap">
+    <div class="container checkout-page">
 
-    <h1 class="page-title">Checkout</h1>
+      <h1 class="page-title">Checkout</h1>
 
-    <div class="checkout-grid">
-      <!-- LEFT: Address selection -->
-      <section class="card address-card">
-        <h2 class="card-title">Delivery Address</h2>
+      <div class="checkout-grid">
+        <!-- LEFT: Address selection -->
+        <section class="card address-card">
+          <h2 class="card-title">Delivery Address</h2>
 
-        <div class="addresses">
-          <% if (addresses && addresses.length) { %>
-            <% addresses.forEach(function(addr){ %>
-              <label class="address-row">
-                <input
-                  type="radio"
-                  name="selectedAddress"
-                  value="<%= addr._id %>"
-                  <%= addr.isDefault ? 'checked' : '' %>
-                />
-                <div class="addr-body">
-                  <p class="addr-line"><%= addr.streetAddress %></p>
-                  <p class="addr-line"><%= addr.city %>, <%= addr.state %> - <%= addr.pincode %></p>
-                  <% if (addr.landmark) { %><p class="addr-line small">Landmark: <%= addr.landmark %></p><% } %>
-                  <p class="addr-line small">📞 <%= addr.phone %></p>
+          <div class="addresses">
+            <% if (addresses && addresses.length) { %>
+              <% addresses.forEach(function(addr){ %>
+                <label class="address-row">
+                  <input type="radio" name="selectedAddress" value="<%= addr._id %>" <%=addr.isDefault ? 'checked' : ''
+                    %>
+                  />
+                  <div class="addr-body">
+                    <p class="addr-line">
+                      <%= addr.streetAddress %>
+                    </p>
+                    <p class="addr-line">
+                      <%= addr.city %>, <%= addr.state %> - <%= addr.pincode %>
+                    </p>
+                    <% if (addr.landmark) { %>
+                      <p class="addr-line small">Landmark: <%= addr.landmark %>
+                      </p>
+                      <% } %>
+                        <p class="addr-line small">📞 <%= addr.phone %>
+                        </p>
+                  </div>
+
+                  <div class="addr-actions">
+                    <a href="/checkout/address/<%= addr._id %>/edit" class="btn small pink-outline">Edit</a>
+                  </div>
+
+                  <% if (addr.isDefault) { %>
+                    <span class="default-badge">Default</span>
+                    <% } %>
+                </label>
+                <% }) %>
+                  <% } else { %>
+                    <p class="no-address">No saved address found.</p>
+                    <% } %>
+          </div>
+
+          <div class="address-cta">
+            <a href="/checkout/address/new" class="btn pink"> Add Address</a>
+          </div>
+        </section>
+
+        <!-- RIGHT: Order summary -->
+        <aside class="card summary-card">
+          <h2 class="card-title">Your Order</h2>
+
+          <div class="cart-item">
+            <% if (checkoutItems && checkoutItems.length) { %>
+              <% checkoutItems.forEach(function(item){ %>
+                <div class="cart-row">
+                  <img src="/uploads/product/<%= item.product.image %>" class="cart-thumb">
+                  <div class="cart-meta">
+                    <div class="cart-name">
+                      <%= item.product.name %>
+                    </div>
+                    <div class="cart-qty">Qty: <%= item.quantity %>
+                    </div>
+                  </div>
+                  <div class="cart-edit">
+                    <a href="/cart" class="btn small pink-outline">Edit Cart</a>
+                  </div>
                 </div>
+                <% }) %>
+                  <% } else { %>
+                    <p>Your cart is empty.</p>
+                    <% } %>
+          </div>
 
-                <div class="addr-actions">
-                  <a href="/checkout/address/<%= addr._id %>/edit" class="btn small pink-outline">Edit</a>
-                </div>
+          <div class="price-box">
+            <div class="price-row"><span>Subtotal :</span><span>₹<%= totals.subTotal || 0 %></span></div>
+            <div class="price-row"><span>Shipping</span><span>
+                <%= totals.shipping===0 ? 'Free' : '₹' + totals.shipping %>
+              </span></div>
+            <div class="price-row"><span>Tax:</span><span>₹<%= totals.tax || 0 %></span></div>
 
-                <% if (addr.isDefault) { %>
-                  <span class="default-badge">Default</span>
-                <% } %>
-              </label>
-            <% }) %>
-          <% } else { %>
-            <p class="no-address">No saved address found.</p>
-          <% } %>
-        </div>
+            <hr class="price-divider" />
 
-        <div class="address-cta">
-          <a href="/checkout/address/new" class="btn pink"> Add Address</a>
-        </div>
-      </section>
+            <div class="price-row total"><span>Total</span><span>₹<%= totals.grandTotal || 0 %></span></div>
+          </div>
 
-      <!-- RIGHT: Order summary -->
-      <aside class="card summary-card">
-        <h2 class="card-title">Your Order</h2>
-
-        <div class="cart-item">
-          <% if (checkoutItems && checkoutItems.length) { %>
-            <% checkoutItems.forEach(function(item){ %>
-              <div class="cart-row">
-                <img src="/uploads/product/<%= item.product.image %>" class="cart-thumb">
-                <div class="cart-meta">
-                  <div class="cart-name"><%= item.product.name %></div>
-                  <div class="cart-qty">Qty: <%= item.quantity %></div>
-                </div>
-                <div class="cart-edit">
-                  <a href="/cart" class="btn small pink-outline">Edit Cart</a>
-                </div>
-              </div>
-            <% }) %>
-          <% } else { %>
-            <p>Your cart is empty.</p>
-          <% } %>
-        </div>
-
-        <div class="price-box">
-          <div class="price-row"><span>Subtotal :</span><span>₹<%= totals.subTotal || 0 %></span></div>
-          <div class="price-row"><span>Shipping</span><span><%= totals.shipping === 0 ? 'Free' : '₹' + totals.shipping %></span></div>
-          <div class="price-row"><span>Tax:</span><span>₹<%= totals.tax || 0 %></span></div>
-
-          <hr class="price-divider" />
-
-          <div class="price-row total"><span>Total</span><span>₹<%= totals.grandTotal || 0 %></span></div>
-        </div>
-
-        <form id="toPersonalize" action="/checkout/personalize" method="GET">
-          <input type="hidden" name="addressId" id="checkoutAddressId" value="">
-          <button type="submit" class="btn personalize-btn">Personalize</button>
-        </form>
-      </aside>
+          <form id="toPersonalize" action="/checkout/personalize" method="GET">
+            <input type="hidden" name="addressId" id="checkoutAddressId" value="">
+            <button type="submit" class="btn personalize-btn">Personalize</button>
+          </form>
+        </aside>
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-  // -- Set hidden addressId to selected radio value (defaulted)
-  (function(){
-    const radios = document.querySelectorAll("input[name='selectedAddress']");
-    const hidden = document.getElementById('checkoutAddressId');
+  <script>
+    // -- Set hidden addressId to selected radio value (defaulted)
+    (function () {
+      const radios = document.querySelectorAll("input[name='selectedAddress']");
+      const hidden = document.getElementById('checkoutAddressId');
 
-    function setHiddenFromChecked(){
-      const checked = document.querySelector("input[name='selectedAddress']:checked");
-      if(checked) hidden.value = checked.value;
-    }
-    setHiddenFromChecked();
-
-    radios.forEach(r => r.addEventListener('change', setHiddenFromChecked));
-
-    // If no address exists, remove personalization action (prevent submit)
-    document.getElementById('toPersonalize').addEventListener('submit', function(e){
-      const hasAddr = document.querySelector("input[name='selectedAddress']:checked");
-      if(!hasAddr){
-        e.preventDefault();
-        showToast("Please add/select a delivery address before proceeding.", "warning");
+      function setHiddenFromChecked() {
+        const checked = document.querySelector("input[name='selectedAddress']:checked");
+        if (checked) hidden.value = checked.value;
       }
-    });
-  })();
-</script>
+      setHiddenFromChecked();
 
-<%- include('../partials/user/footer') %>
+      radios.forEach(r => r.addEventListener('change', setHiddenFromChecked));
+
+      // If no address exists, remove personalization action (prevent submit)
+      document.getElementById('toPersonalize').addEventListener('submit', function (e) {
+        const hasAddr = document.querySelector("input[name='selectedAddress']:checked");
+        if (!hasAddr) {
+          e.preventDefault();
+          showToast("Please add/select a delivery address before proceeding.", "warning");
+        }
+      });
+    })();
+  </script>
+
+  <%- include('../partials/user/footer') %>

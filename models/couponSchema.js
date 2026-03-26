@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const couponSchema = new mongoose.Schema({
-    name: {
+  name: {
     type: String,
     required: true,
     trim: true
@@ -18,11 +18,11 @@ const couponSchema = new mongoose.Schema({
     required: true,
     trim: true,
     maxlength: 150
- },
+  },
 
   discountType: {
     type: String,
-    enum: ["percentage","flat"],
+    enum: ["percentage", "flat"],
     default: "percentage",
   },
 
@@ -68,10 +68,10 @@ const couponSchema = new mongoose.Schema({
     default: 1,
   },
   assignedUser: {
-  type: mongoose.Schema.Types.ObjectId,
-  ref: "User",
-  default:null
-},
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null
+  },
 
 
   usersUsed: [
@@ -91,7 +91,7 @@ const couponSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
-},{ timestamps: true });
+}, { timestamps: true });
 
 
 const Coupon = mongoose.model("Coupon", couponSchema);

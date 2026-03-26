@@ -1,285 +1,305 @@
 <%- include('../partials/admin/header') %>
-<link rel="stylesheet" href="/css/admin-style/dashboard.css">
+  <link rel="stylesheet" href="/css/admin-style/dashboard.css">
 
-<div class="dashboard-container">
-  <div class="dashboard-wrapper">
+  <div class="dashboard-container">
+    <div class="dashboard-wrapper">
 
-    <!-- Sidebar -->
-    <%- include('../partials/admin/sidebar') %>
+      <!-- Sidebar -->
+      <%- include('../partials/admin/sidebar') %>
 
-    <!-- Main Content -->
-    <main class="dashboard-main">
+        <!-- Main Content -->
+        <main class="dashboard-main">
 
-      <div class="dashboard-header">
-        <h1 class="dashboard-title">Dashboard</h1>
-      </div>
+          <div class="dashboard-header">
+            <h1 class="dashboard-title">Dashboard</h1>
+          </div>
 
-      <!-- =========================
+          <!-- =========================
            STATS CARDS
       ========================== -->
-      <div class="stats-container">
+          <div class="stats-container">
 
-        <!-- Total Users -->
-        <div class="stat-card">
-          <div class="stat-header">
-            <h3 class="stat-label">Total Users</h3>
-            <span class="stat-icon user-icon">👤</span>
+            <!-- Total Users -->
+            <div class="stat-card">
+              <div class="stat-header">
+                <h3 class="stat-label">Total Users</h3>
+                <span class="stat-icon user-icon">👤</span>
+              </div>
+              <div class="stat-value">
+                <%= totalUsers %>
+              </div>
+            </div>
+
+            <!-- Total Orders -->
+            <div class="stat-card">
+              <div class="stat-header">
+                <h3 class="stat-label">Total Orders</h3>
+                <span class="stat-icon order-icon">📦</span>
+              </div>
+              <div class="stat-value">
+                <%= totalOrders %>
+              </div>
+            </div>
+
+            <!-- Total Revenue -->
+            <div class="stat-card">
+              <div class="stat-header">
+                <h3 class="stat-label">Total Order Value</h3>
+                <span class="stat-icon revenue-icon">💰</span>
+              </div>
+              <div class="stat-value">₹<%= totalRevenue %>
+              </div>
+            </div>
+
           </div>
-          <div class="stat-value"><%= totalUsers %></div>
-        </div>
-
-        <!-- Total Orders -->
-        <div class="stat-card">
-          <div class="stat-header">
-            <h3 class="stat-label">Total Orders</h3>
-            <span class="stat-icon order-icon">📦</span>
-          </div>
-          <div class="stat-value"><%= totalOrders %></div>
-        </div>
-
-        <!-- Total Revenue -->
-        <div class="stat-card">
-          <div class="stat-header">
-            <h3 class="stat-label">Total Order Value</h3>
-            <span class="stat-icon revenue-icon">💰</span>
-          </div>
-          <div class="stat-value">₹<%= totalRevenue %></div>
-        </div>
-
-      </div>
 
 
-      <!-- =========================
+          <!-- =========================
            SALES CHART
       ========================== -->
-      <div class="sales-section">
+          <div class="sales-section">
 
-        <div class="sales-header">
-          <h2 class="sales-title">Sales Chart</h2>
+            <div class="sales-header">
+              <h2 class="sales-title">Sales Chart</h2>
 
-          <div class="sales-controls">
-            <button class="sales-btn" onclick="loadChart('daily')">Daily</button>
-            <button class="sales-btn" onclick="loadChart('monthly')">Monthly</button>
-            <button class="sales-btn" onclick="loadChart('yearly')">Yearly</button>
+              <div class="sales-controls">
+                <button class="sales-btn" onclick="loadChart('daily')">Daily</button>
+                <button class="sales-btn" onclick="loadChart('monthly')">Monthly</button>
+                <button class="sales-btn" onclick="loadChart('yearly')">Yearly</button>
+              </div>
+            </div>
+
+            <div class="chart-container">
+              <canvas id="salesChart"></canvas>
+            </div>
+
           </div>
-        </div>
-
-        <div class="chart-container">
-          <canvas id="salesChart"></canvas>
-        </div>
-
-      </div>
 
 
-      <!-- =========================
+          <!-- =========================
            BEST SELLING PRODUCTS
       ========================== -->
-      <div class="orders-section">
+          <div class="orders-section">
 
-        <h2 style="margin-bottom:20px;">Best Selling Products</h2>
+            <h2 style="margin-bottom:20px;">Best Selling Products</h2>
 
-        <table class="orders-table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Total Sold</th>
-            </tr>
-          </thead>
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Total Sold</th>
+                </tr>
+              </thead>
 
-          <tbody>
-            <% bestProducts.forEach(product => { %>
-              <tr>
-                <td><%= product.product.productName %></td>
-                <td><%= product.totalSold %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
+              <tbody>
+                <% bestProducts.forEach(product=> { %>
+                  <tr>
+                    <td>
+                      <%= product.product.productName %>
+                    </td>
+                    <td>
+                      <%= product.totalSold %>
+                    </td>
+                  </tr>
+                  <% }) %>
+              </tbody>
+            </table>
 
-      </div>
+          </div>
 
 
-      <!-- =========================
+          <!-- =========================
            BEST SELLING CATEGORY
       ========================== -->
-      <div class="orders-section">
+          <div class="orders-section">
 
-        <h2 style="margin-bottom:20px;">Best Selling Categories</h2>
+            <h2 style="margin-bottom:20px;">Best Selling Categories</h2>
 
-        <table class="orders-table">
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Total Sold</th>
-            </tr>
-          </thead>
+            <table class="orders-table">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Total Sold</th>
+                </tr>
+              </thead>
 
-          <tbody>
-            <% bestCategories.forEach(cat => { %>
-              <tr>
-                <td><%= cat.category.categoryName %></td>
-                <td><%= cat.totalSold %></td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
+              <tbody>
+                <% bestCategories.forEach(cat=> { %>
+                  <tr>
+                    <td>
+                      <%= cat.category.categoryName %>
+                    </td>
+                    <td>
+                      <%= cat.totalSold %>
+                    </td>
+                  </tr>
+                  <% }) %>
+              </tbody>
+            </table>
 
-      </div>
+          </div>
 
-      <!-- =========================
+          <!-- =========================
         RECENT ORDERS
        ========================== -->
 
-        <div class="orders-section">
+          <div class="orders-section">
 
             <h2 style="margin-bottom:20px;">Recent Orders</h2>
 
             <table class="orders-table">
-                <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>User</th>
-                        <th>Total</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>User</th>
+                  <th>Total</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
 
-                <tbody>
+              <tbody>
 
-                    <% recentOrders.forEach(order => { %>
-                        <tr>
-                            <td><%= order.orderId  %></td>
-                            <td><%= order.userId?.name %></td>
-                            <td>₹<%= order.totalAmount %></td>
-                            <td><%= order.orderDate.toDateString() %></td>
-                        </tr>
-                    <% }) %>
+                <% recentOrders.forEach(order=> { %>
+                  <tr>
+                    <td>
+                      <%= order.orderId %>
+                    </td>
+                    <td>
+                      <%= order.userId?.name %>
+                    </td>
+                    <td>₹<%= order.totalAmount %>
+                    </td>
+                    <td>
+                      <%= order.orderDate.toDateString() %>
+                    </td>
+                  </tr>
+                  <% }) %>
 
-                </tbody>
+              </tbody>
             </table>
 
-        </div>
+          </div>
 
-    </main>
+        </main>
+    </div>
   </div>
-</div>
 
 
-<!-- =========================
+  <!-- =========================
      CHART SCRIPT
 ========================== -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script>
+  <script>
 
-let chart;
+    let chart;
 
-async function loadChart(type) {
+    async function loadChart(type) {
 
-  const res = await fetch(`/admin/sales-chart?filter=${type}`);
-  const data = await res.json();
+      const res = await fetch(`/admin/sales-chart?filter=${type}`);
+      const data = await res.json();
 
-  const labels = data.map(item => {
-    const d = item._id;
+      const labels = data.map(item => {
+        const d = item._id;
 
-    const months = [
-            "Jan","Feb","Mar","Apr","May","Jun",
-            "Jul","Aug","Sep","Oct","Nov","Dec"
-    ];
+        const months = [
+          "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ];
 
-    // DAILY FORMAT (like : 4 Dec 2025)
-    if (d.day) {
-        return `${d.day} ${months[d.month-1]} ${d.year}`;
-    }
-
-    // MONTHLY FORMAT → Dec 2025
-    if (d.month) {
-        return `${months[d.month-1]} ${d.year}`;
-    }
-
-    // YEARLY FORMAT
-    return `${d.year}`;
-  });
-  const values = data.map(item => item.revenue);
-
-  if (chart) {
-    chart.destroy();
-  }
-
-  const ctx = document.getElementById("salesChart").getContext("2d");
-
-  chart = new Chart(ctx, {
-  type: "line",
-
-  data: {
-    labels: labels,
-
-    datasets: [{
-      label: "Sales",
-      data: values,
-
-      borderColor: "#4a90e2",
-      backgroundColor: "rgba(74,144,226,0.25)",
-
-      borderWidth: 3,
-      fill: true,
-
-      pointRadius: 4,
-      pointBackgroundColor: "#4a90e2",
-      pointBorderColor: "#ffffff",
-      pointBorderWidth: 2
-    }]
-  },
-
-  options: {
-
-    responsive: true,
-    maintainAspectRatio: false,
-
-    plugins: {
-      legend: {
-        display: true,
-        labels: {
-          color: "#ffffff",
-          boxWidth: 30,
-          padding: 20
+        // DAILY FORMAT (like : 4 Dec 2025)
+        if (d.day) {
+          return `${d.day} ${months[d.month - 1]} ${d.year}`;
         }
-      }
-    },
 
-    scales: {
-
-      y: {
-        beginAtZero: true,
-        ticks: {
-          color: "#ffffff"
-        },
-        grid: {
-          color: "rgba(255,255,255,0.08)"
+        // MONTHLY FORMAT → Dec 2025
+        if (d.month) {
+          return `${months[d.month - 1]} ${d.year}`;
         }
-      },
 
-      x: {
-        ticks: {
-          color: "#ffffff",
-           maxRotation:45,
-           minRotation:45
-        },
-        grid: {
-          color: "rgba(255,255,255,0.05)"
-        }
+        // YEARLY FORMAT
+        return `${d.year}`;
+      });
+      const values = data.map(item => item.revenue);
+
+      if (chart) {
+        chart.destroy();
       }
 
+      const ctx = document.getElementById("salesChart").getContext("2d");
+
+      chart = new Chart(ctx, {
+        type: "line",
+
+        data: {
+          labels: labels,
+
+          datasets: [{
+            label: "Sales",
+            data: values,
+
+            borderColor: "#4a90e2",
+            backgroundColor: "rgba(74,144,226,0.25)",
+
+            borderWidth: 3,
+            fill: true,
+
+            pointRadius: 4,
+            pointBackgroundColor: "#4a90e2",
+            pointBorderColor: "#ffffff",
+            pointBorderWidth: 2
+          }]
+        },
+
+        options: {
+
+          responsive: true,
+          maintainAspectRatio: false,
+
+          plugins: {
+            legend: {
+              display: true,
+              labels: {
+                color: "#ffffff",
+                boxWidth: 30,
+                padding: 20
+              }
+            }
+          },
+
+          scales: {
+
+            y: {
+              beginAtZero: true,
+              ticks: {
+                color: "#ffffff"
+              },
+              grid: {
+                color: "rgba(255,255,255,0.08)"
+              }
+            },
+
+            x: {
+              ticks: {
+                color: "#ffffff",
+                maxRotation: 45,
+                minRotation: 45
+              },
+              grid: {
+                color: "rgba(255,255,255,0.05)"
+              }
+            }
+
+          }
+
+        }
+
+      });
+
     }
 
-  }
+    loadChart("monthly");
 
-});
+  </script>
 
-}
-
-loadChart("monthly");
-
-</script>
-
-<%- include('../partials/admin/footer') %>
+  <%- include('../partials/admin/footer') %>

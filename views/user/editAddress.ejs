@@ -1,190 +1,201 @@
 <%- include('../partials/user/header') %>
-<link rel="stylesheet" href="/css/user-style/editAddress.css">
+  <link rel="stylesheet" href="/css/user-style/editAddress.css">
 
-<div class="account-container">
-  <!-- Sidebar -->
-  <div class="account-sidebar">
-    <h3 class="sidebar-title">My Account</h3>
-    <ul class="sidebar-menu">
-      <li><a href="/order" class="sidebar-link"><i class="fas fa-shopping-bag"></i> Order</a></li>
-      <li><a href="/wishlist" class="sidebar-link"><i class="fas fa-heart"></i> Wishlist</a></li>
-      <li><a href="/address" class="sidebar-link active"><i class="fas fa-map-marker-alt"></i> Address</a></li>
-      <% if (!user.isGoogleUser) { %>
-        <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li>
-      <% } %>
-      <li><a href="/account" class="sidebar-link"><i class="fas fa-user"></i> Account Detail</a></li>
-      <li><a href="/wallet" class="sidebar-link"><i class="fas fa-wallet"></i> Wallet</a></li>
-      <li><a href="/referral" class="sidebar-link"><i class="fas fa-share-alt"></i> Referral</a></li>
-      <li>
-        <form action="/logout" method="POST" class="logout-form">
-          <button type="submit" class="sidebar-link logout-btn">
-            <i class="fas fa-sign-out-alt"></i> Logout
-          </button>
-        </form>
-      </li>
-    </ul>
-  </div>
-
-  <!-- Main Content -->
-  <div class="account-content">
-    <div class="account-header">
-      <h2>Edit Address</h2>
+  <div class="account-container">
+    <!-- Sidebar -->
+    <div class="account-sidebar">
+      <h3 class="sidebar-title">My Account</h3>
+      <ul class="sidebar-menu">
+        <li><a href="/order" class="sidebar-link"><i class="fas fa-shopping-bag"></i> Order</a></li>
+        <li><a href="/wishlist" class="sidebar-link"><i class="fas fa-heart"></i> Wishlist</a></li>
+        <li><a href="/address" class="sidebar-link active"><i class="fas fa-map-marker-alt"></i> Address</a></li>
+        <% if (!user.isGoogleUser) { %>
+          <li><a href="/password" class="sidebar-link"><i class="fas fa-lock"></i> Password</a></li>
+          <% } %>
+            <li><a href="/account" class="sidebar-link"><i class="fas fa-user"></i> Account Detail</a></li>
+            <li><a href="/wallet" class="sidebar-link"><i class="fas fa-wallet"></i> Wallet</a></li>
+            <li><a href="/referral" class="sidebar-link"><i class="fas fa-share-alt"></i> Referral</a></li>
+            <li>
+              <form action="/logout" method="POST" class="logout-form">
+                <button type="submit" class="sidebar-link logout-btn">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+              </form>
+            </li>
+      </ul>
     </div>
 
-    <form id="editAddressForm" method="POST" action="/address/<%= address._id %>" novalidate class="address-form">
-      <div class="form-group">
-        <label>Phone</label>
-        <input type="tel" name="phone" id="phone" value="<%= address.phone %>" required>
-        <span class="error-message" id="phoneError"></span>
+    <!-- Main Content -->
+    <div class="account-content">
+      <div class="account-header">
+        <h2>Edit Address</h2>
       </div>
 
-      <div class="form-group">
-        <label>Street Address</label>
-        <input type="text" name="streetAddress" id="streetAddress" value="<%= address.streetAddress %>" required>
-        <span class="error-message" id="streetAddressError"></span>
-      </div>
-
-      <div class="form-row">
+      <form id="editAddressForm" method="POST" action="/address/<%= address._id %>" novalidate class="address-form">
         <div class="form-group">
-          <label>City</label>
-          <input type="text" name="city" id="city" value="<%= address.city %>" required>
-          <span class="error-message" id="cityError"></span>
+          <label>Phone</label>
+          <input type="tel" name="phone" id="phone" value="<%= address.phone %>" required>
+          <span class="error-message" id="phoneError"></span>
         </div>
+
         <div class="form-group">
-          <label>District</label>
-          <select name="district" id="district" required>
-            <option value="">Select District</option>
-            <option value="Thiruvananthapuram" <%= address.district?.toLowerCase() === 'thiruvananthapuram' ? 'selected' : '' %>>Thiruvananthapuram</option>
-            <option value="Kollam" <%= address.district?.toLowerCase() === 'kollam' ? 'selected' : '' %>>Kollam</option>
-            <option value="Pathanamthitta" <%= address.district?.toLowerCase() === 'pathanamthitta' ? 'selected' : '' %>>Pathanamthitta</option>
-            <option value="Alappuzha" <%= address.district?.toLowerCase() === 'alappuzha' ? 'selected' : '' %>>Alappuzha</option>
-            <option value="Kottayam" <%= address.district?.toLowerCase() === 'kottayam' ? 'selected' : '' %>>Kottayam</option>
-            <option value="Idukki" <%= address.district?.toLowerCase() === 'idukki' ? 'selected' : '' %>>Idukki</option>
-            <option value="Ernakulam" <%= address.district?.toLowerCase() === 'ernakulam' ? 'selected' : '' %>>Ernakulam</option>
-            <option value="Thrissur" <%= address.district?.toLowerCase() === 'thrissur' ? 'selected' : '' %>>Thrissur</option>
-            <option value="Palakkad" <%= address.district?.toLowerCase() === 'palakkad' ? 'selected' : '' %>>Palakkad</option>
-            <option value="Malappuram" <%= address.district?.toLowerCase() === 'malappuram' ? 'selected' : '' %>>Malappuram</option>
-            <option value="Kozhikode" <%= address.district?.toLowerCase() === 'kozhikode' ? 'selected' : '' %>>Kozhikode</option>
-            <option value="Wayanad" <%= address.district?.toLowerCase() === 'wayanad' ? 'selected' : '' %>>Wayanad</option>
-            <option value="Kannur" <%= address.district?.toLowerCase() === 'kannur' ? 'selected' : '' %>>Kannur</option>
-            <option value="Kasaragod" <%= address.district?.toLowerCase() === 'kasaragod' ? 'selected' : '' %>>Kasaragod</option>
-          </select>
+          <label>Street Address</label>
+          <input type="text" name="streetAddress" id="streetAddress" value="<%= address.streetAddress %>" required>
+          <span class="error-message" id="streetAddressError"></span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" name="city" id="city" value="<%= address.city %>" required>
+            <span class="error-message" id="cityError"></span>
+          </div>
+          <div class="form-group">
+            <label>District</label>
+            <select name="district" id="district" required>
+              <option value="">Select District</option>
+              <option value="Thiruvananthapuram" <%=address.district?.toLowerCase()==='thiruvananthapuram' ? 'selected'
+                : '' %>>Thiruvananthapuram</option>
+              <option value="Kollam" <%=address.district?.toLowerCase()==='kollam' ? 'selected' : '' %>>Kollam</option>
+              <option value="Pathanamthitta" <%=address.district?.toLowerCase()==='pathanamthitta' ? 'selected' : '' %>
+                >Pathanamthitta</option>
+              <option value="Alappuzha" <%=address.district?.toLowerCase()==='alappuzha' ? 'selected' : '' %>>Alappuzha
+              </option>
+              <option value="Kottayam" <%=address.district?.toLowerCase()==='kottayam' ? 'selected' : '' %>>Kottayam
+              </option>
+              <option value="Idukki" <%=address.district?.toLowerCase()==='idukki' ? 'selected' : '' %>>Idukki</option>
+              <option value="Ernakulam" <%=address.district?.toLowerCase()==='ernakulam' ? 'selected' : '' %>>Ernakulam
+              </option>
+              <option value="Thrissur" <%=address.district?.toLowerCase()==='thrissur' ? 'selected' : '' %>>Thrissur
+              </option>
+              <option value="Palakkad" <%=address.district?.toLowerCase()==='palakkad' ? 'selected' : '' %>>Palakkad
+              </option>
+              <option value="Malappuram" <%=address.district?.toLowerCase()==='malappuram' ? 'selected' : '' %>
+                >Malappuram</option>
+              <option value="Kozhikode" <%=address.district?.toLowerCase()==='kozhikode' ? 'selected' : '' %>>Kozhikode
+              </option>
+              <option value="Wayanad" <%=address.district?.toLowerCase()==='wayanad' ? 'selected' : '' %>>Wayanad
+              </option>
+              <option value="Kannur" <%=address.district?.toLowerCase()==='kannur' ? 'selected' : '' %>>Kannur</option>
+              <option value="Kasaragod" <%=address.district?.toLowerCase()==='kasaragod' ? 'selected' : '' %>>Kasaragod
+              </option>
+            </select>
             <span class="error-message" id="districtError"></span>
+          </div>
         </div>
-      </div>
 
-      <div class="form-row">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Pincode</label>
+            <input type="text" name="pincode" id="pincode" value="<%= address.pincode %>" required>
+            <span class="error-message" id="pincodeError"></span>
+          </div>
+          <div class="form-group">
+            <label>State</label>
+            <input type="text" name="state" id="state" value="<%= address.state %>" required>
+            <span class="error-message" id="stateError"></span>
+          </div>
+        </div>
+
         <div class="form-group">
-          <label>Pincode</label>
-          <input type="text" name="pincode" id="pincode" value="<%= address.pincode %>" required>
-          <span class="error-message" id="pincodeError"></span>
+          <label>Landmark (Optional)</label>
+          <input type="text" name="landmark" id="landmark" value="<%= address.landmark %>">
+          <span class="error-message" id="landmarkError"></span>
         </div>
+
         <div class="form-group">
-          <label>State</label>
-          <input type="text" name="state" id="state" value="<%= address.state %>" required>
-          <span class="error-message" id="stateError"></span>
+          <label>Address Type</label>
+          <select name="addressType" id="addressType">
+            <option value="Home" <%=address.addressType==='Home' ? 'selected' : '' %>>Home</option>
+            <option value="Work" <%=address.addressType==='Work' ? 'selected' : '' %>>Work</option>
+            <option value="Other" <%=address.addressType==='Other' ? 'selected' : '' %>>Other</option>
+          </select>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label>Landmark (Optional)</label>
-        <input type="text" name="landmark" id="landmark" value="<%= address.landmark %>">
-        <span class="error-message" id="landmarkError"></span>
-      </div>
-
-      <div class="form-group">
-        <label>Address Type</label>
-        <select name="addressType" id="addressType">
-          <option value="Home" <%= address.addressType === 'Home' ? 'selected' : '' %>>Home</option>
-          <option value="Work" <%= address.addressType === 'Work' ? 'selected' : '' %>>Work</option>
-          <option value="Other" <%= address.addressType === 'Other' ? 'selected' : '' %>>Other</option>
-        </select>
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="save-btn">Save Changes</button>
-        <a href="/address" class="cancel-btn">Cancel</a>
-      </div>
-    </form>
+        <div class="form-actions">
+          <button type="submit" class="save-btn">Save Changes</button>
+          <a href="/address" class="cancel-btn">Cancel</a>
+        </div>
+      </form>
+    </div>
   </div>
-</div>
 
-<%- include('../partials/user/footer') %>
+  <%- include('../partials/user/footer') %>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
 
-  function validateAddressForm(data) {
-  let valid = true;
-  document.querySelectorAll('.error-message').forEach(el => {
-    el.textContent = '';
-    el.style.display = 'none';
-  });
+        function validateAddressForm(data) {
+          let valid = true;
+          document.querySelectorAll('.error-message').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+          });
 
-  const phoneRegex = /^\d{10}$/;
-  const textRegex = /^[A-Za-z\s]+$/i;
-  const pincodeRegex = /^\d{6}$/;
+          const phoneRegex = /^\d{10}$/;
+          const textRegex = /^[A-Za-z\s]+$/i;
+          const pincodeRegex = /^\d{6}$/;
 
-  if (!data.phone || !phoneRegex.test(data.phone.trim())) {
-    document.getElementById('phoneError').textContent = 'Enter valid 10-digit number';
-    document.getElementById('phoneError').style.display = 'block';
-    valid = false;
-  }
-  if (!data.streetAddress || data.streetAddress.trim().length < 5) {
-    document.getElementById('streetAddressError').textContent = 'Enter valid street address';
-    document.getElementById('streetAddressError').style.display = 'block';
-    valid = false;
-  }
-  if (!data.city || !textRegex.test(data.city.trim())) {
-    document.getElementById('cityError').textContent = 'Enter valid city';
-    document.getElementById('cityError').style.display = 'block';
-    valid = false;
-  }
-  if (!data.district || !textRegex.test(data.district.trim())) {
-    document.getElementById('districtError').textContent = 'Enter valid district';
-    document.getElementById('districtError').style.display = 'block';
-    valid = false;
-  }
+          if (!data.phone || !phoneRegex.test(data.phone.trim())) {
+            document.getElementById('phoneError').textContent = 'Enter valid 10-digit number';
+            document.getElementById('phoneError').style.display = 'block';
+            valid = false;
+          }
+          if (!data.streetAddress || data.streetAddress.trim().length < 5) {
+            document.getElementById('streetAddressError').textContent = 'Enter valid street address';
+            document.getElementById('streetAddressError').style.display = 'block';
+            valid = false;
+          }
+          if (!data.city || !textRegex.test(data.city.trim())) {
+            document.getElementById('cityError').textContent = 'Enter valid city';
+            document.getElementById('cityError').style.display = 'block';
+            valid = false;
+          }
+          if (!data.district || !textRegex.test(data.district.trim())) {
+            document.getElementById('districtError').textContent = 'Enter valid district';
+            document.getElementById('districtError').style.display = 'block';
+            valid = false;
+          }
 
-  if (!data.state || !textRegex.test(data.state.trim())) {
-    document.getElementById('stateError').textContent = 'Enter valid state';
-    document.getElementById('stateError').style.display = 'block';
-    valid = false;
-  }
-  if (!data.pincode || !pincodeRegex.test(data.pincode.trim())) {
-    document.getElementById('pincodeError').textContent = 'Enter 6-digit pincode';
-    document.getElementById('pincodeError').style.display = 'block';
-    valid = false;
-  }
-  if (data.landmark && data.landmark.trim().length < 2) {
-    document.getElementById('landmarkError').textContent = 'Invalid landmark';
-    document.getElementById('landmarkError').style.display = 'block';
-    valid = false;
-  }
+          if (!data.state || !textRegex.test(data.state.trim())) {
+            document.getElementById('stateError').textContent = 'Enter valid state';
+            document.getElementById('stateError').style.display = 'block';
+            valid = false;
+          }
+          if (!data.pincode || !pincodeRegex.test(data.pincode.trim())) {
+            document.getElementById('pincodeError').textContent = 'Enter 6-digit pincode';
+            document.getElementById('pincodeError').style.display = 'block';
+            valid = false;
+          }
+          if (data.landmark && data.landmark.trim().length < 2) {
+            document.getElementById('landmarkError').textContent = 'Invalid landmark';
+            document.getElementById('landmarkError').style.display = 'block';
+            valid = false;
+          }
 
-  return valid;
-}
+          return valid;
+        }
 
 
-  const form = document.getElementById('editAddressForm');
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.target).entries());
-    if (!validateAddressForm(data)) return;
+        const form = document.getElementById('editAddressForm');
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const data = Object.fromEntries(new FormData(e.target).entries());
+          if (!validateAddressForm(data)) return;
 
-    const res = await fetch(`/address/<%= address._id %>`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
+          const res = await fetch(`/address/<%= address._id %>`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+          });
 
-    const result = await res.json();
-    if (result.success) {
-      window.location.href = "/address";
-    } else {
-      showToast(result.message || "Failed to update address", "error");
-    }
-  });
+          const result = await res.json();
+          if (result.success) {
+            window.location.href = "/address";
+          } else {
+            showToast(result.message || "Failed to update address", "error");
+          }
+        });
 
-});
-</script>
+      });
+    </script>

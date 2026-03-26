@@ -1,25 +1,25 @@
 import mongoose from "mongoose";
-const {Schema} = mongoose;
+const { Schema } = mongoose;
 
 const userSchema = new Schema({
-    name:{
-        type:String,
-        required:true
+    name: {
+        type: String,
+        required: true
     },
-    email:{
-        type:String,
-        required:true,
-        unique:true
+    email: {
+        type: String,
+        required: true,
+        unique: true
     },
-    googleId:{
-        type:String,
-        unique:true,
-        sparse:true,
-        required:false
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true,
+        required: false
     },
-    password:{
-        type:String,
-        required:false
+    password: {
+        type: String,
+        required: false
     },
     profileImage: {
         type: String,
@@ -29,13 +29,13 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
-    isBlocked:{
-        type:Boolean,
-        default:false
+    isBlocked: {
+        type: Boolean,
+        default: false
     },
-    isAdmin:{
-        type:Boolean,
-        default:false
+    isAdmin: {
+        type: Boolean,
+        default: false
     },
     referralCode: {
         type: String,
@@ -49,8 +49,8 @@ const userSchema = new Schema({
         default: null
     },
 
-    createdOn:{
-        type:String,
+    createdOn: {
+        type: String,
         default: () => {
             const now = new Date();
             return now.toISOString().split('T')[0]; //Get the date part only
@@ -59,6 +59,6 @@ const userSchema = new Schema({
     }
 });
 
-const User = mongoose.model("User",userSchema);
+const User = mongoose.model("User", userSchema);
 
 export default User;

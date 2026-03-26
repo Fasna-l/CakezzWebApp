@@ -1,123 +1,115 @@
 <%- include('../partials/user/header') %>
-<link rel="stylesheet" href="/css/user-style/password.css">
+  <link rel="stylesheet" href="/css/user-style/password.css">
 
-<div class="account-container">
+  <div class="account-container">
 
-  <!-- ================= SIDEBAR ================= -->
-  <div class="account-sidebar">
-    <h3 class="sidebar-title">My Account</h3>
-    <ul class="sidebar-menu">
-      <li>
-        <a href="/order" class="sidebar-link">
-          <i class="fas fa-shopping-bag"></i> Order
-        </a>
-      </li>
-
-      <li>
-        <a href="/wishlist" class="sidebar-link">
-          <i class="fas fa-heart"></i> Wishlist
-        </a>
-      </li>
-
-      <li>
-        <a href="/address" class="sidebar-link">
-          <i class="fas fa-map-marker-alt"></i> Address
-        </a>
-      </li>
-
-      <% if (!user.isGoogleUser) { %>
+    <!-- ================= SIDEBAR ================= -->
+    <div class="account-sidebar">
+      <h3 class="sidebar-title">My Account</h3>
+      <ul class="sidebar-menu">
         <li>
-          <a href="/password" class="sidebar-link">
-            <i class="fas fa-lock"></i> Password
+          <a href="/order" class="sidebar-link">
+            <i class="fas fa-shopping-bag"></i> Order
           </a>
         </li>
-      <% } %>
 
-      <li>
-        <a href="/account" class="sidebar-link">
-          <i class="fas fa-user"></i> Account Detail
-        </a>
-      </li>
+        <li>
+          <a href="/wishlist" class="sidebar-link">
+            <i class="fas fa-heart"></i> Wishlist
+          </a>
+        </li>
 
-      <li>
-        <a href="/wallet" class="sidebar-link">
-          <i class="fas fa-wallet"></i> Wallet
-        </a>
-      </li>
+        <li>
+          <a href="/address" class="sidebar-link">
+            <i class="fas fa-map-marker-alt"></i> Address
+          </a>
+        </li>
 
-      <li>
-        <a href="/referral" class="sidebar-link active">
-          <i class="fas fa-share-alt"></i> Referral
-        </a>
-      </li>
+        <% if (!user.isGoogleUser) { %>
+          <li>
+            <a href="/password" class="sidebar-link">
+              <i class="fas fa-lock"></i> Password
+            </a>
+          </li>
+          <% } %>
 
-      <li>
-        <form action="/logout" method="POST" class="logout-form">
-          <button type="submit" class="sidebar-link logout-btn">
-            <i class="fas fa-sign-out-alt"></i> Logout
-          </button>
-        </form>
-      </li>
-    </ul>
-  </div>
+            <li>
+              <a href="/account" class="sidebar-link">
+                <i class="fas fa-user"></i> Account Detail
+              </a>
+            </li>
 
-  <!-- ================= MAIN CONTENT ================= -->
-  <div class="account-content">
+            <li>
+              <a href="/wallet" class="sidebar-link">
+                <i class="fas fa-wallet"></i> Wallet
+              </a>
+            </li>
 
-    <div class="account-header">
-      <h2>REFER A FRIEND</h2>
+            <li>
+              <a href="/referral" class="sidebar-link active">
+                <i class="fas fa-share-alt"></i> Referral
+              </a>
+            </li>
+
+            <li>
+              <form action="/logout" method="POST" class="logout-form">
+                <button type="submit" class="sidebar-link logout-btn">
+                  <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+              </form>
+            </li>
+      </ul>
     </div>
 
-    <div class="payment-box" style="max-width: 650px;">
-      <p style="margin-bottom: 15px; line-height: 1.6;">
-        To refer a friend, ask them to sign up using the link below.
-        <br>
-        Reward will be credited once the signup is completed.
-        <br>
-        <small style="color:#777;">
-          (Not applicable for Google signup)
-        </small>
-      </p>
+    <!-- ================= MAIN CONTENT ================= -->
+    <div class="account-content">
 
-      <!-- Referral Link -->
-      <label><strong>Your Referral Link</strong></label>
-      <div style="display: flex; gap: 10px; margin: 10px 0;">
-        <input
-          type="text"
-          id="referralLink"
-          readonly
-          value="<%= process.env.BASE_URL || 'http://localhost:3000' %>/signup?code=<%= user.referralCode %>"
-          style="flex:1; padding:8px; border-radius:6px;"
-        />
-        <button onclick="copyReferral()" class="save-btn">
-          Copy
-        </button>
+      <div class="account-header">
+        <h2>REFER A FRIEND</h2>
       </div>
 
-      <!-- Referral Code -->
-      <label style="margin-top: 10px;">
-        <strong>Your Referral Code</strong>
-      </label>
-      <input
-        type="text"
-        readonly
-        value="<%= user.referralCode %>"
-        style="width: 220px; padding:8px; border-radius:6px; margin-top:6px;"
-      />
+      <div class="payment-box" style="max-width: 650px;">
+        <p style="margin-bottom: 15px; line-height: 1.6;">
+          To refer a friend, ask them to sign up using the link below.
+          <br>
+          Reward will be credited once the signup is completed.
+          <br>
+          <small style="color:#777;">
+            (Not applicable for Google signup)
+          </small>
+        </p>
+
+        <!-- Referral Link -->
+        <label><strong>Your Referral Link</strong></label>
+        <div style="display: flex; gap: 10px; margin: 10px 0;">
+          <input type="text" id="referralLink" readonly
+            value="<%= process.env.BASE_URL || 'http://localhost:3000' %>/signup?code=<%= user.referralCode %>"
+            style="flex:1; padding:8px; border-radius:6px;" />
+          <button onclick="copyReferral()" class="save-btn">
+            Copy
+          </button>
+        </div>
+
+        <!-- Referral Code -->
+        <label style="margin-top: 10px;">
+          <strong>Your Referral Code</strong>
+        </label>
+        <input type="text" readonly value="<%= user.referralCode %>"
+          style="width: 220px; padding:8px; border-radius:6px; margin-top:6px;" />
+      </div>
+
     </div>
-
   </div>
-</div>
 
-<!-- ================= SCRIPT ================= -->
-<script>
-  function copyReferral() {
-    const input = document.getElementById("referralLink");
-    input.select();
-    input.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(input.value);
-    showToast("Referral link copied!", "success");
-  }
-</script> 
+  <!-- ================= SCRIPT ================= -->
+  <script>
+    function copyReferral() {
+      const input = document.getElementById("referralLink");
+      input.select();
+      input.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(input.value);
+      showToast("Referral link copied!", "success");
+    }
+  </script>
 
-<%- include('../partials/user/footer') %>
+  <%- include('../partials/user/footer') %>

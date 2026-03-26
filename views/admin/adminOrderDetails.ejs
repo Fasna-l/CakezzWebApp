@@ -1,134 +1,157 @@
 <%- include('../partials/admin/header') %>
-<div id="toast-data"
-     data-message="<%= toastMessage || '' %>"
-     data-type="<%= toastType || '' %>">
-</div>
+  <div id="toast-data" data-message="<%= toastMessage || '' %>" data-type="<%= toastType || '' %>">
+  </div>
 
-<link rel="stylesheet" href="/css/admin-style/orderdetails.css">
+  <link rel="stylesheet" href="/css/admin-style/orderdetails.css">
 
-<div class="dashboard-container">
-  <div class="dashboard-wrapper">
+  <div class="dashboard-container">
+    <div class="dashboard-wrapper">
 
-    <%- include('../partials/admin/sidebar') %>
+      <%- include('../partials/admin/sidebar') %>
 
-    <div class="customers-container">
+        <div class="customers-container">
 
-      <h2 class="order-title">Order Details ( <%= order.orderId %> )</h2>
+          <h2 class="order-title">Order Details ( <%= order.orderId %> )</h2>
 
-      <!-- ==================== CUSTOMER DETAILS ==================== -->
-      <div class="section-box">
-        <h3>Customer Information</h3>
-        <div class="info-grid">
-          <p><strong>Name:</strong> <%= order.userId?.name %></p>
-          <p><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
-          <p><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleDateString("en-GB") %></p>
-        </div>
-      </div>
-
-      <!-- ==================== SHIPPING ADDRESS ==================== -->
-      <div class="section-box">
-        <h3>Shipping Address</h3>
-        <p>
-          <%= order.shippingAddress.streetAddress %>, 
-          <%= order.shippingAddress.city %>, 
-          <%= order.shippingAddress.district %>,
-          <%= order.shippingAddress.state %> - 
-          <%= order.shippingAddress.pinCode %> <br>
-          <strong>Phone:</strong> <%= order.shippingAddress.phoneNumber %>
-        </p>
-      </div>
-
-      <!-- ==================== ORDERED ITEMS ==================== -->
-      <div class="section-box">
-        <h3>Ordered Items</h3>
-
-        <% order.items.forEach(item => { %>
-          <div class="product-item-wrapper">
-
-            <div class="product-image-box">
-              <img src="/uploads/product/<%= item.productImage %>" alt="">
-            </div>
-
-            <div class="product-info">
-              <p><strong>Product Name:</strong> <%= item.productName %></p>
-              <p><strong>Size:</strong> <%= item.size %></p>
-              <p><strong>Price:</strong> ₹<%= item.price %></p>
-              <p><strong>Quantity:</strong> <%= item.quantity %></p>
-              <p><strong>Status:</strong> <%= item.status %></p>
-
-            <!-- If return already approved -->
-            <% if (item.status === "Returned") { %>
-              <p style="color: green; font-weight:bold;">✔ Return Approved</p>
-            <% } %>
-
-            <!-- If return rejected -->
-            <% if (item.returnStatus === "Rejected") { %>
-              <p style="color: red; font-weight:bold;">✘ Return Rejected</p>
-            <% } %>
-
-            </div>
-
-          </div>
-        <% }) %>
-      </div>
-
-      <!-- ==================== ORDER SUMMARY ==================== -->
-      <div class="section-box">
-        <h3>Payment Summary</h3>
-        <p><strong>Subtotal:</strong> ₹<%= order.subTotal %></p>
-        <p><strong>Tax:</strong> ₹<%= order.taxAmount %></p>
-        <p><strong>Shipping:</strong> ₹<%= order.shippingCharge %></p>
-        <p><strong>Total:</strong> ₹<%= order.totalAmount %></p>
-      </div>
-
-      <!-- ==================== UPDATE ORDER STATUS ==================== -->
-      <div class="section-box">
-        <h3>Update Order Status</h3>
-
-        <% 
-            const hasReturnCompleted = order.items.some(i => 
-              i.status === "Returned" || i.returnStatus === "Rejected"
-            );
-        %>
-
-        <form action="/admin/orders/<%= order._id %>/status?_method=PATCH" method="POST" class="status-form">
-
-          <% if (hasReturnCompleted) { %>
-
-              <select class="status-select" disabled>
-                  <option><%= order.orderStatus %></option>
-              </select>
-
-              <p style="color:#888; margin-top:5px;">
-                Order status cannot be changed after return approval/rejection.
+          <!-- ==================== CUSTOMER DETAILS ==================== -->
+          <div class="section-box">
+            <h3>Customer Information</h3>
+            <div class="info-grid">
+              <p><strong>Name:</strong>
+                <%= order.userId?.name %>
               </p>
+              <p><strong>Payment Method:</strong>
+                <%= order.paymentMethod %>
+              </p>
+              <p><strong>Order Date:</strong>
+                <%= new Date(order.orderDate).toLocaleDateString("en-GB") %>
+              </p>
+            </div>
+          </div>
 
-          <% } else { %>
+          <!-- ==================== SHIPPING ADDRESS ==================== -->
+          <div class="section-box">
+            <h3>Shipping Address</h3>
+            <p>
+              <%= order.shippingAddress.streetAddress %>,
+                <%= order.shippingAddress.city %>,
+                  <%= order.shippingAddress.district %>,
+                    <%= order.shippingAddress.state %> -
+                      <%= order.shippingAddress.pinCode %> <br>
+                        <strong>Phone:</strong>
+                        <%= order.shippingAddress.phoneNumber %>
+            </p>
+          </div>
 
-              <select name="status" class="status-select">
-                  <option value="Pending" <%= order.orderStatus==="Pending" ? "selected" : "" %>>Pending</option>
-                  <option value="Processing" <%= order.orderStatus==="Processing" ? "selected" : "" %>>Processing</option>
-                  <option value="Shipped" <%= order.orderStatus==="Shipped" ? "selected" : "" %>>Shipped</option>
-                  <option value="Out for Delivery" <%= order.orderStatus==="Out for Delivery" ? "selected" : "" %>>Out for Delivery</option>
-                  <option value="Delivered" <%= order.orderStatus==="Delivered" ? "selected" : "" %>>Delivered</option>
-                  <option value="Cancelled" <%= order.orderStatus==="Cancelled" ? "selected" : "" %>>Cancelled</option>
-              </select>
-              <button type="submit" class="btn-primary">Update</button>
+          <!-- ==================== ORDERED ITEMS ==================== -->
+          <div class="section-box">
+            <h3>Ordered Items</h3>
+
+            <% order.items.forEach(item=> { %>
+              <div class="product-item-wrapper">
+
+                <div class="product-image-box">
+                  <img src="/uploads/product/<%= item.productImage %>" alt="">
+                </div>
+
+                <div class="product-info">
+                  <p><strong>Product Name:</strong>
+                    <%= item.productName %>
+                  </p>
+                  <p><strong>Size:</strong>
+                    <%= item.size %>
+                  </p>
+                  <p><strong>Price:</strong> ₹<%= item.price %>
+                  </p>
+                  <p><strong>Quantity:</strong>
+                    <%= item.quantity %>
+                  </p>
+                  <p><strong>Status:</strong>
+                    <%= item.status %>
+                  </p>
+
+                  <!-- If return already approved -->
+                  <% if (item.status==="Returned" ) { %>
+                    <p style="color: green; font-weight:bold;">✔ Return Approved</p>
+                    <% } %>
+
+                      <!-- If return rejected -->
+                      <% if (item.returnStatus==="Rejected" ) { %>
+                        <p style="color: red; font-weight:bold;">✘ Return Rejected</p>
+                        <% } %>
+
+                </div>
+
+              </div>
+              <% }) %>
+          </div>
+
+          <!-- ==================== ORDER SUMMARY ==================== -->
+          <div class="section-box">
+            <h3>Payment Summary</h3>
+            <p><strong>Subtotal:</strong> ₹<%= order.subTotal %>
+            </p>
+            <p><strong>Tax:</strong> ₹<%= order.taxAmount %>
+            </p>
+            <p><strong>Shipping:</strong> ₹<%= order.shippingCharge %>
+            </p>
+            <p><strong>Total:</strong> ₹<%= order.totalAmount %>
+            </p>
+          </div>
+
+          <!-- ==================== UPDATE ORDER STATUS ==================== -->
+          <div class="section-box">
+            <h3>Update Order Status</h3>
+
+            <% const hasReturnCompleted=order.items.some(i=>
+              i.status === "Returned" || i.returnStatus === "Rejected"
+              );
+              %>
+
+              <form action="/admin/orders/<%= order._id %>/status?_method=PATCH" method="POST" class="status-form">
+
+                <% if (hasReturnCompleted) { %>
+
+                  <select class="status-select" disabled>
+                    <option>
+                      <%= order.orderStatus %>
+                    </option>
+                  </select>
+
+                  <p style="color:#888; margin-top:5px;">
+                    Order status cannot be changed after return approval/rejection.
+                  </p>
+
+                  <% } else { %>
+
+                    <select name="status" class="status-select">
+                      <option value="Pending" <%=order.orderStatus==="Pending" ? "selected" : "" %>>Pending</option>
+                      <option value="Processing" <%=order.orderStatus==="Processing" ? "selected" : "" %>>Processing
+                      </option>
+                      <option value="Shipped" <%=order.orderStatus==="Shipped" ? "selected" : "" %>>Shipped</option>
+                      <option value="Out for Delivery" <%=order.orderStatus==="Out for Delivery" ? "selected" : "" %>
+                        >Out for Delivery</option>
+                      <option value="Delivered" <%=order.orderStatus==="Delivered" ? "selected" : "" %>>Delivered
+                      </option>
+                      <option value="Cancelled" <%=order.orderStatus==="Cancelled" ? "selected" : "" %>>Cancelled
+                      </option>
+                    </select>
+                    <button type="submit" class="btn-primary">Update</button>
+                    <% } %>
+              </form>
+          </div>
+
+          <!-- ==================== CANCEL ORDER ==================== -->
+          <% if (order.orderStatus !=="Cancelled" && order.orderStatus !=="Delivered" ) { %>
+            <div class="button-section">
+              <form action="/admin/orders/<%= order._id %>/cancel?_method=PATCH" method="POST"></form>
+              <button class="btn-cancel">Cancel Order</button>
+              </form>
+            </div>
             <% } %>
-        </form>
-      </div>
 
-      <!-- ==================== CANCEL ORDER ==================== -->
-      <% if (order.orderStatus !== "Cancelled" && order.orderStatus !== "Delivered") { %>
-      <div class="button-section">
-        <form action="/admin/orders/<%= order._id %>/cancel?_method=PATCH" method="POST"></form>
-          <button class="btn-cancel">Cancel Order</button>
-        </form>
-      </div>
-      <% } %>
-
+        </div>
     </div>
   </div>
-</div>
 
-<%- include('../partials/admin/footer') %>
+  <%- include('../partials/admin/footer') %>

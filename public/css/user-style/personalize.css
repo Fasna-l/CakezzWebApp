@@ -18,7 +18,7 @@
   background: #fff;
   padding: 24px;
   border-radius: 10px;
-  border: 1px solid rgba(233,219,226,0.9);
+  border: 1px solid rgba(233, 219, 226, 0.9);
 }
 
 /* LEFT Card */
@@ -70,11 +70,12 @@ input[type="datetime-local"] {
 
 /* RIGHT CARD */
 .summary-card {}
+
 .cart-row {
   display: flex;
   gap: 14px;
   padding: 10px;
-  border: 1px solid rgba(233,219,226,0.9);
+  border: 1px solid rgba(233, 219, 226, 0.9);
   border-radius: 8px;
   margin-bottom: 12px;
 }
@@ -100,7 +101,7 @@ input[type="datetime-local"] {
   margin-top: 20px;
   padding: 16px;
   border-radius: 8px;
-  border: 1px solid rgba(233,219,226,0.9);
+  border: 1px solid rgba(233, 219, 226, 0.9);
 }
 
 .price-row {

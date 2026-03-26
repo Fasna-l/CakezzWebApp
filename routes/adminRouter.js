@@ -12,7 +12,7 @@ import salesReportController from "../controllers/admin/salesReportController.js
 import referralController from "../controllers/admin/referralController.js";
 import bannerController from "../controllers/admin/bannerController.js";
 
-import { userAuth, adminAuth} from "../middlewares/auth.js";
+import { userAuth, adminAuth } from "../middlewares/auth.js";
 import multer from "multer";
 import { uploads } from "../helpers/multer.js";
 
@@ -97,7 +97,7 @@ router.patch("/referral-settings", adminAuth, referralController.updateReferralS
 
 // Banner Image(slider) Management
 router.get("/banners", adminAuth, bannerController.loadBannerPage);
-router.post("/banners",adminAuth,uploads.single("bannerImage"),bannerController.addBanner);
-router.delete("/banners/:id",adminAuth,bannerController.deleteBanner);
+router.post("/banners", adminAuth, uploads.single("bannerImage"), bannerController.addBanner);
+router.delete("/banners/:id", adminAuth, bannerController.deleteBanner);
 
 export default router;

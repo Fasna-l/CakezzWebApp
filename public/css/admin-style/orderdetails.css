@@ -404,27 +404,29 @@ body {
 }
 
 /* Remove unwanted space from p, h3 */
-.section-box p, 
+.section-box p,
 .section-box h3 {
-    margin: 4px 0 !important;  /* Reduce vertical space */
-    line-height: 1.4;          /* Tight but readable */
+  margin: 4px 0 !important;
+  /* Reduce vertical space */
+  line-height: 1.4;
+  /* Tight but readable */
 }
 
 /* Reduce spacing between section blocks */
 .section-box {
-    padding: 15px 18px !important;
-    margin-bottom: 12px !important;
+  padding: 15px 18px !important;
+  margin-bottom: 12px !important;
 }
 
 /* Tighter spacing inside product items */
 .product-item-wrapper {
-    padding: 12px 15px !important;
-    margin-bottom: 10px !important;
+  padding: 12px 15px !important;
+  margin-bottom: 10px !important;
 }
 
 /* Tighter spacing between product text rows */
 .product-info p {
-    margin: 3px 0 !important;
+  margin: 3px 0 !important;
 }
 
 .order-section,
@@ -433,83 +435,84 @@ body {
 .items-section,
 .payment-section,
 .status-section {
-    margin-bottom: 18px !important;
+  margin-bottom: 18px !important;
 }
 
 /* Remove big gaps between paragraphs & rows */
 .info-row,
 .product-info p,
 .product-info div {
-    margin: -4px 0 !important;
-    padding: 0 !important;
-    line-height: 1.25 !important;
+  margin: -4px 0 !important;
+  padding: 0 !important;
+  line-height: 1.25 !important;
 }
 
 /* Title spacing */
 .section-title {
-    margin-bottom: 8px !important;
+  margin-bottom: 8px !important;
 }
 
 .product-item-wrapper {
-    background: #1e1e1e;       /* same as your theme */
-    border-radius: 10px;
-    padding: 15px 20px !important;
-    margin-bottom: 15px !important;
+  background: #1e1e1e;
+  /* same as your theme */
+  border-radius: 10px;
+  padding: 15px 20px !important;
+  margin-bottom: 15px !important;
 }
 
 /* Image container fix */
 .product-image-box img {
-    width: 85px;
-    height: 85px;
-    border-radius: 8px;
-    margin: 0 !important;
-    padding: 0 !important;
+  width: 85px;
+  height: 85px;
+  border-radius: 8px;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* Compact layout inside product info */
 .product-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Label styling */
 .info-label {
-    font-weight: 600;
-    margin-right: 5px;
+  font-weight: 600;
+  margin-right: 5px;
 }
 
 /* Product status alignment */
 .product-status {
-    margin-top: 3px !important;
+  margin-top: 3px !important;
 }
 
 .info-card {
-    background: #1e1e1e;
-    padding: 20px !important;
-    border-radius: 12px;
-    margin-bottom: 18px !important;
+  background: #1e1e1e;
+  padding: 20px !important;
+  border-radius: 12px;
+  margin-bottom: 18px !important;
 }
 
 .payment-box {
-    background: #1e1e1e;
-    padding: 18px !important;
-    border-radius: 10px;
+  background: #1e1e1e;
+  padding: 18px !important;
+  border-radius: 10px;
 }
 
 .payment-box p {
-    margin: 3px 0 !important;
-    line-height: 1.2 !important;
+  margin: 3px 0 !important;
+  line-height: 1.2 !important;
 }
 
 .status-update-box {
-    background: #1e1e1e;
-    padding: 18px !important;
-    border-radius: 10px;
+  background: #1e1e1e;
+  padding: 18px !important;
+  border-radius: 10px;
 }
 
 .status-update-box .form-group {
-    margin: 0 !important;
+  margin: 0 !important;
 }
 
 .admin-return-actions {
@@ -529,11 +532,13 @@ body {
 }
 
 .approve-btn {
-  background: #28a745;  /* green */
+  background: #28a745;
+  /* green */
 }
 
 .reject-btn {
-  background: #dc3545;  /* red */
+  background: #dc3545;
+  /* red */
 }
 
 .admin-btn:hover {

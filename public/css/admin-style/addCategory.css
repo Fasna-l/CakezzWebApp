@@ -170,7 +170,8 @@ body {
   color: #ffffff;
   font-size: 14px;
   transition: all 0.3s ease;
-  appearance: none;           /* Remove default browser style */
+  appearance: none;
+  /* Remove default browser style */
   -webkit-appearance: none;
   -moz-appearance: none;
 }
@@ -253,11 +254,11 @@ body {
   border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #4caf50;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(24px);
 }
 
@@ -305,8 +306,9 @@ input:checked + .slider:before {
 .add-category-container::-webkit-scrollbar-thumb:hover {
   background: #666;
 }
+
 /*error message*/
-.error-message{
+.error-message {
   color: #ff4d4d;
   font-size: 0.75rem;
   display: none;

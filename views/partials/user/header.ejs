@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,8 +19,9 @@
   <script src="/js/wishlist.js" defer></script>
 
 </head>
+
 <body>
-  <!--==================== HEADER SECTION ====================-->  
+  <!--==================== HEADER SECTION ====================-->
   <nav class="navbar navbar-expand-lg">
     <div class="container">
       <a class="navbar-brand" href="#">
@@ -55,45 +57,49 @@
             <div class="user-dropdown-menu">
               <% if(locals.user) { %>
                 <div class="dropdown-header">
-                  <h4>Hi, <%= locals.user.name %> </h4>
+                  <h4>Hi, <%= locals.user.name %>
+                  </h4>
                   <p>Welcome back!</p>
                 </div>
 
                 <div class="dropdown-menu-items">
-                <a href="/account" class="dropdown-menu-item">My Account</a>
-                <a href="/referral" class="dropdown-menu-item">My Referral</a>
-                <a href="/order" class="dropdown-menu-item">My Orders</a>
-                <a href="/address" class="dropdown-menu-item">My Address Book</a>
-                <a href="/wallet" class="dropdown-menu-item">My Wallet</a>
-                <form action="/logout" method="POST" style="margin:0;">
-                  <button type="submit" class="dropdown-menu-item logout-btn">Logout</button>
-                </form>
-              </div>
-              <!--Show when no user is logged in -->
-              <% } else { %>
-                <div class="dropdown-header">
-                <h4>Welcome</h4>
-                <p>To access account and manage orders</p>
-                <div class="dropdown-buttons">
-                  <a href="/login" class="dropdown-login-btn">Login</a>
-                  <a href="/signup" class="dropdown-login-btn">Signup</a>
+                  <a href="/account" class="dropdown-menu-item">My Account</a>
+                  <a href="/referral" class="dropdown-menu-item">My Referral</a>
+                  <a href="/order" class="dropdown-menu-item">My Orders</a>
+                  <a href="/address" class="dropdown-menu-item">My Address Book</a>
+                  <a href="/wallet" class="dropdown-menu-item">My Wallet</a>
+                  <form action="/logout" method="POST" style="margin:0;">
+                    <button type="submit" class="dropdown-menu-item logout-btn">Logout</button>
+                  </form>
                 </div>
-              </div>
-              <% } %>
+                <!--Show when no user is logged in -->
+                <% } else { %>
+                  <div class="dropdown-header">
+                    <h4>Welcome</h4>
+                    <p>To access account and manage orders</p>
+                    <div class="dropdown-buttons">
+                      <a href="/login" class="dropdown-login-btn">Login</a>
+                      <a href="/signup" class="dropdown-login-btn">Signup</a>
+                    </div>
+                  </div>
+                  <% } %>
 
             </div>
           </div>
-          <div class="cart-icon-wrapper wishlist-icon-wrapper"
-            onclick="window.location.href='/wishlist'">
+          <div class="cart-icon-wrapper wishlist-icon-wrapper" onclick="window.location.href='/wishlist'">
 
             <i class="fas fa-heart"></i>
-            <span id="wishlist-count"><%= wishlistCount || 0 %></span> 
+            <span id="wishlist-count">
+              <%= wishlistCount || 0 %>
+            </span>
           </div>
 
 
           <div class="cart-icon-wrapper" onclick="window.location.href='/cart'">
             <i class="fas fa-shopping-cart"></i>
-            <span id="cart-count"><%= typeof cartCount !== 'undefined' ? cartCount : 0 %></span>
+            <span id="cart-count">
+              <%= typeof cartCount !=='undefined' ? cartCount : 0 %>
+            </span>
           </div>
 
         </div>

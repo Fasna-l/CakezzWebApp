@@ -9,7 +9,7 @@ const loadOrderList = async (req, res, next) => {
       page = 1,
       search = "",
       status = "",
-      date= ""
+      date = ""
     } = req.query;
 
     page = parseInt(page) || 1;
@@ -85,7 +85,7 @@ const loadOrderList = async (req, res, next) => {
     });
 
   } catch (error) {
-      next(error);
+    next(error);
   }
 };
 
@@ -154,11 +154,11 @@ const updateOrderStatus = async (req, res, next) => {
 
     // Rule: If any item is returned or return rejected → block all updates
     if (order.items.some(i => i.status === "Returned" || i.returnStatus === "Rejected")) {
-        return res.render("adminOrderDetails", {
-            order,
-            toastMessage: "Cannot update status after return approval/rejection.",
-            toastType: "error"
-        });
+      return res.render("adminOrderDetails", {
+        order,
+        toastMessage: "Cannot update status after return approval/rejection.",
+        toastType: "error"
+      });
     }
 
     // Rule 1: Block backward movement (except Cancelled)
@@ -195,7 +195,7 @@ const updateOrderStatus = async (req, res, next) => {
     orderToUpdate.orderStatus = status;
 
     // when the status set as delivered => set delivery date (because return item is only possible upto 2 hr from the  time of delivered item)
-    if(status === "Delivered"){
+    if (status === "Delivered") {
       orderToUpdate.deliveryDate = new Date();
 
       if (orderToUpdate.paymentMethod === "COD") {
@@ -295,7 +295,7 @@ const approveReturnItem = async (req, res, next) => {
     item.returnedAt = new Date();
 
     // Refund amount = price * qty
-    const refundAmount =calculateRefundWithCoupon(order,item);
+    const refundAmount = calculateRefundWithCoupon(order, item);
     //item.refundAmount = item.price * item.quantity;
     item.refundAmount = refundAmount;
     item.refundStatus = "Processed";
@@ -309,7 +309,7 @@ const approveReturnItem = async (req, res, next) => {
       await product.save();
     }
 
-     //WALLET REFUND (ONLY AFTER ADMIN APPROVAL)
+    //WALLET REFUND (ONLY AFTER ADMIN APPROVAL)
     if (order.paymentStatus === "Paid") {
       let wallet = await Wallet.findOne({ userId: order.userId });
 
@@ -331,7 +331,7 @@ const approveReturnItem = async (req, res, next) => {
       comment: `Returned item: ${item.productName}`,
       date: new Date()
     });
-    
+
     recalculateOrderTotals(order);
     await order.save();
 
@@ -386,7 +386,7 @@ const rejectReturnItem = async (req, res, next) => {
 const loadReturnRequests = async (req, res, next) => {
   try {
     let page = parseInt(req.query.page) || 1;
-    const ORDERS_PER_PAGE = 1; 
+    const ORDERS_PER_PAGE = 1;
     const search = req.query.search ? req.query.search.trim() : "";
     const searchRegex = search ? new RegExp(search, "i") : null;
     // 1. Fetch all return request items
@@ -419,16 +419,16 @@ const loadReturnRequests = async (req, res, next) => {
       // Optional search
       ...(searchRegex
         ? [
-            {
-              $match: {
-                $or: [
-                  { orderId: { $regex: searchRegex } },
-                  { "items.productName": { $regex: searchRegex } },
-                  { "user.name": { $regex: searchRegex } }
-                ]
-              }
+          {
+            $match: {
+              $or: [
+                { orderId: { $regex: searchRegex } },
+                { "items.productName": { $regex: searchRegex } },
+                { "user.name": { $regex: searchRegex } }
+              ]
             }
-          ]
+          }
+        ]
         : []),
 
       {
@@ -521,7 +521,7 @@ const rejectWholeReturn = async (req, res, next) => {
   }
 };
 
-const approveWholeReturn = async (req, res ,next) => {
+const approveWholeReturn = async (req, res, next) => {
   try {
     const orderId = req.params.id;
     const order = await Order.findById(orderId);
@@ -539,7 +539,7 @@ const approveWholeReturn = async (req, res ,next) => {
 
         // Refund calculation
         //item.refundAmount = item.price * item.quantity;
-        const refundAmount = calculateRefundWithCoupon(order,item);
+        const refundAmount = calculateRefundWithCoupon(order, item);
         item.refundAmount = refundAmount
         item.refundStatus = "Processed";
 
@@ -619,7 +619,7 @@ function recalculateOrderTotals(order) {
 
   if (order.originalCouponDiscount > 0 && originalSubTotal > 0) {
     newCouponDiscount = Math.round(
-      (newSubTotal / originalSubTotal) * order.originalCouponDiscount 
+      (newSubTotal / originalSubTotal) * order.originalCouponDiscount
     );
   }
 
@@ -637,24 +637,24 @@ function recalculateOrderTotals(order) {
     newSubTotal + taxAmount + shippingCharge - newCouponDiscount;
 }
 
-function calculateRefundWithCoupon(order,item){
+function calculateRefundWithCoupon(order, item) {
   //No coupon => Full refund (When there is no coupon applied)
-  if(!order.couponCode || order.couponDiscount <= 0) {
+  if (!order.couponCode || order.couponDiscount <= 0) {
     return item.price * item.quantity;
   }
 
   //Total order sum (before returning any item(eg: product1:500,product2:600,total=1100 this total is original subtotal before returning product1 or 2 ))
-  const originalSubTotal = order.items.reduce((sum,i)=>{
-    return sum+ i.price * i.quantity
-  },0);
+  const originalSubTotal = order.items.reduce((sum, i) => {
+    return sum + i.price * i.quantity
+  }, 0);
 
   //avoid division by 0(avoid problematic situations)
-  if(originalSubTotal <=0){
+  if (originalSubTotal <= 0) {
     return item.price * item.quantity;
   }
 
   //single item total(eg: product price=500 ,quantity:1 => 500*1 =500)
-  const itemTotal = item.price*item.quantity;
+  const itemTotal = item.price * item.quantity;
 
   //Propotional coupon share
   const couponShare = (itemTotal / originalSubTotal) * order.originalCouponDiscount;

@@ -5,9 +5,9 @@ const RESPONSE_MESSAGES = {
   ORDER_NOT_FOUND: "Order not found",
   INVALID_COUPON: "Invalid coupon",
   PRODUCT_NOT_FOUND: "Product not found",
-  COD_LIMIT_EXCEEDED:"Cash on delivery is not available for orders above ₹1000. Please choose another payment method.",
-  WALLET_EMPTY:"No wallet balance. Please choose another payment method.",
-  
+  COD_LIMIT_EXCEEDED: "Cash on delivery is not available for orders above ₹1000. Please choose another payment method.",
+  WALLET_EMPTY: "No wallet balance. Please choose another payment method.",
+
   ADDRESS_ADDED: "Address added",
   ADDRESS_UPDATED: "Address updated successfully",
   ADDRESS_DELETED: "Address deleted",
@@ -94,7 +94,7 @@ const RESPONSE_MESSAGES = {
   MIN_PRODUCT_IMAGES: "Upload at least 3 product images",
 
   SALES_REPORT_LOAD_FAILED: "Failed to load sales report",
-  
+
   BANNER_IMAGE_REQUIRED: "Please upload a banner image",
   MAX_BANNER_LIMIT: "Maximum 10 banners allowed",
   MIN_BANNER_LIMIT: "Minimum 3 banners required",

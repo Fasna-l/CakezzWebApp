@@ -11,11 +11,11 @@ const getDateRange = (range, startDate, endDate) => {
   let from, to;
 
   switch (range) {
-    case "today": from = new Date(); from.setHours(0,0,0,0); to = new Date(); to.setHours(23,59,59,999); break;
-    case "week": from = new Date(now - 7 * 24 * 60 * 60 * 1000); from.setHours(0,0,0,0); to = new Date(); break;
-    case "month": from = new Date(now.getFullYear(), now.getMonth(), 1); to = new Date(now.getFullYear(), now.getMonth()+1, 0,23,59,59,999); break;
-    case "year": from = new Date(now.getFullYear(), 0, 1); to = new Date(now.getFullYear(),11,31,23,59,59,999); break;
-    case "custom": from = new Date(startDate); from.setHours(0,0,0,0); to = new Date(endDate); to.setHours(23,59,59,999); break;
+    case "today": from = new Date(); from.setHours(0, 0, 0, 0); to = new Date(); to.setHours(23, 59, 59, 999); break;
+    case "week": from = new Date(now - 7 * 24 * 60 * 60 * 1000); from.setHours(0, 0, 0, 0); to = new Date(); break;
+    case "month": from = new Date(now.getFullYear(), now.getMonth(), 1); to = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999); break;
+    case "year": from = new Date(now.getFullYear(), 0, 1); to = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999); break;
+    case "custom": from = new Date(startDate); from.setHours(0, 0, 0, 0); to = new Date(endDate); to.setHours(23, 59, 59, 999); break;
     default: from = new Date(0); to = new Date();
   }
 
@@ -29,18 +29,18 @@ const getSalesReport = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     let filter = {
-      $or:[
-        {paymentMethod: "COD" , orderStatus: "Delivered"},
-        {paymentMethod:{$ne:"COD"}, paymentStatus:"Paid"}
+      $or: [
+        { paymentMethod: "COD", orderStatus: "Delivered" },
+        { paymentMethod: { $ne: "COD" }, paymentStatus: "Paid" }
       ]
     };
     if (status) filter.orderStatus = status;
     if (search) filter.orderId = { $regex: search, $options: "i" };
     if (startDate && endDate) {
       const from = new Date(startDate);
-      from.setHours(0,0,0,0);
+      from.setHours(0, 0, 0, 0);
       const to = new Date(endDate);
-      to.setHours(23,59,59,999);
+      to.setHours(23, 59, 59, 999);
       filter.orderDate = { $gte: from, $lte: to };
     } else if (range) {
       const { from, to } = getDateRange(range);
@@ -88,9 +88,9 @@ const exportSalesReportExcel = async (req, res) => {
   if (search) filter.orderId = { $regex: search, $options: "i" };
   if (startDate && endDate) {
     const from = new Date(startDate);
-    from.setHours(0,0,0,0);
+    from.setHours(0, 0, 0, 0);
     const to = new Date(endDate);
-    to.setHours(23,59,59,999);
+    to.setHours(23, 59, 59, 999);
     filter.orderDate = { $gte: from, $lte: to };
   } else if (range) {
     const { from, to } = getDateRange(range);
@@ -101,7 +101,7 @@ const exportSalesReportExcel = async (req, res) => {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Sales Report");
 
-  sheet.addRow(["Order ID","Order Date","Payment","Subtotal","Discount","Paid Amount","Status"]);
+  sheet.addRow(["Order ID", "Order Date", "Payment", "Subtotal", "Discount", "Paid Amount", "Status"]);
 
   orders.forEach(o => {
     const paid = o.paymentMethod === "COD" ? o.totalAmount || 0 : o.payableAmount || o.totalAmount || 0;
@@ -116,8 +116,8 @@ const exportSalesReportExcel = async (req, res) => {
     ]);
   });
 
-  res.setHeader("Content-Type","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-  res.setHeader("Content-Disposition","attachment; filename=sales-report.xlsx");
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader("Content-Disposition", "attachment; filename=sales-report.xlsx");
   logger.info(
     `ADMIN EXPORT SALES REPORT EXCEL | Range: ${range || "custom"}`
   );
@@ -138,9 +138,9 @@ const exportSalesReportPDF = async (req, res) => {
   if (search) filter.orderId = { $regex: search, $options: "i" };
   if (startDate && endDate) {
     const from = new Date(startDate);
-    from.setHours(0,0,0,0);
+    from.setHours(0, 0, 0, 0);
     const to = new Date(endDate);
-    to.setHours(23,59,59,999);
+    to.setHours(23, 59, 59, 999);
     filter.orderDate = { $gte: from, $lte: to };
   } else if (range) {
     const { from, to } = getDateRange(range);

@@ -1,174 +1,174 @@
 <%- include('../partials/user/header') %>
-<link rel="stylesheet" href="/css/user-style/personalize.css">
+  <link rel="stylesheet" href="/css/user-style/personalize.css">
 
-<div class="page-wrap">
-  <div class="container personalize-page">
+  <div class="page-wrap">
+    <div class="container personalize-page">
 
-    <h1 class="page-title">Checkout</h1>
+      <h1 class="page-title">Checkout</h1>
 
-    <div class="personalize-grid">
+      <div class="personalize-grid">
 
-      <!-- LEFT: Delivery Date -->
-      <section class="card delivery-card">
-        <h2 class="card-title">Delivery Date and Time</h2>
+        <!-- LEFT: Delivery Date -->
+        <section class="card delivery-card">
+          <h2 class="card-title">Delivery Date and Time</h2>
 
-        <form id="deliveryForm" method="POST" action="/checkout/delivery" novalidate>
+          <form id="deliveryForm" method="POST" action="/checkout/delivery" novalidate>
 
-          <div class="form-group">
-            <label>Date & Time</label>
-            <input 
-              type="datetime-local" 
-              name="deliveryDate" 
-              id="deliveryDate" 
-              required 
-              value=""
-            >
-    <!-- show server-side error if exists -->
-          <% if (typeof deliveryError !== 'undefined' && deliveryError) { %>
-            <span class="error-message" id="deliveryError" style="display:block;"><%= deliveryError %></span>
-          <% } else { %>
-            <span class="error-message" id="deliveryError"></span>
-          <% } %>
-        </div>
-
-
-          <button class="btn save-btn" type="submit">Save</button>
-        </form>
-      </section>
-
-      <!-- RIGHT: Summary -->
-      <aside class="card summary-card">
-        <h2 class="card-title">Your Order</h2>
-
-        <div class="cart-item">
-          <% checkoutItems.forEach(item => { %>
-            <div class="cart-row">
-              <img src="/uploads/product/<%= item.product.image %>" class="cart-thumb">
-              <div class="cart-meta">
-                <div class="cart-name"><%= item.product.name %></div>
-                <div class="cart-qty">Qty: <%= item.quantity %></div>
-              </div>
+            <div class="form-group">
+              <label>Date & Time</label>
+              <input type="datetime-local" name="deliveryDate" id="deliveryDate" required value="">
+              <!-- show server-side error if exists -->
+              <% if (typeof deliveryError !=='undefined' && deliveryError) { %>
+                <span class="error-message" id="deliveryError" style="display:block;">
+                  <%= deliveryError %>
+                </span>
+                <% } else { %>
+                  <span class="error-message" id="deliveryError"></span>
+                  <% } %>
             </div>
-          <% }) %>
-        </div>
 
-        <div class="price-box">
-          <div class="price-row"><span>Subtotal :</span><span>₹<%= totals.subTotal %></span></div>
-          <div class="price-row"><span>Shipping</span><span><%= totals.shipping === 0 ? 'Free' : '₹' + totals.shipping %></span></div>
-          <div class="price-row"><span>Tax:</span><span>₹<%= totals.tax %></span></div>
 
-          <hr class="price-divider">
+            <button class="btn save-btn" type="submit">Save</button>
+          </form>
+        </section>
 
-          <div class="price-row total"><span>Total</span><span>₹<%= totals.grandTotal %></span></div>
-        </div>
+        <!-- RIGHT: Summary -->
+        <aside class="card summary-card">
+          <h2 class="card-title">Your Order</h2>
 
-        <form id="goPaymentForm" action="/checkout/payment" method="GET">
-          <button class="btn payment-btn" type="submit">Select Payment</button>
-        </form>
+          <div class="cart-item">
+            <% checkoutItems.forEach(item=> { %>
+              <div class="cart-row">
+                <img src="/uploads/product/<%= item.product.image %>" class="cart-thumb">
+                <div class="cart-meta">
+                  <div class="cart-name">
+                    <%= item.product.name %>
+                  </div>
+                  <div class="cart-qty">Qty: <%= item.quantity %>
+                  </div>
+                </div>
+              </div>
+              <% }) %>
+          </div>
 
-      </aside>
+          <div class="price-box">
+            <div class="price-row"><span>Subtotal :</span><span>₹<%= totals.subTotal %></span></div>
+            <div class="price-row"><span>Shipping</span><span>
+                <%= totals.shipping===0 ? 'Free' : '₹' + totals.shipping %>
+              </span></div>
+            <div class="price-row"><span>Tax:</span><span>₹<%= totals.tax %></span></div>
 
+            <hr class="price-divider">
+
+            <div class="price-row total"><span>Total</span><span>₹<%= totals.grandTotal %></span></div>
+          </div>
+
+          <form id="goPaymentForm" action="/checkout/payment" method="GET">
+            <button class="btn payment-btn" type="submit">Select Payment</button>
+          </form>
+
+        </aside>
+
+      </div>
     </div>
   </div>
-</div>
 
-<%- include('../partials/user/footer') %>
-<script>
-const deliveryInput = document.getElementById("deliveryDate");
-const deliveryError = document.getElementById("deliveryError");
-const deliveryForm = document.getElementById("deliveryForm");
+  <%- include('../partials/user/footer') %>
+    <script>
+      const deliveryInput = document.getElementById("deliveryDate");
+      const deliveryError = document.getElementById("deliveryError");
+      const deliveryForm = document.getElementById("deliveryForm");
 
-(function () {
-  const now = new Date();
+      (function () {
+        const now = new Date();
 
-  //Set minimum delivery date time(time now +1hr : only select a time with minimum 1 hr from the current time on a particular date)
-  //MIN =now + 1 hour
-  const minDate = new Date(now.getTime() + 60 * 60 * 1000);
+        //Set minimum delivery date time(time now +1hr : only select a time with minimum 1 hr from the current time on a particular date)
+        //MIN =now + 1 hour
+        const minDate = new Date(now.getTime() + 60 * 60 * 1000);
 
-  //MAX = today + 3Days(cake expiry)(I choose 3 days because i set 3 day expiry for my cake)
-  const maxDate = new Date();
-  maxDate.setDate(maxDate.getDate() + 3);
-  maxDate.setHours(23, 59, 0, 0);
+        //MAX = today + 3Days(cake expiry)(I choose 3 days because i set 3 day expiry for my cake)
+        const maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() + 3);
+        maxDate.setHours(23, 59, 0, 0);
 
-  const formatDate = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2,"0");
-    const day = String(date.getDate()).padStart(2,"0");
-    const hour = String(date.getHours()).padStart(2,"0");
-    const min = String(date.getMinutes()).padStart(2,"0");
-    return `${year}-${month}-${day}T${hour}:${min}`;
-  };
+        const formatDate = (date) => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const day = String(date.getDate()).padStart(2, "0");
+          const hour = String(date.getHours()).padStart(2, "0");
+          const min = String(date.getMinutes()).padStart(2, "0");
+          return `${year}-${month}-${day}T${hour}:${min}`;
+        };
 
-  deliveryInput.min = formatDate(minDate);
-  deliveryInput.max = formatDate(maxDate);
-})();
+        deliveryInput.min = formatDate(minDate);
+        deliveryInput.max = formatDate(maxDate);
+      })();
 
-// --- VALIDATION ---
-deliveryForm.addEventListener("submit", function (e) {
-    const value = deliveryInput.value.trim();
+      // --- VALIDATION ---
+      deliveryForm.addEventListener("submit", function (e) {
+        const value = deliveryInput.value.trim();
 
-    // If no date/time selected
-    if (!value) {
-        e.preventDefault();
-        deliveryError.textContent = "Please select a delivery date & time.";
-        deliveryError.style.display = "block";
-        return;
-    }
+        // If no date/time selected
+        if (!value) {
+          e.preventDefault();
+          deliveryError.textContent = "Please select a delivery date & time.";
+          deliveryError.style.display = "block";
+          return;
+        }
 
-    const selected = new Date(value);
-    const minAllowed = new Date(deliveryInput.min);
-    const maxAllowed = new Date(deliveryInput.max);
+        const selected = new Date(value);
+        const minAllowed = new Date(deliveryInput.min);
+        const maxAllowed = new Date(deliveryInput.max);
 
-    // If selected time < minimum allowed
-    if (selected < minAllowed) {
-        e.preventDefault();
-        deliveryError.textContent =
+        // If selected time < minimum allowed
+        if (selected < minAllowed) {
+          e.preventDefault();
+          deliveryError.textContent =
             "Delivery must be at least 1 hour from now.";
-        deliveryError.style.display = "block";
-        return;
-    }
+          deliveryError.style.display = "block";
+          return;
+        }
 
-    if(selected > maxAllowed) {
-      e.preventDefault();
-      deliveryError.textContent = "Delivery date cannot be more than 3 days from today.";
-      deliveryError.style.display = "block";
-      return;
-    }
-    // Hide error if valid
-    deliveryError.style.display = "none";
-});
+        if (selected > maxAllowed) {
+          e.preventDefault();
+          deliveryError.textContent = "Delivery date cannot be more than 3 days from today.";
+          deliveryError.style.display = "block";
+          return;
+        }
+        // Hide error if valid
+        deliveryError.style.display = "none";
+      });
 
 
 
-// Block going to payment unless a date is selected & valid
-document.getElementById("goPaymentForm").addEventListener("submit", function(e) {
-    const value = deliveryInput.value.trim();
+      // Block going to payment unless a date is selected & valid
+      document.getElementById("goPaymentForm").addEventListener("submit", function (e) {
+        const value = deliveryInput.value.trim();
 
-    if (!value) {
-        e.preventDefault();
-        deliveryError.textContent = "Please select a delivery date & time.";
-        deliveryError.style.display = "block";
-        return;
-    }
+        if (!value) {
+          e.preventDefault();
+          deliveryError.textContent = "Please select a delivery date & time.";
+          deliveryError.style.display = "block";
+          return;
+        }
 
-    const selected = new Date(value);
-    const minAllowed = new Date(deliveryInput.min);
-    const maxAllowed = new Date(deliveryInput.max);
+        const selected = new Date(value);
+        const minAllowed = new Date(deliveryInput.min);
+        const maxAllowed = new Date(deliveryInput.max);
 
-    if (selected < minAllowed) {
-        e.preventDefault();
-        deliveryError.textContent = "Delivery must be at least 1 hour from now.";
-        deliveryError.style.display = "block";
-        return;
-    }
+        if (selected < minAllowed) {
+          e.preventDefault();
+          deliveryError.textContent = "Delivery must be at least 1 hour from now.";
+          deliveryError.style.display = "block";
+          return;
+        }
 
-    if(selected > maxAllowed){
-      e.preventDefault();
-      deliveryError.textContent = "Delivery date cannot be more than 3 days from today.";
-      deliveryError.style.display = "block";
-      return;
-    }
-});
+        if (selected > maxAllowed) {
+          e.preventDefault();
+          deliveryError.textContent = "Delivery date cannot be more than 3 days from today.";
+          deliveryError.style.display = "block";
+          return;
+        }
+      });
 
-</script>
-
+    </script>

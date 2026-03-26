@@ -1,186 +1,204 @@
 <%- include('../partials/admin/header') %>
-<link rel="stylesheet" href="/css/admin-style/category.css">
+  <link rel="stylesheet" href="/css/admin-style/category.css">
 
-<div class="dashboard-container">
-  <div class="dashboard-wrapper">
-    <%- include('../partials/admin/sidebar') %>
+  <div class="dashboard-container">
+    <div class="dashboard-wrapper">
+      <%- include('../partials/admin/sidebar') %>
 
-    <!-- Main Content -->
-    <div class="categories-container">
+        <!-- Main Content -->
+        <div class="categories-container">
 
-      <!-- Page Title -->
-      <div class="page-title">
-        <h2>Coupons</h2>
-        <a href="/admin/coupons/add" class="btn-add-category">Add Coupon</a>
+          <!-- Page Title -->
+          <div class="page-title">
+            <h2>Coupons</h2>
+            <a href="/admin/coupons/add" class="btn-add-category">Add Coupon</a>
 
-        <!-- Search -->
-        <form action="/admin/coupons" method="get" class="search-form">
-          <div class="search-box">
-            <input
-              type="text"
-              class="search-input"
-              placeholder="Search coupons..."
-              name="search"
-              value="<%= search || '' %>"
-            >
-            <button class="search-button-text" type="submit">Search</button>
+            <!-- Search -->
+            <form action="/admin/coupons" method="get" class="search-form">
+              <div class="search-box">
+                <input type="text" class="search-input" placeholder="Search coupons..." name="search"
+                  value="<%= search || '' %>">
+                <button class="search-button-text" type="submit">Search</button>
 
-            <% if (search && search.trim() !== '') { %>
-              <a href="/admin/coupons" class="search-button-text" style="background:#888;text-decoration:none;">Clear</a>
-            <% } %>
+                <% if (search && search.trim() !=='' ) { %>
+                  <a href="/admin/coupons" class="search-button-text"
+                    style="background:#888;text-decoration:none;">Clear</a>
+                  <% } %>
+              </div>
+            </form>
           </div>
-        </form>
-      </div>
 
-      <!-- Coupon Table -->
-      <div class="table-wrapper">
-        <table class="categories-table">
-          <thead>
-            <tr>
-              <th>Sl.No</th>
-              <th>Coupon Code</th>
-              <th>Coupon Name</th>
-              <th>Type</th>
-              <th>Coupon Amount</th>
-              <th>Max Discount</th>
-              <th>Description</th>
-              <th>Usage Limit</th>
-              <th>Min Purchase</th>
-              <th>Expiry Date</th>
-              <th>Status</th>
-              <th>Action</th>
-              <th>Edit</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <% if (coupons && coupons.length > 0) { %>
-              <% coupons.forEach((coupon, index) => { %>
+          <!-- Coupon Table -->
+          <div class="table-wrapper">
+            <table class="categories-table">
+              <thead>
                 <tr>
-                  <td><%= (currentPage - 1) * limit + index + 1 %></td>
-                  <td><%= coupon.code %></td>
-                  <td><%= coupon.name %></td>
-                  <td>
-                    <% if (coupon.discountType === "percentage") { %>
-                      <span style="color:rgb(128, 189, 128);">%</span>
-                    <% } else { %>
-                      <span style="color:rgb(163, 163, 226);">Flat</span>
-                    <% } %>
-                  </td>
-
-                  <td>
-                    <% if (coupon.discountType === "percentage") { %>
-                      <%= coupon.discountValue %>%
-                    <% } else { %>
-                      ₹<%= coupon.discountValue %>
-                    <% } %>
-                  </td>
-                  <td><%= coupon.maxDiscountAmount || "-" %></td>
-                  <td><%= coupon.description %></td>
-                  <td><%= coupon.usageLimit || "∞" %></td>
-                  <td><%= coupon.minPurchaseAmount %></td>
-                  <td><%= coupon.expiryDate.toISOString().split("T")[0] %></td>
-                  <!-- STATUS -->
-                  <td>
-                    <% if (coupon.isActive && new Date(coupon.expiryDate) > new Date()) { %>
-                      <span class="status-badge active">Active</span>
-                    <% } else { %>
-                      <span class="status-badge inactive">Inactive</span>
-                    <% } %>
-                  </td>
-
-                  <!-- TOGGLE BUTTON -->
-                  <td>
-                    <button
-                      class="btn-toggle <%= coupon.isActive ? 'btn-disable' : 'btn-enable' %>"
-                      onclick="toggleCoupon('<%= coupon._id %>')"
-                    >
-                      <%= coupon.isActive ? 'Disable' : 'Enable' %>
-                    </button>
-                  </td>
-
-                  <!-- EDIT -->
-                  <td>
-                    <a href="/admin/coupons/edit/<%= coupon._id %>" class="btn-edit">✏️</a>
-                  </td>
-
+                  <th>Sl.No</th>
+                  <th>Coupon Code</th>
+                  <th>Coupon Name</th>
+                  <th>Type</th>
+                  <th>Coupon Amount</th>
+                  <th>Max Discount</th>
+                  <th>Description</th>
+                  <th>Usage Limit</th>
+                  <th>Min Purchase</th>
+                  <th>Expiry Date</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                  <th>Edit</th>
                 </tr>
-              <% }) %>
-            <% } else { %>
-              <tr>
-                <td colspan="10" style="text-align:center;">No coupons found</td>
-              </tr>
-            <% } %>
-          </tbody>
-        </table>
-      </div>
+              </thead>
 
-      <!-- Pagination -->
-      <div class="pagination-container">
+              <tbody>
+                <% if (coupons && coupons.length> 0) { %>
+                  <% coupons.forEach((coupon, index)=> { %>
+                    <tr>
+                      <td>
+                        <%= (currentPage - 1) * limit + index + 1 %>
+                      </td>
+                      <td>
+                        <%= coupon.code %>
+                      </td>
+                      <td>
+                        <%= coupon.name %>
+                      </td>
+                      <td>
+                        <% if (coupon.discountType==="percentage" ) { %>
+                          <span style="color:rgb(128, 189, 128);">%</span>
+                          <% } else { %>
+                            <span style="color:rgb(163, 163, 226);">Flat</span>
+                            <% } %>
+                      </td>
 
-        <% if (currentPage > 1) { %>
-          <a href="/admin/coupons?page=<%= currentPage - 1 %>&search=<%= search || '' %>" class="pagination-link prev">« Prev</a>
-        <% } else { %>
-          <span class="pagination-link disabled">« Prev</span>
-        <% } %>
+                      <td>
+                        <% if (coupon.discountType==="percentage" ) { %>
+                          <%= coupon.discountValue %>%
+                            <% } else { %>
+                              ₹<%= coupon.discountValue %>
+                                <% } %>
+                      </td>
+                      <td>
+                        <%= coupon.maxDiscountAmount || "-" %>
+                      </td>
+                      <td>
+                        <%= coupon.description %>
+                      </td>
+                      <td>
+                        <%= coupon.usageLimit || "∞" %>
+                      </td>
+                      <td>
+                        <%= coupon.minPurchaseAmount %>
+                      </td>
+                      <td>
+                        <%= coupon.expiryDate.toISOString().split("T")[0] %>
+                      </td>
+                      <!-- STATUS -->
+                      <td>
+                        <% if (coupon.isActive && new Date(coupon.expiryDate)> new Date()) { %>
+                          <span class="status-badge active">Active</span>
+                          <% } else { %>
+                            <span class="status-badge inactive">Inactive</span>
+                            <% } %>
+                      </td>
 
-        <% 
-          const startPage = Math.max(1, currentPage - 2);
-          const endPage = Math.min(totalPages, currentPage + 2);
-        %>
+                      <!-- TOGGLE BUTTON -->
+                      <td>
+                        <button class="btn-toggle <%= coupon.isActive ? 'btn-disable' : 'btn-enable' %>"
+                          onclick="toggleCoupon('<%= coupon._id %>')">
+                          <%= coupon.isActive ? 'Disable' : 'Enable' %>
+                        </button>
+                      </td>
 
-        <% if (startPage > 1) { %>
-          <a href="/admin/coupons?page=1&search=<%= search || '' %>" class="pagination-link">1</a>
-          <% if (startPage > 2) { %>
-            <span class="pagination-link disabled">...</span>
-          <% } %>
-        <% } %>
+                      <!-- EDIT -->
+                      <td>
+                        <a href="/admin/coupons/edit/<%= coupon._id %>" class="btn-edit">✏️</a>
+                      </td>
 
-        <% for (let i = startPage; i <= endPage; i++) { %>
-          <% if (i === currentPage) { %>
-            <span class="pagination-link current"><%= i %></span>
-          <% } else { %>
-            <a href="/admin/coupons?page=<%= i %>&search=<%= search || '' %>" class="pagination-link"><%= i %></a>
-          <% } %>
-        <% } %>
+                    </tr>
+                    <% }) %>
+                      <% } else { %>
+                        <tr>
+                          <td colspan="10" style="text-align:center;">No coupons found</td>
+                        </tr>
+                        <% } %>
+              </tbody>
+            </table>
+          </div>
 
-        <% if (endPage < totalPages) { %>
-          <% if (endPage < totalPages - 1) { %>
-            <span class="pagination-link disabled">...</span>
-          <% } %>
-          <a href="/admin/coupons?page=<%= totalPages %>&search=<%= search || '' %>" class="pagination-link"><%= totalPages %></a>
-        <% } %>
+          <!-- Pagination -->
+          <div class="pagination-container">
 
-        <% if (currentPage < totalPages) { %>
-          <a href="/admin/coupons?page=<%= currentPage + 1 %>&search=<%= search || '' %>" class="pagination-link next">Next »</a>
-        <% } else { %>
-          <span class="pagination-link disabled">Next »</span>
-        <% } %>
+            <% if (currentPage> 1) { %>
+              <a href="/admin/coupons?page=<%= currentPage - 1 %>&search=<%= search || '' %>"
+                class="pagination-link prev">« Prev</a>
+              <% } else { %>
+                <span class="pagination-link disabled">« Prev</span>
+                <% } %>
 
-      </div>
-      <p style="text-align:center;color:#aaa;font-size:13px;margin-top:8px;">
-        Page <%= currentPage %> of <%= totalPages %>
-      </p>
+                  <% const startPage=Math.max(1, currentPage - 2); const endPage=Math.min(totalPages, currentPage + 2);
+                    %>
 
+                    <% if (startPage> 1) { %>
+                      <a href="/admin/coupons?page=1&search=<%= search || '' %>" class="pagination-link">1</a>
+                      <% if (startPage> 2) { %>
+                        <span class="pagination-link disabled">...</span>
+                        <% } %>
+                          <% } %>
+
+                            <% for (let i=startPage; i <=endPage; i++) { %>
+                              <% if (i===currentPage) { %>
+                                <span class="pagination-link current">
+                                  <%= i %>
+                                </span>
+                                <% } else { %>
+                                  <a href="/admin/coupons?page=<%= i %>&search=<%= search || '' %>"
+                                    class="pagination-link">
+                                    <%= i %>
+                                  </a>
+                                  <% } %>
+                                    <% } %>
+
+                                      <% if (endPage < totalPages) { %>
+                                        <% if (endPage < totalPages - 1) { %>
+                                          <span class="pagination-link disabled">...</span>
+                                          <% } %>
+                                            <a href="/admin/coupons?page=<%= totalPages %>&search=<%= search || '' %>"
+                                              class="pagination-link">
+                                              <%= totalPages %>
+                                            </a>
+                                            <% } %>
+
+                                              <% if (currentPage < totalPages) { %>
+                                                <a href="/admin/coupons?page=<%= currentPage + 1 %>&search=<%= search || '' %>"
+                                                  class="pagination-link next">Next »</a>
+                                                <% } else { %>
+                                                  <span class="pagination-link disabled">Next »</span>
+                                                  <% } %>
+
+          </div>
+          <p style="text-align:center;color:#aaa;font-size:13px;margin-top:8px;">
+            Page <%= currentPage %> of <%= totalPages %>
+          </p>
+
+        </div>
     </div>
   </div>
-</div>
 
-<script>
-function toggleCoupon(couponId) {
-  fetch(`/admin/coupons/toggle/${couponId}`, {
-    method: "PATCH"
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      location.reload();
+  <script>
+    function toggleCoupon(couponId) {
+      fetch(`/admin/coupons/toggle/${couponId}`, {
+        method: "PATCH"
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            location.reload();
+          }
+        })
+        .catch(() => {
+          showToast("Failed to update coupon status", "error");
+        });
     }
-  })
-  .catch(() => {
-    showToast("Failed to update coupon status", "error");
-  });
-}
-</script>
+  </script>
 
-<%- include('../partials/admin/footer') %>
+  <%- include('../partials/admin/footer') %>

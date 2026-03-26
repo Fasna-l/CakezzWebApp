@@ -5,7 +5,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   width: 100%;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
@@ -239,18 +240,19 @@ html, body {
   border-color: #4a90e2;
   pointer-events: none;
 }
+
 /* Header row (Title + Add Button + Search all in one line) */
 .products-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
 }
 
 .content-title {
-    font-size: 1.8rem;
-    font-weight: 600;
-    margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0;
 }
 
 /*  Same header layout as Category page */
@@ -298,11 +300,11 @@ html, body {
 .search-box {
   display: flex;
   align-items: center;
-  background: rgba(40,40,40,0.9);
+  background: rgba(40, 40, 40, 0.9);
   border: 1px solid #333;
   border-radius: 30px;
   padding: 6px 10px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.5);
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
 }
 

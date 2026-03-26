@@ -1,39 +1,35 @@
 <%- include('../partials/admin/header') %>
-<link rel="stylesheet" href="/css/admin-style/orderlist.css">
+    <link rel="stylesheet" href="/css/admin-style/orderlist.css">
 
-<div class="dashboard-container">
-    <div class="dashboard-wrapper">
-        <%- include('../partials/admin/sidebar') %>
-        
-        <!-- Main Content -->
-        <div class="categories-container">
-            <!-- Page Title with Search -->
-            <div class="page-title">
-                <h2>Orders</h2>
+    <div class="dashboard-container">
+        <div class="dashboard-wrapper">
+            <%- include('../partials/admin/sidebar') %>
 
-                <form action="/admin/orders" method="get" class="search-form">
-                    <div class="search-box">
-                        <input type="text" 
-                        class="search-input" 
-                        placeholder="Search orders..." 
-                        name="search" 
-                        value="<%= search || '' %>">
+                <!-- Main Content -->
+                <div class="categories-container">
+                    <!-- Page Title with Search -->
+                    <div class="page-title">
+                        <h2>Orders</h2>
 
-                        <button class="search-button-text" type="submit">Search</button>    
+                        <form action="/admin/orders" method="get" class="search-form">
+                            <div class="search-box">
+                                <input type="text" class="search-input" placeholder="Search orders..." name="search"
+                                    value="<%= search || '' %>">
 
-                        <% if (search && search.trim() !== '') { %>
-                            <a href="/admin/orders" class="clear-btn">Clear</a>
-                        <% } %>
+                                <button class="search-button-text" type="submit">Search</button>
+
+                                <% if (search && search.trim() !=='' ) { %>
+                                    <a href="/admin/orders" class="clear-btn">Clear</a>
+                                    <% } %>
+                            </div>
+                        </form>
+
                     </div>
-                </form>
 
-            </div>
+                    <div class="filter-section">
 
-            <div class="filter-section">
-
-    <!-- Date Filter -->
-    <select class="filter-select"
-        onchange="
+                        <!-- Date Filter -->
+                        <select class="filter-select" onchange="
             if(this.value === ''){
                 window.location.href='/admin/orders';
             } else {
@@ -41,17 +37,16 @@
             }
     ">
 
-    <!-- Default label (not selectable as filter logic) -->
-        <option value="" <%= !date ? 'selected' : '' %>>Date Range</option>
-        <option value="today" <%= date === 'today' ? 'selected' : '' %>>Today</option>
-        <option value="week" <%= date === 'week' ? 'selected' : '' %>>This Week</option>
-        <option value="month" <%= date === 'month' ? 'selected' : '' %>>This Month</option>
+                            <!-- Default label (not selectable as filter logic) -->
+                            <option value="" <%=!date ? 'selected' : '' %>>Date Range</option>
+                            <option value="today" <%=date==='today' ? 'selected' : '' %>>Today</option>
+                            <option value="week" <%=date==='week' ? 'selected' : '' %>>This Week</option>
+                            <option value="month" <%=date==='month' ? 'selected' : '' %>>This Month</option>
 
-    </select>
+                        </select>
 
-    <!-- Order Status Filter -->
-    <select class="filter-select"
-        onchange="
+                        <!-- Order Status Filter -->
+                        <select class="filter-select" onchange="
             if(this.value === ''){
                 window.location.href='/admin/orders';
             } else {
@@ -59,114 +54,138 @@
             }
     ">
 
-        <option value="" <%= !status ? 'selected' : '' %>>Order Status</option>
-        <option value="Pending" <%= status === 'Pending' ? 'selected' : '' %>>Pending</option>
-        <option value="Processing" <%= status === 'Processing' ? 'selected' : '' %>>Processing</option>
-        <option value="Shipped" <%= status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-        <option value="Delivered" <%= status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-        <option value="Cancelled" <%= status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                            <option value="" <%=!status ? 'selected' : '' %>>Order Status</option>
+                            <option value="Pending" <%=status==='Pending' ? 'selected' : '' %>>Pending</option>
+                            <option value="Processing" <%=status==='Processing' ? 'selected' : '' %>>Processing</option>
+                            <option value="Shipped" <%=status==='Shipped' ? 'selected' : '' %>>Shipped</option>
+                            <option value="Delivered" <%=status==='Delivered' ? 'selected' : '' %>>Delivered</option>
+                            <option value="Cancelled" <%=status==='Cancelled' ? 'selected' : '' %>>Cancelled</option>
 
-    </select>
-</div>
+                        </select>
+                    </div>
 
-            <!-- Orders Table -->
-            <div class="table-wrapper">
-                <table class="customers-table">
+                    <!-- Orders Table -->
+                    <div class="table-wrapper">
+                        <table class="customers-table">
 
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>NAME</th>
-                            <th>ADDRESS</th>
-                            <th>DATE</th>
-                            <th>TYPE</th>
-                            <th>STATUS</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (orders && orders.length > 0) { %>
-                            <% orders.forEach((order) => { %>
+                            <thead>
                                 <tr>
-                                    <td><%= order.id %></td>
-                                    <td><%= order.customerName %></td>
-                                    <td><%= order.address %></td>
-                                    <td><%= order.date %></td>
-                                    <td><%= order.type %></td>
-                                    <td>
-                                        <span class="status-badge <%= order.status.toLowerCase() %>">
-                                            <%= order.status %>
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <a href="/admin/order-details/<%= order._id %>" class="btn-edit">
-                                            View
-                                        </a>
-                                    </td>
+                                    <th>ID</th>
+                                    <th>NAME</th>
+                                    <th>ADDRESS</th>
+                                    <th>DATE</th>
+                                    <th>TYPE</th>
+                                    <th>STATUS</th>
+                                    <th>Action</th>
                                 </tr>
-                            <% }) %>
-                        <% } else { %>
-                            <tr>
-                                <td colspan="7" style="text-align:center;">No orders found</td>
-                            </tr>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
+                            </thead>
+                            <tbody>
+                                <% if (orders && orders.length> 0) { %>
+                                    <% orders.forEach((order)=> { %>
+                                        <tr>
+                                            <td>
+                                                <%= order.id %>
+                                            </td>
+                                            <td>
+                                                <%= order.customerName %>
+                                            </td>
+                                            <td>
+                                                <%= order.address %>
+                                            </td>
+                                            <td>
+                                                <%= order.date %>
+                                            </td>
+                                            <td>
+                                                <%= order.type %>
+                                            </td>
+                                            <td>
+                                                <span class="status-badge <%= order.status.toLowerCase() %>">
+                                                    <%= order.status %>
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <a href="/admin/order-details/<%= order._id %>" class="btn-edit">
+                                                    View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="7" style="text-align:center;">No orders found</td>
+                                                </tr>
+                                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
 
-             <!-- Pagination -->
-            <div class="pagination-container">
+                    <!-- Pagination -->
+                    <div class="pagination-container">
 
-                <!-- Prev -->
-                <% if (currentPage > 1) { %>
-                    <a href="/admin/orders?page=<%= currentPage - 1 %>&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>" class="pagination-link prev">« Prev</a>
-                <% } else { %>
-                    <span class="pagination-link disabled">« Prev</span>
-                <% } %>
+                        <!-- Prev -->
+                        <% if (currentPage> 1) { %>
+                            <a href="/admin/orders?page=<%= currentPage - 1 %>&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>"
+                                class="pagination-link prev">« Prev</a>
+                            <% } else { %>
+                                <span class="pagination-link disabled">« Prev</span>
+                                <% } %>
 
-                <% 
-                    const startPage = Math.max(1, currentPage - 2);
-                    const endPage = Math.min(totalPages, currentPage + 2);
-                %>
+                                    <% const startPage=Math.max(1, currentPage - 2); const endPage=Math.min(totalPages,
+                                        currentPage + 2); %>
 
-                <!-- First Page -->
-                <% if (startPage > 1) { %>
-                    <a href="/admin/orders?page=1&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>" class="pagination-link">1</a>
-                    <% if (startPage > 2) { %>
-                        <span class="pagination-link disabled">...</span>
-                    <% } %>
-                <% } %>
+                                        <!-- First Page -->
+                                        <% if (startPage> 1) { %>
+                                            <a href="/admin/orders?page=1&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>"
+                                                class="pagination-link">1</a>
+                                            <% if (startPage> 2) { %>
+                                                <span class="pagination-link disabled">...</span>
+                                                <% } %>
+                                                    <% } %>
 
-                <!-- Middle Pages -->
-                <% for (let i = startPage; i <= endPage; i++) { %>
-                    <% if (i === currentPage) { %>
-                        <span class="pagination-link current"><%= i %></span>
-                    <% } else { %>
-                        <a href="/admin/orders?page=<%= i %>&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>" class="pagination-link"><%= i %></a>
-                    <% } %>
-                <% } %>
+                                                        <!-- Middle Pages -->
+                                                        <% for (let i=startPage; i <=endPage; i++) { %>
+                                                            <% if (i===currentPage) { %>
+                                                                <span class="pagination-link current">
+                                                                    <%= i %>
+                                                                </span>
+                                                                <% } else { %>
+                                                                    <a href="/admin/orders?page=<%= i %>&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>"
+                                                                        class="pagination-link">
+                                                                        <%= i %>
+                                                                    </a>
+                                                                    <% } %>
+                                                                        <% } %>
 
-                <!-- Last Page -->
-                <% if (endPage < totalPages) { %>
-                    <% if (endPage < totalPages - 1) { %>
-                        <span class="pagination-link disabled">...</span>
-                    <% } %>
-                    <a href="/admin/orders?page=<%= totalPages %>&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>" class="pagination-link"><%= totalPages %></a>
-                <% } %>
+                                                                            <!-- Last Page -->
+                                                                            <% if (endPage < totalPages) { %>
+                                                                                <% if (endPage < totalPages - 1) { %>
+                                                                                    <span
+                                                                                        class="pagination-link disabled">...</span>
+                                                                                    <% } %>
+                                                                                        <a href="/admin/orders?page=<%= totalPages %>&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>"
+                                                                                            class="pagination-link">
+                                                                                            <%= totalPages %>
+                                                                                        </a>
+                                                                                        <% } %>
 
-                <!-- Next -->
-                <% if (currentPage < totalPages) { %>
-                    <a href="/admin/orders?page=<%= currentPage + 1 %>&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>" class="pagination-link next">Next »</a>
-                <% } else { %>
-                    <span class="pagination-link disabled">Next »</span>
-                <% } %>
+                                                                                            <!-- Next -->
+                                                                                            <% if (currentPage <
+                                                                                                totalPages) { %>
+                                                                                                <a href="/admin/orders?page=<%= currentPage + 1 %>&date=<%= date || '' %>&status=<%= status || '' %>&search=<%= search || '' %>"
+                                                                                                    class="pagination-link next">Next
+                                                                                                    »</a>
+                                                                                                <% } else { %>
+                                                                                                    <span
+                                                                                                        class="pagination-link disabled">Next
+                                                                                                        »</span>
+                                                                                                    <% } %>
 
-            </div>
-            <p style="text-align: center; color: #aaa; font-size: 13px; margin-top: 8px;">
-                Page <%= currentPage %> of <%= totalPages %>
-            </p>
+                    </div>
+                    <p style="text-align: center; color: #aaa; font-size: 13px; margin-top: 8px;">
+                        Page <%= currentPage %> of <%= totalPages %>
+                    </p>
+                </div>
         </div>
     </div>
-</div>
 
-<%- include('../partials/admin/footer') %>
+    <%- include('../partials/admin/footer') %>

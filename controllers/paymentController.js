@@ -72,7 +72,7 @@ const verifyPayment = async (req, res, next) => {
       logger.error(
         `PAYMENT SIGNATURE MISMATCH | UserId: ${order.userId} | OrderId: ${order._id}`
       );
-      
+
       order.paymentStatus = "Failed";
       order.orderStatus = "Payment Failed";
       await order.save();
@@ -118,7 +118,7 @@ const verifyPayment = async (req, res, next) => {
       success: true,
       message: RESPONSE_MESSAGES.SUCCESS
     });
-    
+
   } catch (error) {
     next(error);
   }
@@ -141,7 +141,7 @@ const markPaymentFailed = async (req, res, next) => {
       success: true,
       message: RESPONSE_MESSAGES.SUCCESS
     });
-    
+
   } catch (error) {
     next(error);
   }
@@ -161,7 +161,7 @@ const retryPayment = async (req, res, next) => {
       );
       return retryRazorpay(order, res);
     }
-    
+
     return res.redirect(`/orders/${order._id}/success`);
   } catch (error) {
     next(error);

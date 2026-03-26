@@ -298,11 +298,11 @@ body {
   border-radius: 50%;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: #ffffff;
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(20px);
   background-color: #2a2a2a;
 }
@@ -326,8 +326,10 @@ input:checked + .slider:before {
   border-color: #ffffff;
   background-color: #3a3a3a;
 }
+
 .btn-edit svg {
-  stroke: #ffffff; /* Make icon white */
+  stroke: #ffffff;
+  /* Make icon white */
 }
 
 /*Pagination*/
@@ -414,7 +416,7 @@ input:checked + .slider:before {
     border-bottom: 1px solid #333;
   }
 
-    /**/
+  /**/
   .search-box {
     flex-direction: column;
     align-items: stretch;
@@ -448,6 +450,7 @@ input:checked + .slider:before {
     padding: 4px 12px;
     font-size: 11px;
   }
+
   .pagination-link {
     padding: 6px 10px;
     font-size: 11px;
@@ -463,16 +466,20 @@ input:checked + .slider:before {
   .categories-table td {
     padding: 10px 6px;
   }
+
   .pagination-link {
     padding: 5px 8px;
     font-size: 10px;
   }
 }
+
 /* Make heading, add button, and search bar stay in one line */
 .page-title {
   display: flex;
-  justify-content: space-between; /* Push content left & right */
-  align-items: center;            /* Vertically align center */
+  justify-content: space-between;
+  /* Push content left & right */
+  align-items: center;
+  /* Vertically align center */
   gap: 15px;
 }
 
@@ -482,7 +489,7 @@ input:checked + .slider:before {
 }
 
 .page-title .btn-add-category {
-  margin-left: auto; 
+  margin-left: auto;
   margin-right: 15px;
 }
 
@@ -491,30 +498,40 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
 }
+
 /* Style for Add Category Button */
 .btn-add-category {
-  background:#1a1a1a;       /* Gray background */
-  color: #fff;                  /* White text */
-  padding: 8px 18px;            /* Button size */
-  border-radius: 6px;           /* Smooth rounded corners */
-  text-decoration: none;        /* Remove underline */
+  background: #1a1a1a;
+  /* Gray background */
+  color: #fff;
+  /* White text */
+  padding: 8px 18px;
+  /* Button size */
+  border-radius: 6px;
+  /* Smooth rounded corners */
+  text-decoration: none;
+  /* Remove underline */
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.3s ease;    /* Smooth hover effect */
+  transition: all 0.3s ease;
+  /* Smooth hover effect */
   border: 1px solid #666;
 }
 
 .btn-add-category:hover {
-  background-color: rgba(40, 40, 40, 0.9);       /* Slightly lighter on hover */
+  background-color: rgba(40, 40, 40, 0.9);
+  /* Slightly lighter on hover */
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
-  transform: scale(1.02);       /* Small hover animation */
+  transform: scale(1.02);
+  /* Small hover animation */
 }
 
 /* Status Badges */
- /*  Status text only — white color, no background, no button look */
+/*  Status text only — white color, no background, no button look */
 .badge-listed,
 .badge-unlisted {
-  color: #ffffff;    /* White text for both */
+  color: #ffffff;
+  /* White text for both */
   font-weight: 500;
   background: none;
   border: none;
@@ -534,12 +551,14 @@ input:checked + .slider:before {
 }
 
 .action-list {
-  background: #28a745;   /* Green */
+  background: #28a745;
+  /* Green */
   color: white;
 }
 
 .action-unlist {
-  background: #d9534f;   /* Red */
+  background: #d9534f;
+  /* Red */
   color: white;
 }
 
@@ -556,11 +575,13 @@ input:checked + .slider:before {
 }
 
 .status-badge.listed {
-  color: #4caf50; /* Green text */
+  color: #4caf50;
+  /* Green text */
 }
 
 .status-badge.unlisted {
-  color: #ff5252; /* Red text */
+  color: #ff5252;
+  /* Red text */
 }
 
 /* Button */
@@ -593,7 +614,8 @@ input:checked + .slider:before {
 
 /* Green button → List */
 .action-list {
-  background-color: #28a745;  /* Green */
+  background-color: #28a745;
+  /* Green */
 }
 
 .action-list:hover {
@@ -602,7 +624,8 @@ input:checked + .slider:before {
 
 /* Red button → Unlist */
 .action-unlist {
-  background-color: #dc3545;  /* Red */
+  background-color: #dc3545;
+  /* Red */
 }
 
 .action-unlist:hover {
@@ -611,21 +634,23 @@ input:checked + .slider:before {
 
 /* Read More / Read Less button style */
 .toggle-desc-btn {
-    background: none;
-    border: none;
-    color: #3498db; /* Blue link color */
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 0;
-    margin-left: 5px;
-    text-decoration: underline;
-    transition: 0.2s ease;
+  background: none;
+  border: none;
+  color: #3498db;
+  /* Blue link color */
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0;
+  margin-left: 5px;
+  text-decoration: underline;
+  transition: 0.2s ease;
 }
 
 .toggle-desc-btn:hover {
-    color: #1abc9c;  /* Teal hover color */
-    text-decoration: none;
+  color: #1abc9c;
+  /* Teal hover color */
+  text-decoration: none;
 }
 
 
@@ -672,76 +697,77 @@ input:checked + .slider:before {
 }
 
 .categories-table {
-  min-width: 120px; /* adjust if needed */
+  min-width: 120px;
+  /* adjust if needed */
 }
 
-.referral-code{
-  font-weight:600;
+.referral-code {
+  font-weight: 600;
 }
 
-.referral-count{
-  display:inline-block;
-  background:#474e4b;
-  color:#ebedf1;
-  font-weight:700;
-  padding:6px 12px;
-  border-radius:20px;
-  font-size:14px;
-  text-align:center;
-  min-width:32px;
+.referral-count {
+  display: inline-block;
+  background: #474e4b;
+  color: #ebedf1;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  text-align: center;
+  min-width: 32px;
 }
 
 /* Referral settings section */
 
-.referral-settings{
-  display:flex;
-  gap:30px;
-  margin-top:15px;
-  padding:15px 20px;
-  background:#2a2a2a;
-  border-radius:8px;
-  align-items:center;
-  flex-wrap:wrap;
+.referral-settings {
+  display: flex;
+  gap: 30px;
+  margin-top: 15px;
+  padding: 15px 20px;
+  background: #2a2a2a;
+  border-radius: 8px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.setting-group{
-  display:flex;
-  align-items:center;
-  gap:10px;
+.setting-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.setting-group label{
-  font-size:14px;
-  font-weight:500;
-  color:#ddd;
+.setting-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ddd;
 }
 
-.setting-group input{
-  width:80px;
-  padding:6px 8px;
-  border-radius:5px;
-  border:1px solid #444;
-  background:#1f1f1f;
-  color:#fff;
-  font-size:14px;
+.setting-group input {
+  width: 80px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  border: 1px solid #444;
+  background: #1f1f1f;
+  color: #fff;
+  font-size: 14px;
 }
 
-.setting-group input:focus{
-  outline:none;
-  border-color:#6c5ce7;
+.setting-group input:focus {
+  outline: none;
+  border-color: #6c5ce7;
 }
 
-.btn-edit-setting{
-  padding:6px 12px;
-  border:none;
-  background:#6c5ce7;
-  color:#fff;
-  font-size:13px;
-  border-radius:5px;
-  cursor:pointer;
-  transition:0.2s ease;
+.btn-edit-setting {
+  padding: 6px 12px;
+  border: none;
+  background: #6c5ce7;
+  color: #fff;
+  font-size: 13px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s ease;
 }
 
-.btn-edit-setting:hover{
-  background:#5a4bd4;
+.btn-edit-setting:hover {
+  background: #5a4bd4;
 }

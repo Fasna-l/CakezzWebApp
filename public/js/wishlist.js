@@ -90,67 +90,67 @@ document.addEventListener("click", async (e) => {
 
   /*PRODUCT DETAILS PAGE WISHLIST */
 
-const pdHeart = e.target.closest("#pd-wishlist");
+  const pdHeart = e.target.closest("#pd-wishlist");
 
-if (pdHeart) {
+  if (pdHeart) {
 
-  e.preventDefault();
+    e.preventDefault();
 
-  const productId = pdHeart.dataset.productId;
+    const productId = pdHeart.dataset.productId;
 
-  const activeWeight = document.querySelector(".weight-btn.active");
+    const activeWeight = document.querySelector(".weight-btn.active");
 
-  if (!activeWeight) {
-    showToast("Please select a weight", "error");
-    return;
-  }
-
-  const size = activeWeight.dataset.size;
-
-  try {
-    const res = await fetch("/wishlist", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ productId, size })
-    });
-
-    const data = await res.json();
-
-    if (!data.success) {
-      showToast(data.message || "Please login", "error");
+    if (!activeWeight) {
+      showToast("Please select a weight", "error");
       return;
     }
 
-    pdHeart.classList.toggle("active", data.isAdded);
+    const size = activeWeight.dataset.size;
 
-    /* update local wishlistItems array */
-    if (typeof wishlistItems !== "undefined") {
+    try {
+      const res = await fetch("/wishlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, size })
+      });
 
-      if (data.isAdded) {
-        wishlistItems.push({ product: productId, size });
-      } else {
-        const index = wishlistItems.findIndex(
-          item =>
-            String(item.product) === String(productId) &&
-            item.size === size
-        );
+      const data = await res.json();
 
-        if (index > -1) wishlistItems.splice(index, 1);
+      if (!data.success) {
+        showToast(data.message || "Please login", "error");
+        return;
       }
 
+      pdHeart.classList.toggle("active", data.isAdded);
+
+      /* update local wishlistItems array */
+      if (typeof wishlistItems !== "undefined") {
+
+        if (data.isAdded) {
+          wishlistItems.push({ product: productId, size });
+        } else {
+          const index = wishlistItems.findIndex(
+            item =>
+              String(item.product) === String(productId) &&
+              item.size === size
+          );
+
+          if (index > -1) wishlistItems.splice(index, 1);
+        }
+
+      }
+
+      updateWishlistCount();
+
+      showToast(data.message);
+
+    } catch (err) {
+      console.error(err);
+      showToast("Something went wrong", "error");
     }
 
-    updateWishlistCount();
-
-    showToast(data.message);
-
-  } catch (err) {
-    console.error(err);
-    showToast("Something went wrong", "error");
+    return;
   }
-
-  return;
-}
 
   /*HEART CLICK (HOME / SHOP) */
 
@@ -202,7 +202,7 @@ if (pdHeart) {
 
     try {
 
-      const res = await fetch("/wishlist",{
+      const res = await fetch("/wishlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -268,7 +268,7 @@ async function updateWishlistCount() {
 
     if (el) el.textContent = data.count;
 
-  } catch {}
+  } catch { }
 
 }
 

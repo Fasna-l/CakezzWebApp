@@ -24,7 +24,7 @@ const loadShoppage = async (req, res, next) => {
     let search = req.query.search || "";
     let categoryFilter = req.query.category || "";
     let sort = req.query.sort || "";
-    let priceRange = req.query.priceRange || ""; 
+    let priceRange = req.query.priceRange || "";
     let minPrice = 0, maxPrice = 100000;
 
     // Basic Filter
@@ -38,9 +38,9 @@ const loadShoppage = async (req, res, next) => {
     }
 
     if (priceRange) {
-        const [min, max] = priceRange.split("-").map(Number);
-        minPrice = min;
-        maxPrice = max;
+      const [min, max] = priceRange.split("-").map(Number);
+      minPrice = min;
+      maxPrice = max;
     }
 
     //  Total product count BEFORE pagination
@@ -88,15 +88,15 @@ const loadShoppage = async (req, res, next) => {
     });
 
     const products = await Product.aggregate(pipeline);
-    
-    //  APPLY BEST OFFER (Product vs Category)
-for (let product of products) {
-  const basePrice = product.minPrice;
-  const offer = await calculateBestOffer(product, basePrice);
 
-  product.offerPercentage = offer.discountPercentage;
-  product.appliedOfferType = offer.appliedOfferType;
-}
+    //  APPLY BEST OFFER (Product vs Category)
+    for (let product of products) {
+      const basePrice = product.minPrice;
+      const offer = await calculateBestOffer(product, basePrice);
+
+      product.offerPercentage = offer.discountPercentage;
+      product.appliedOfferType = offer.appliedOfferType;
+    }
 
     const totalPages = Math.ceil(totalProducts / limit);
 
@@ -145,7 +145,7 @@ const loadProductDetails = async (req, res, next) => {
       return res.redirect("/shop");
     }
 
-          //  APPLY BEST OFFER
+    //  APPLY BEST OFFER
     const basePrice = product.variants[0].price;
     const offer = await calculateBestOffer(product, basePrice);
 
@@ -157,9 +157,9 @@ const loadProductDetails = async (req, res, next) => {
       _id: { $ne: productId },
       isBlocked: false
     })
-    .populate("category")
-    .limit(4)
-    .lean();
+      .populate("category")
+      .limit(4)
+      .lean();
 
 
     for (let p of relatedProducts) {
@@ -170,7 +170,7 @@ const loadProductDetails = async (req, res, next) => {
       p.appliedOfferType = offer.appliedOfferType
     }
 
-    const user = userId ? await User.findById(userId).lean() : null; 
+    const user = userId ? await User.findById(userId).lean() : null;
 
     let wishlistItems = [];
 
@@ -183,7 +183,7 @@ const loadProductDetails = async (req, res, next) => {
       product,
       relatedProducts,
       user,
-      cartCount, 
+      cartCount,
       wishlistItems
     });
 
@@ -204,7 +204,7 @@ const loadReviewPage = async (req, res, next) => {
         RESPONSE_MESSAGES.PRODUCT_NOT_FOUND
       );
     }
-    res.render("reviewPage", { product, user }); 
+    res.render("reviewPage", { product, user });
   } catch (error) {
     next(error);
   }

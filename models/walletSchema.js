@@ -90,6 +90,6 @@ walletSchema.methods.addTransaction = async function (transactionData) {
   await this.save();
 };
 
-const Wallet = mongoose.model("Wallet",walletSchema);
+const Wallet = mongoose.model("Wallet", walletSchema);
 
 export default Wallet;

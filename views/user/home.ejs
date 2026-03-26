@@ -1,266 +1,242 @@
 <%- include('../partials/user/header') %>
 
-<!-- Swiper CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
-<!-- Swiper JS -->
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <!-- Swiper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
-<!--==================== MAIN CONTENT SECTION ====================-->
+  <!--==================== MAIN CONTENT SECTION ====================-->
 
-<!-- Hero Section-->
-<section class="hero-section">
+  <!-- Hero Section-->
+  <section class="hero-section">
 
-  <% if(banners && banners.length > 0){ %>
+    <% if(banners && banners.length> 0){ %>
 
-  <div class="swiper bannerSwiper">
-    <div class="swiper-wrapper">
+      <div class="swiper bannerSwiper">
+        <div class="swiper-wrapper">
 
-      <% banners.forEach(banner => { %>
+          <% banners.forEach(banner=> { %>
 
-        <div class="swiper-slide">
+            <div class="swiper-slide">
+              <a href="/shop">
+                <img src="/uploads/banner/<%= banner.bannerImage %>" class="hero-banner-img">
+              </a>
+            </div>
+
+            <% }) %>
+
+        </div>
+
+        <div class="swiper-pagination banner-pagination"></div>
+
+      </div>
+
+      <% } else { %>
+
+        <div class="hero-banner-container">
           <a href="/shop">
-            <img 
-              src="/uploads/banner/<%= banner.bannerImage %>" 
-              class="hero-banner-img"
-            >
+            <img src="/images/banner image.jpg" class="hero-banner-img">
           </a>
         </div>
 
-      <% }) %>
+        <% } %>
 
-    </div>
+  </section>
 
-    <div class="swiper-pagination banner-pagination"></div>
+  <!-- Cakes Section (Latest Products – 1 kg check) -->
+  <section class="cakes-section">
+    <div class="container">
+      <div class="text-center mb-4">
+        <h2 class="section-title mb-1">Cakes</h2>
+        <p class="section-subtitle mb-3">Dreamy cakes for every occasion</p>
+      </div>
 
-  </div>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title mb-0">Latest Products</h2>
+        <a href="/shop" class="view-all-btn">VIEW ALL</a>
+      </div>
 
-  <% } else { %>
-
-  <div class="hero-banner-container">
-    <a href="/shop">
-      <img src="/images/banner image.jpg" class="hero-banner-img">
-    </a>
-  </div>
-
-  <% } %>
-
-</section>
-
-<!-- Cakes Section (Latest Products – 1 kg check) -->
-<section class="cakes-section">
-  <div class="container">
-    <div class="text-center mb-4">
-      <h2 class="section-title mb-1">Cakes</h2>
-      <p class="section-subtitle mb-3">Dreamy cakes for every occasion</p>
-    </div>
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="section-title mb-0">Latest Products</h2>
-      <a href="/shop" class="view-all-btn">VIEW ALL</a>
-    </div>
-
-    <div class="row">
-      <% latestProducts.forEach(product => { 
-           const oneKgVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
-      %>
-        <div class="col-lg-3 col-md-6">
-          <div class="cake-card">
-            <% if (product.offerPercentage > 0) { %>
-              <span class="offer-badge">
-                <%= product.offerPercentage %>%
-                <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
-              </span>
-            <% } %>
-
-
-            <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
-              data-product-id="<%= product._id %>">
-              <i class="fa-heart"></i>
-            </div>
-            <a href="/product/<%= product._id %>">
-              <img src="/uploads/product/<%= product.productImage[0] %>" alt="<%= product.productName %>" />
-            </a>
-
-            <div class="cake-card-body">
-              <h5 class="cake-card-title">
-                <a href="/product/<%= product._id %>" class="product-link">
-                  <%= product.productName %>
-                </a>
-              </h5>
-              <div class="price-rating-row">
-              <p class="cake-card-subtitle">
-                Starting from ₹<%= product.offerPercentage
-                                    ? Math.round(oneKgVariant.price - (oneKgVariant.price * product.offerPercentage) / 100)
-                                    : oneKgVariant.price
-                                %>
-
-              </p>
-
-              <% 
-                let avg = 0;
-                if(product.reviews && product.reviews.length){
-                  avg = (product.reviews.reduce((a, b) => a + b.rating, 0) / product.reviews.length).toFixed(1);
-                }
-              %>
-
-              <% if(avg > 0){ %>
-                <span class="rating-badgelatestprdct rating-inline">★ <%= avg %></span>
-              <% } %>
-            </div>
-
-              <button 
-                class="cake-add-to-cart-btn"
-                data-product-id="<%= product._id %>"
-                data-variants='<%- JSON.stringify(product.variants) %>'
-                data-qty="1">
-
-                <i class="fas fa-shopping-cart"></i>
-                  Add to Cart
-              </button>
-
-
-            </div>
-          </div>
-        </div>
-      <% }) %>
-    </div>
-  </div>
-</section>
-
-<!-- Bestsellers Section – check 3 kg / highest variant -->
-<section class="bestsellers-section">
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="section-title mb-0">Bestsellers</h2>
-      <a href="/shop" class="view-all-grey">VIEW ALL</a>
-    </div>
-
-    <div class="swiper mySwiper">
-      <div class="swiper-wrapper">
-        <% bestProducts.forEach(product => { 
-             const threeKgVariant = product.variants && product.variants.length > 0 
-               ? product.variants[product.variants.length - 1] 
-               : null;
-        %>
-          <div class="swiper-slide">
-            <div class="product-card">
-
-              <% if (product.offerPercentage > 0) { %>
+      <div class="row">
+        <% latestProducts.forEach(product=> {
+          const oneKgVariant = product.variants && product.variants.length > 0 ? product.variants[0] : null;
+          %>
+          <div class="col-lg-3 col-md-6">
+            <div class="cake-card">
+              <% if (product.offerPercentage> 0) { %>
                 <span class="offer-badge">
                   <%= product.offerPercentage %>%
-                  <%= product.appliedOfferType === "category" ? "C-OFF" : "OFF" %>
+                    <%= product.appliedOfferType==="category" ? "C-OFF" : "OFF" %>
                 </span>
-              <% } %>
-              <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
-                data-product-id="<%= product._id %>">
-                <i class="fa-heart"></i>
-              </div>
-
-              <a href="/product/<%= product._id %>">
-                <img src="/uploads/product/<%= product.productImage[0] %>" alt="<%= product.productName %>">
-              </a>
-
-              <div class="price-container">
-                ₹<%=
-                  threeKgVariant
-                    ? Math.max(
-                      0,
-                      product.offerPercentage
-                        ? Math.round(
-                            threeKgVariant.price -
-                            (threeKgVariant.price * product.offerPercentage) / 100
-                          )
-                        : threeKgVariant.price
-                    )
-                    : product.maxPrice || "N/A"
-                %>
-
-              </div>
-
-              <div class="product-card-body">
-                <button 
-                  class="add-to-cart-btn mb-3"
-                  data-product-id="<%= product._id %>"
-                  data-variants='<%- JSON.stringify(product.variants) %>'
-                  data-qty="1">
-
-                  <i class="fas fa-shopping-cart"></i>
-                    Add to Cart
-                </button>
-
-
-                <h5 class="product-title">
-                  <a href="/product/<%= product._id %>" class="product-link">
-                    <%= product.productName %>
-                  </a>
-                </h5>
-                <% 
-                  let avg = 0;
-                    if(product.reviews && product.reviews.length){
-                      avg = (product.reviews.reduce((a, b) => a + b.rating, 0) / product.reviews.length).toFixed(1);
-                    }
-                %>
-
-                <% if(avg > 0){ %>
-                  <span class="rating-badge">★ <%= avg %></span>
                 <% } %>
-              </div>
+
+
+                  <div class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
+                    data-product-id="<%= product._id %>">
+                    <i class="fa-heart"></i>
+                  </div>
+                  <a href="/product/<%= product._id %>">
+                    <img src="/uploads/product/<%= product.productImage[0] %>" alt="<%= product.productName %>" />
+                  </a>
+
+                  <div class="cake-card-body">
+                    <h5 class="cake-card-title">
+                      <a href="/product/<%= product._id %>" class="product-link">
+                        <%= product.productName %>
+                      </a>
+                    </h5>
+                    <div class="price-rating-row">
+                      <p class="cake-card-subtitle">
+                        Starting from ₹<%= product.offerPercentage ? Math.round(oneKgVariant.price - (oneKgVariant.price
+                          * product.offerPercentage) / 100) : oneKgVariant.price %>
+
+                      </p>
+
+                      <% let avg=0; if(product.reviews && product.reviews.length){ avg=(product.reviews.reduce((a, b)=>
+                        a + b.rating, 0) / product.reviews.length).toFixed(1);
+                        }
+                        %>
+
+                        <% if(avg> 0){ %>
+                          <span class="rating-badgelatestprdct rating-inline">★ <%= avg %></span>
+                          <% } %>
+                    </div>
+
+                    <button class="cake-add-to-cart-btn" data-product-id="<%= product._id %>"
+                      data-variants='<%- JSON.stringify(product.variants) %>' data-qty="1">
+
+                      <i class="fas fa-shopping-cart"></i>
+                      Add to Cart
+                    </button>
+
+
+                  </div>
             </div>
           </div>
-        <% }) %>
-      </div>
-
-      <div class="swiper-button-prev"></div>
-      <div class="swiper-button-next"></div>
-      <div class="swiper-pagination"></div>
-    </div>
-  </div>
-</section>
-
-<!-- CTA Section -->
-<section class="cta-section">
-  <div class="container">
-    <div class="row">
-      <div class="col-12 text-center">
-        <h2 class="cta-pink-text">VISIT & EXPERIENCE</h2>
-        <p class="cta-black-text">OUR SERVICES IN YOUR CITY</p>
+          <% }) %>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- Small Weight Popup wishlist -->
-<div id="weightPopup" class="weight-popup"></div>
+  <!-- Bestsellers Section – check 3 kg / highest variant -->
+  <section class="bestsellers-section">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="section-title mb-0">Bestsellers</h2>
+        <a href="/shop" class="view-all-grey">VIEW ALL</a>
+      </div>
 
-<!-- Add to Cart popup -->
-<div id="cartWeightPopup" class="weight-popup"></div>
+      <div class="swiper mySwiper">
+        <div class="swiper-wrapper">
+          <% bestProducts.forEach(product=> {
+            const threeKgVariant = product.variants && product.variants.length > 0
+            ? product.variants[product.variants.length - 1]
+            : null;
+            %>
+            <div class="swiper-slide">
+              <div class="product-card">
 
-<!--==================== END MAIN CONTENT SECTION ====================-->
-<script>
-  var swiper = new Swiper(".mySwiper", {
-    slidesPerView: 4,
-    spaceBetween: 20,
-    loop: true,
-    autoplay: { delay: 3000, disableOnInteraction: false },
-    navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
-    breakpoints: { 1024: { slidesPerView: 4 }, 768: { slidesPerView: 2 }, 480: { slidesPerView: 1 } }
-  });
-</script>
-<script>
-var bannerSwiper = new Swiper(".bannerSwiper", {
-  loop: true,
-  speed: 800,
+                <% if (product.offerPercentage> 0) { %>
+                  <span class="offer-badge">
+                    <%= product.offerPercentage %>%
+                      <%= product.appliedOfferType==="category" ? "C-OFF" : "OFF" %>
+                  </span>
+                  <% } %>
+                    <div
+                      class="wishlist-icon <%= wishlistProductIds?.includes(product._id.toString()) ? 'active' : '' %>"
+                      data-product-id="<%= product._id %>">
+                      <i class="fa-heart"></i>
+                    </div>
 
-  autoplay: {
-    delay: 4000,   // 4 seconds
-    disableOnInteraction: false
-  },
+                    <a href="/product/<%= product._id %>">
+                      <img src="/uploads/product/<%= product.productImage[0] %>" alt="<%= product.productName %>">
+                    </a>
 
-  pagination: {
-    el: ".banner-pagination",
-    clickable: true
-  }
-});
-</script>
-<%- include('../partials/user/footer') %>
+                    <div class="price-container">
+                      ₹<%= threeKgVariant ? Math.max( 0, product.offerPercentage ? Math.round( threeKgVariant.price -
+                        (threeKgVariant.price * product.offerPercentage) / 100 ) : threeKgVariant.price ) :
+                        product.maxPrice || "N/A" %>
+
+                    </div>
+
+                    <div class="product-card-body">
+                      <button class="add-to-cart-btn mb-3" data-product-id="<%= product._id %>"
+                        data-variants='<%- JSON.stringify(product.variants) %>' data-qty="1">
+
+                        <i class="fas fa-shopping-cart"></i>
+                        Add to Cart
+                      </button>
+
+
+                      <h5 class="product-title">
+                        <a href="/product/<%= product._id %>" class="product-link">
+                          <%= product.productName %>
+                        </a>
+                      </h5>
+                      <% let avg=0; if(product.reviews && product.reviews.length){ avg=(product.reviews.reduce((a, b)=>
+                        a + b.rating, 0) / product.reviews.length).toFixed(1);
+                        }
+                        %>
+
+                        <% if(avg> 0){ %>
+                          <span class="rating-badge">★ <%= avg %></span>
+                          <% } %>
+                    </div>
+              </div>
+            </div>
+            <% }) %>
+        </div>
+
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-pagination"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-12 text-center">
+          <h2 class="cta-pink-text">VISIT & EXPERIENCE</h2>
+          <p class="cta-black-text">OUR SERVICES IN YOUR CITY</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Small Weight Popup wishlist -->
+  <div id="weightPopup" class="weight-popup"></div>
+
+  <!-- Add to Cart popup -->
+  <div id="cartWeightPopup" class="weight-popup"></div>
+
+  <!--==================== END MAIN CONTENT SECTION ====================-->
+  <script>
+    var swiper = new Swiper(".mySwiper", {
+      slidesPerView: 4,
+      spaceBetween: 20,
+      loop: true,
+      autoplay: { delay: 3000, disableOnInteraction: false },
+      navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+      breakpoints: { 1024: { slidesPerView: 4 }, 768: { slidesPerView: 2 }, 480: { slidesPerView: 1 } }
+    });
+  </script>
+  <script>
+    var bannerSwiper = new Swiper(".bannerSwiper", {
+      loop: true,
+      speed: 800,
+
+      autoplay: {
+        delay: 4000,   // 4 seconds
+        disableOnInteraction: false
+      },
+
+      pagination: {
+        el: ".banner-pagination",
+        clickable: true
+      }
+    });
+  </script>
+  <%- include('../partials/user/footer') %>

@@ -1,253 +1,281 @@
 <%- include('../partials/admin/header') %>
-<link rel="stylesheet" href="/css/admin-style/category.css">
+    <link rel="stylesheet" href="/css/admin-style/category.css">
 
-<div class="dashboard-container">
-    <div class="dashboard-wrapper">
-        <%- include('../partials/admin/sidebar') %>
-        
-        <!-- Main Content -->
-        <div class="categories-container">
-            <!-- Page Title -->
-            <div class="page-title">
-            <h2>Categories</h2>
-            <a href="/admin/category/add" class="btn-add-category"> Add Category</a>
+    <div class="dashboard-container">
+        <div class="dashboard-wrapper">
+            <%- include('../partials/admin/sidebar') %>
 
-        <form action="/admin/category" method="get" class="search-form">  
-            <div class="search-box">
-                <input type="text" class="search-input" placeholder="Search categories..." name="search" value="<%= search || '' %>">
-                <button class="search-button-text" type="submit">Search</button>
+                <!-- Main Content -->
+                <div class="categories-container">
+                    <!-- Page Title -->
+                    <div class="page-title">
+                        <h2>Categories</h2>
+                        <a href="/admin/category/add" class="btn-add-category"> Add Category</a>
 
-                <% if (search && search.trim() !== '') { %>
-                    <a href="/admin/category" class="search-button-text" style="background:#888;text-decoration: none;">Clear</a>
-                <% } %>
-            </div>
-        </form>
-</div>
+                        <form action="/admin/category" method="get" class="search-form">
+                            <div class="search-box">
+                                <input type="text" class="search-input" placeholder="Search categories..." name="search"
+                                    value="<%= search || '' %>">
+                                <button class="search-button-text" type="submit">Search</button>
 
-
-            <!-- Categories Table -->
-            <div class="table-wrapper">
-                <table class="categories-table">
-                    <thead>
-                        <tr>
-                            <th>Sl.No</th>
-                            <th>Category Name</th>
-                            <th>Description</th>
-                            <th>category offer</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                            <th>Edit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (cat && cat.length > 0) { %>
-                            <% cat.forEach((category, index) => { %>
-                                <tr>
-                                    <td><%= (currentPage - 1) * 3 + index + 1 %></td>
-                                    <td><%= category.categoryName %></td>
-                                     <td>
-                                        <% if (category.description && category.description.length > 120) { %>
-                                            <span class="desc-short"><%= category.description.substring(0, 120) %>...</span>
-                                            <span class="desc-full" style="display:none;"><%= category.description %></span>
-                                            <button class="toggle-desc-btn">Read More</button>
-                                        <% } else { %>
-                                            <span><%= category.description %></span>
-                                        <% } %>
-                                    </td>
- 
-
-                                    <!-- Offer (Display Only) -->
-                                     <td>
-                                        <% if (category.categoryOffer) { %>
-                                            <a 
-                                                href="/admin/category-offer/edit/<%= category.categoryOffer %>" 
-                                                class="btn-offer"
-                                                style="text-decoration: none;"
-                                            >
-                                                Edit Offer
-                                            </a>
-                                        <% } else { %>
-                                            <a 
-                                                href="/admin/category-offer/add?categoryId=<%= category._id %>" 
-                                                class="btn-offer"
-                                                style="text-decoration: none;"
-                                            >
-                                                Add Offer
-                                            </a>
-                                        <% } %>
-                                     </td>
-                                     
-                                     <!-- List / Unlist -->
-                                   
-                                    <td class="status-cell">
-                                        <% if (category.isListed) { %>
-                                            <span class="status-badge listed">Listed</span>
-                                        <% } else { %>
-                                            <span class="status-badge unlisted">Unlisted</span>
-                                        <% } %>
-                                    </td>
-
-                                    <td>
-                                        <% if (category.isListed) { %>
-                                            <!-- If category is listed, show Unlist (Red Button) -->
-                                            <button class="btn-status action-unlist" data-id="<%= category._id %>" data-status="listed">
-                                            Unlist
-                                            </button>
-                                        <% } else { %>
-                                        <!-- If category is unlisted, show List (Green Button) -->
-                                            <button class="btn-status action-list" data-id="<%= category._id %>" data-status="unlisted">
-                                            List
-                                            </button>
+                                <% if (search && search.trim() !=='' ) { %>
+                                    <a href="/admin/category" class="search-button-text"
+                                        style="background:#888;text-decoration: none;">Clear</a>
                                     <% } %>
-                                    </td>
+                            </div>
+                        </form>
+                    </div>
 
 
-
-                                    <td>
-                                        <div class="action-group">
-                                            <a href="/admin/edit-category?id=<%= category._id %>" class="btn-edit">
-                                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    </td>
+                    <!-- Categories Table -->
+                    <div class="table-wrapper">
+                        <table class="categories-table">
+                            <thead>
+                                <tr>
+                                    <th>Sl.No</th>
+                                    <th>Category Name</th>
+                                    <th>Description</th>
+                                    <th>category offer</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                    <th>Edit</th>
                                 </tr>
-                            <% }) %>
-                        <% } else { %>
-                            <tr>
-                                <td colspan="5" style="text-align:center;">No categories found</td>
-                            </tr>
-                        <% } %>
-                    </tbody>
-                </table>
-            </div>
+                            </thead>
+                            <tbody>
+                                <% if (cat && cat.length> 0) { %>
+                                    <% cat.forEach((category, index)=> { %>
+                                        <tr>
+                                            <td>
+                                                <%= (currentPage - 1) * 3 + index + 1 %>
+                                            </td>
+                                            <td>
+                                                <%= category.categoryName %>
+                                            </td>
+                                            <td>
+                                                <% if (category.description && category.description.length> 120) { %>
+                                                    <span class="desc-short">
+                                                        <%= category.description.substring(0, 120) %>...
+                                                    </span>
+                                                    <span class="desc-full" style="display:none;">
+                                                        <%= category.description %>
+                                                    </span>
+                                                    <button class="toggle-desc-btn">Read More</button>
+                                                    <% } else { %>
+                                                        <span>
+                                                            <%= category.description %>
+                                                        </span>
+                                                        <% } %>
+                                            </td>
 
-            <!-- Pagination -->
-            <div class="pagination-container">
 
-                <% if (currentPage > 1) { %>
-                    <a href="/admin/category?page=<%= currentPage - 1 %>&search=<%= search || '' %>" class="pagination-link prev">« Prev</a>
-                <% } else { %>
-                    <span class="pagination-link disabled">« Prev</span>
-                <% } %>
+                                            <!-- Offer (Display Only) -->
+                                            <td>
+                                                <% if (category.categoryOffer) { %>
+                                                    <a href="/admin/category-offer/edit/<%= category.categoryOffer %>"
+                                                        class="btn-offer" style="text-decoration: none;">
+                                                        Edit Offer
+                                                    </a>
+                                                    <% } else { %>
+                                                        <a href="/admin/category-offer/add?categoryId=<%= category._id %>"
+                                                            class="btn-offer" style="text-decoration: none;">
+                                                            Add Offer
+                                                        </a>
+                                                        <% } %>
+                                            </td>
 
-                <% 
-                    const startPage = Math.max(1, currentPage - 2);
-                    const endPage = Math.min(totalPages, currentPage + 2);
-                %>
+                                            <!-- List / Unlist -->
 
-                <% if (startPage > 1) { %>
-                    <a href="/admin/category?page=1&search=<%= search || '' %>" class="pagination-link">1</a>
-                    <% if (startPage > 2) { %>
-                    <span class="pagination-link disabled">...</span>
-                    <% } %>
-                <% } %>
+                                            <td class="status-cell">
+                                                <% if (category.isListed) { %>
+                                                    <span class="status-badge listed">Listed</span>
+                                                    <% } else { %>
+                                                        <span class="status-badge unlisted">Unlisted</span>
+                                                        <% } %>
+                                            </td>
 
-                <% for (let i = startPage; i <= endPage; i++) { %>
-                    <% if (i === currentPage) { %>
-                        <span class="pagination-link current"><%= i %></span>
-                    <% } else { %>
-                        <a href="/admin/category?page=<%= i %>&search=<%= search || '' %>" class="pagination-link"><%= i %></a>
-                    <% } %>
-                    <% } %>
+                                            <td>
+                                                <% if (category.isListed) { %>
+                                                    <!-- If category is listed, show Unlist (Red Button) -->
+                                                    <button class="btn-status action-unlist"
+                                                        data-id="<%= category._id %>" data-status="listed">
+                                                        Unlist
+                                                    </button>
+                                                    <% } else { %>
+                                                        <!-- If category is unlisted, show List (Green Button) -->
+                                                        <button class="btn-status action-list"
+                                                            data-id="<%= category._id %>" data-status="unlisted">
+                                                            List
+                                                        </button>
+                                                        <% } %>
+                                            </td>
 
-                <% if (endPage < totalPages) { %>
-                    <% if (endPage < totalPages - 1) { %>
-                        <span class="pagination-link disabled">...</span>
-                    <% } %>
-                    <a href="/admin/category?page=<%= totalPages %>&search=<%= search || '' %>" class="pagination-link"><%= totalPages %></a>
-                <% } %>
 
-                <% if (currentPage < totalPages) { %>
-                    <a href="/admin/category?page=<%= currentPage + 1 %>&search=<%= search || '' %>" class="pagination-link next">Next »</a>
-                <% } else { %>
-                    <span class="pagination-link disabled">Next »</span>
-                <% } %>
 
-            </div>
-    <!-- Page indicator -->
-        <p style="text-align: center; color: #aaa; font-size: 13px; margin-top: 8px;">
-            Page <%= currentPage %> of <%= totalPages %>
-        </p>
+                                            <td>
+                                                <div class="action-group">
+                                                    <a href="/admin/edit-category?id=<%= category._id %>"
+                                                        class="btn-edit">
+                                                        <svg width="18" height="18" fill="none" stroke="currentColor"
+                                                            stroke-width="2">
+                                                            <path
+                                                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7">
+                                                            </path>
+                                                            <path
+                                                                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z">
+                                                            </path>
+                                                        </svg>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                            <% } else { %>
+                                                <tr>
+                                                    <td colspan="5" style="text-align:center;">No categories found</td>
+                                                </tr>
+                                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
 
+                    <!-- Pagination -->
+                    <div class="pagination-container">
+
+                        <% if (currentPage> 1) { %>
+                            <a href="/admin/category?page=<%= currentPage - 1 %>&search=<%= search || '' %>"
+                                class="pagination-link prev">« Prev</a>
+                            <% } else { %>
+                                <span class="pagination-link disabled">« Prev</span>
+                                <% } %>
+
+                                    <% const startPage=Math.max(1, currentPage - 2); const endPage=Math.min(totalPages,
+                                        currentPage + 2); %>
+
+                                        <% if (startPage> 1) { %>
+                                            <a href="/admin/category?page=1&search=<%= search || '' %>"
+                                                class="pagination-link">1</a>
+                                            <% if (startPage> 2) { %>
+                                                <span class="pagination-link disabled">...</span>
+                                                <% } %>
+                                                    <% } %>
+
+                                                        <% for (let i=startPage; i <=endPage; i++) { %>
+                                                            <% if (i===currentPage) { %>
+                                                                <span class="pagination-link current">
+                                                                    <%= i %>
+                                                                </span>
+                                                                <% } else { %>
+                                                                    <a href="/admin/category?page=<%= i %>&search=<%= search || '' %>"
+                                                                        class="pagination-link">
+                                                                        <%= i %>
+                                                                    </a>
+                                                                    <% } %>
+                                                                        <% } %>
+
+                                                                            <% if (endPage < totalPages) { %>
+                                                                                <% if (endPage < totalPages - 1) { %>
+                                                                                    <span
+                                                                                        class="pagination-link disabled">...</span>
+                                                                                    <% } %>
+                                                                                        <a href="/admin/category?page=<%= totalPages %>&search=<%= search || '' %>"
+                                                                                            class="pagination-link">
+                                                                                            <%= totalPages %>
+                                                                                        </a>
+                                                                                        <% } %>
+
+                                                                                            <% if (currentPage <
+                                                                                                totalPages) { %>
+                                                                                                <a href="/admin/category?page=<%= currentPage + 1 %>&search=<%= search || '' %>"
+                                                                                                    class="pagination-link next">Next
+                                                                                                    »</a>
+                                                                                                <% } else { %>
+                                                                                                    <span
+                                                                                                        class="pagination-link disabled">Next
+                                                                                                        »</span>
+                                                                                                    <% } %>
+
+                    </div>
+                    <!-- Page indicator -->
+                    <p style="text-align: center; color: #aaa; font-size: 13px; margin-top: 8px;">
+                        Page <%= currentPage %> of <%= totalPages %>
+                    </p>
+
+                </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.querySelectorAll('.btn-status').forEach(button => {
-  button.addEventListener('click', async function () {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.querySelectorAll('.btn-status').forEach(button => {
+            button.addEventListener('click', async function () {
 
-    const id = this.getAttribute('data-id');
-    const currentStatus = this.getAttribute('data-status');
-    const action = currentStatus === "listed" ? "unlist" : "list";
+                const id = this.getAttribute('data-id');
+                const currentStatus = this.getAttribute('data-status');
+                const action = currentStatus === "listed" ? "unlist" : "list";
 
-    const result = await Swal.fire({
-      title: action === "list" ? "List this category?" : "Unlist this category?",
-      text: "Please confirm your action",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, confirm it!",
-      cancelButtonText: "Cancel",
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      background: "#2a2a2a",
-      color: "#fff"
-    });
+                const result = await Swal.fire({
+                    title: action === "list" ? "List this category?" : "Unlist this category?",
+                    text: "Please confirm your action",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, confirm it!",
+                    cancelButtonText: "Cancel",
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    background: "#2a2a2a",
+                    color: "#fff"
+                });
 
-    if (!result.isConfirmed) return;
+                if (!result.isConfirmed) return;
 
-    try {
-      const response = await fetch(
-        `/admin/categories/${id}/${action}`,
-        { method: "PATCH" }
-      );
+                try {
+                    const response = await fetch(
+                        `/admin/categories/${id}/${action}`,
+                        { method: "PATCH" }
+                    );
 
-      const data = await response.json();
+                    const data = await response.json();
 
-      if (data.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: `Category ${action === "list" ? "listed" : "unlisted"} successfully`,
-          timer: 1200,
-          showConfirmButton: false,
-          background: "#2a2a2a",
-          color: "#fff"
-        }).then(() => {
-          location.reload();
+                    if (data.success) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                            text: `Category ${action === "list" ? "listed" : "unlisted"} successfully`,
+                            timer: 1200,
+                            showConfirmButton: false,
+                            background: "#2a2a2a",
+                            color: "#fff"
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        throw new Error();
+                    }
+
+                } catch (error) {
+                    Swal.fire("Error", "Something went wrong", "error");
+                }
+            });
         });
-      } else {
-        throw new Error();
-      }
 
-    } catch (error) {
-      Swal.fire("Error", "Something went wrong", "error");
-    }
-  });
-});
+        // read more/read less function:
 
-// read more/read less function:
+        document.querySelectorAll('.toggle-desc-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const shortText = this.parentElement.querySelector('.desc-short');
+                const fullText = this.parentElement.querySelector('.desc-full');
 
-document.querySelectorAll('.toggle-desc-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
-      const shortText = this.parentElement.querySelector('.desc-short');
-      const fullText = this.parentElement.querySelector('.desc-full');
+                if (fullText.style.display === "none") {
+                    shortText.style.display = "none";
+                    fullText.style.display = "inline";
+                    this.innerText = "Read Less";
+                } else {
+                    shortText.style.display = "inline";
+                    fullText.style.display = "none";
+                    this.innerText = "Read More";
+                }
+            });
+        });
+    </script>
 
-      if (fullText.style.display === "none") {
-        shortText.style.display = "none";
-        fullText.style.display = "inline";
-        this.innerText = "Read Less";
-      } else {
-        shortText.style.display = "inline";
-        fullText.style.display = "none";
-        this.innerText = "Read More";
-      }
-    });
-  });
-</script>
-
-<%- include('../partials/admin/footer') %>
+    <%- include('../partials/admin/footer') %>

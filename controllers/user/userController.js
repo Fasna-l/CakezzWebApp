@@ -28,12 +28,12 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const pageNotFound = async (req,res,next)=>{
-    try {
-        res.render("pageNotFound")
-    } catch (error) {
-      next(error);
-    }
+const pageNotFound = async (req, res, next) => {
+  try {
+    res.render("pageNotFound")
+  } catch (error) {
+    next(error);
+  }
 }
 
 const googleAuth = async (req, res, next) => {
@@ -52,7 +52,7 @@ const googleAuth = async (req, res, next) => {
     req.session.user = user._id;
     authLogger.info(`GOOGLE LOGIN SUCCESS | UserId: ${user._id} | Email: ${user.email} | IP: ${req.ip}`);
 
-     // ENSURE WALLET EXISTS FOR GOOGLE USER
+    // ENSURE WALLET EXISTS FOR GOOGLE USER
     const walletExists = await Wallet.findOne({ userId: user._id });
     if (!walletExists) {
       await Wallet.create({ userId: user._id });
@@ -189,212 +189,212 @@ const loadHomepage = async (req, res, next) => {
   }
 };
 
-const loadLogin = async (req,res,next)=>{
-    try {
-        if(req.session.user){
-            return res.redirect("/");
-        }
-
-        const message = req.session.loginError;
-        delete req.session.loginError;  // clear after showing once
-
-        return res.render("login",{message});
-
-    } catch (error) {
-        next(error);
+const loadLogin = async (req, res, next) => {
+  try {
+    if (req.session.user) {
+      return res.redirect("/");
     }
+
+    const message = req.session.loginError;
+    delete req.session.loginError;  // clear after showing once
+
+    return res.render("login", { message });
+
+  } catch (error) {
+    next(error);
+  }
 }
 
-const login = async (req,res,next)=>{
-    try {
-        const {email,password} = req.body;
-        const findUser = await User.findOne({isAdmin:0,email:email});
-        
-        if(!findUser){
-          authLogger.warn(`LOGIN FAILED | Email: ${email} | Reason: User not found | IP: ${req.ip}`);
-          req.session.loginError = "We couldn't find an account with this email. Please try again or sign up.";
-          return res.redirect("/login");
-        }
-        
-        if(findUser.isBlocked){
-          authLogger.warn(`LOGIN BLOCKED | UserId: ${findUser._id} | IP: ${req.ip}`);
-          req.session.loginError = "Your account has been disabled. Please contact our team for assistance.";
-          return res.redirect("/login");
-        }
+const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const findUser = await User.findOne({ isAdmin: 0, email: email });
 
-        const passwordMatch = await bcrypt.compare(password,findUser.password);
-
-        if(!passwordMatch){
-          authLogger.warn(`LOGIN FAILED | UserId: ${findUser._id} | Reason: Wrong password | IP: ${req.ip}`);
-          req.session.loginError = "Incorrect Password";
-          return res.redirect("/login");
-        }
-
-        req.session.user = findUser._id
-        authLogger.info(`LOGIN SUCCESS | UserId: ${findUser._id} | Email: ${email} | IP: ${req.ip}`);
-        return res.redirect("/")
-
-    } catch (error) {
-      next(error);
+    if (!findUser) {
+      authLogger.warn(`LOGIN FAILED | Email: ${email} | Reason: User not found | IP: ${req.ip}`);
+      req.session.loginError = "We couldn't find an account with this email. Please try again or sign up.";
+      return res.redirect("/login");
     }
+
+    if (findUser.isBlocked) {
+      authLogger.warn(`LOGIN BLOCKED | UserId: ${findUser._id} | IP: ${req.ip}`);
+      req.session.loginError = "Your account has been disabled. Please contact our team for assistance.";
+      return res.redirect("/login");
+    }
+
+    const passwordMatch = await bcrypt.compare(password, findUser.password);
+
+    if (!passwordMatch) {
+      authLogger.warn(`LOGIN FAILED | UserId: ${findUser._id} | Reason: Wrong password | IP: ${req.ip}`);
+      req.session.loginError = "Incorrect Password";
+      return res.redirect("/login");
+    }
+
+    req.session.user = findUser._id
+    authLogger.info(`LOGIN SUCCESS | UserId: ${findUser._id} | Email: ${email} | IP: ${req.ip}`);
+    return res.redirect("/")
+
+  } catch (error) {
+    next(error);
+  }
 }
 
-const loadSignup = async (req,res,next)=>{
-    try {
-      const referralCode = req.query.code || "";
-      return res.render("signup", { referralCode });
-    } catch (error) {
-      next(error);
-    }
+const loadSignup = async (req, res, next) => {
+  try {
+    const referralCode = req.query.code || "";
+    return res.render("signup", { referralCode });
+  } catch (error) {
+    next(error);
+  }
 }
 
-const signup = async (req,res,next) =>{
-    try {
-        const {name,email,password,confirmPassword, referralCode} = req.body;
-        if(password !== confirmPassword){
-            return res.render("signup",{message:RESPONSE_MESSAGES.PASSWORD_MISMATCH});
-        }
-        const findUser = await User.findOne({email});
-        if(findUser){
-            return res.render("signup",{
-                message:RESPONSE_MESSAGES.EMAIL_ALREADY_EXISTS,
-                icon: "warning",
-            });
-        }
-
-        const otp = generateOtp();
-        const emailSent = await sendVerificationEmail(email,otp,"Verify your account");
-        if (!emailSent) {
-            console.log("Email sending failed");
-            return res.render("signup", {
-                message: RESPONSE_MESSAGES.EMAIL_SEND_FAILED,
-                icon: "warning",
-            });
-        }
-        // Store OTP in DB (Replace session-based storage)
-        await Otp.deleteOne({email}); //remove old OTP if exists
-        await Otp.create({email,otp});
-
-        req.session.userData = { name, email, password , referralCode: referralCode || null};
-        res.render("verify-otp");
-        console.log("OTP Send",otp)
-
-    } catch (error) {
-        next(error);
+const signup = async (req, res, next) => {
+  try {
+    const { name, email, password, confirmPassword, referralCode } = req.body;
+    if (password !== confirmPassword) {
+      return res.render("signup", { message: RESPONSE_MESSAGES.PASSWORD_MISMATCH });
     }
-}
-
-const verifyOtp = async (req, res,next) => {
-    try {
-        const enteredOtp = req.body.otp;
-        const { email, name, password, referralCode} = req.session.userData || {};
-
-        if (!email) {
-          return res.status(HTTP_STATUS.BAD_REQUEST).json({
-            success: false,
-            message: RESPONSE_MESSAGES.SESSION_EXPIRED
-          });
-        }
-
-        // Fetch OTP from DB
-        const otpRecord = await Otp.findOne({ email });
-
-        if (!otpRecord) {
-          return res.status(HTTP_STATUS.BAD_REQUEST).json({
-            success: false,
-            message: RESPONSE_MESSAGES.OTP_EXPIRED
-          });
-        }
-        if (otpRecord.otp !== enteredOtp) {
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({
-              success: false,
-              message: RESPONSE_MESSAGES.OTP_INVALID
-            });
-        }
-        //  Save user after OTP match
-        const hashedPassword = await securePassword(password);
-        // Generate referral code for NEW user
-        const generateReferralCode = () =>
-          Math.random().toString(36).substring(2, 8).toUpperCase();
-        
-        let referrerUser = null;
-        if (referralCode) {
-          referrerUser = await User.findOne({ referralCode });
-        }
-        const newUser = new User({ name, email, password: hashedPassword ,referralCode: generateReferralCode(), referredBy: referrerUser ? referrerUser._id : null });
-        await newUser.save();
-        authLogger.info(`NEW USER REGISTERED | UserId: ${newUser._id} | Email: ${newUser.email} | IP: ${req.ip}`);
-
-        // ================= REFERRAL REWARD =================
-      // AUTO-CREATE WALLET (STEP 1)
-      await Wallet.create({
-        userId: newUser._id,
-        balance: 0
+    const findUser = await User.findOne({ email });
+    if (findUser) {
+      return res.render("signup", {
+        message: RESPONSE_MESSAGES.EMAIL_ALREADY_EXISTS,
+        icon: "warning",
       });
-
-      //Referral signup reward (A give code to B : this is for B)
-      if(referrerUser) {
-        const wallet = await Wallet.findOne({ userId: newUser._id});
-
-        const settings = await ReferralSettings.findOne();
-
-        const rewardAmount = settings?.refereeReward || 50;
-
-        await wallet.addTransaction({
-          type:"referral",
-          amount: rewardAmount,
-          description:"Referral signup bonus"
-        });
-      }
-
-      req.session.user = newUser._id;
-      console.log("User data saved successfully");
-
-      // Remove OTP from DB
-      await Otp.deleteOne({ email });
-      res.status(HTTP_STATUS.OK).json({
-        success: true,
-        redirectUrl: "/login"
-      });
-    } catch (error) {
-      next(error);
     }
+
+    const otp = generateOtp();
+    const emailSent = await sendVerificationEmail(email, otp, "Verify your account");
+    if (!emailSent) {
+      console.log("Email sending failed");
+      return res.render("signup", {
+        message: RESPONSE_MESSAGES.EMAIL_SEND_FAILED,
+        icon: "warning",
+      });
+    }
+    // Store OTP in DB (Replace session-based storage)
+    await Otp.deleteOne({ email }); //remove old OTP if exists
+    await Otp.create({ email, otp });
+
+    req.session.userData = { name, email, password, referralCode: referralCode || null };
+    res.render("verify-otp");
+    console.log("OTP Send", otp)
+
+  } catch (error) {
+    next(error);
+  }
+}
+
+const verifyOtp = async (req, res, next) => {
+  try {
+    const enteredOtp = req.body.otp;
+    const { email, name, password, referralCode } = req.session.userData || {};
+
+    if (!email) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.SESSION_EXPIRED
+      });
+    }
+
+    // Fetch OTP from DB
+    const otpRecord = await Otp.findOne({ email });
+
+    if (!otpRecord) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.OTP_EXPIRED
+      });
+    }
+    if (otpRecord.otp !== enteredOtp) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.OTP_INVALID
+      });
+    }
+    //  Save user after OTP match
+    const hashedPassword = await securePassword(password);
+    // Generate referral code for NEW user
+    const generateReferralCode = () =>
+      Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    let referrerUser = null;
+    if (referralCode) {
+      referrerUser = await User.findOne({ referralCode });
+    }
+    const newUser = new User({ name, email, password: hashedPassword, referralCode: generateReferralCode(), referredBy: referrerUser ? referrerUser._id : null });
+    await newUser.save();
+    authLogger.info(`NEW USER REGISTERED | UserId: ${newUser._id} | Email: ${newUser.email} | IP: ${req.ip}`);
+
+    // ================= REFERRAL REWARD =================
+    // AUTO-CREATE WALLET (STEP 1)
+    await Wallet.create({
+      userId: newUser._id,
+      balance: 0
+    });
+
+    //Referral signup reward (A give code to B : this is for B)
+    if (referrerUser) {
+      const wallet = await Wallet.findOne({ userId: newUser._id });
+
+      const settings = await ReferralSettings.findOne();
+
+      const rewardAmount = settings?.refereeReward || 50;
+
+      await wallet.addTransaction({
+        type: "referral",
+        amount: rewardAmount,
+        description: "Referral signup bonus"
+      });
+    }
+
+    req.session.user = newUser._id;
+    console.log("User data saved successfully");
+
+    // Remove OTP from DB
+    await Otp.deleteOne({ email });
+    res.status(HTTP_STATUS.OK).json({
+      success: true,
+      redirectUrl: "/login"
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-const resendOtp = async(req,res,next)=>{
-    try {
+const resendOtp = async (req, res, next) => {
+  try {
 
-        const {email} = req.session.userData;
-        if(!email){
-            return res.status(HTTP_STATUS.BAD_REQUEST).json({
-              success:false,
-              message: RESPONSE_MESSAGES.SESSION_EXPIRED
-            });
-        }
-
-        const otp = generateOtp();
-        await Otp.deleteOne({email});
-        await Otp.create({email,otp});
-
-        const emailSent = await sendVerificationEmail(email,otp,"Your OTP for Account Verification")
-        if(emailSent){
-            console.log("Resend OTP:",otp);
-            res.status(HTTP_STATUS.OK).json({
-              success:true,
-              message: RESPONSE_MESSAGES.OTP_RESENT
-            });
-        }else{
-          res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-            success:false,
-            message: RESPONSE_MESSAGES.EMAIL_SEND_FAILED
-          });
-        }
-    } catch (error) {
-      next(error);
+    const { email } = req.session.userData;
+    if (!email) {
+      return res.status(HTTP_STATUS.BAD_REQUEST).json({
+        success: false,
+        message: RESPONSE_MESSAGES.SESSION_EXPIRED
+      });
     }
+
+    const otp = generateOtp();
+    await Otp.deleteOne({ email });
+    await Otp.create({ email, otp });
+
+    const emailSent = await sendVerificationEmail(email, otp, "Your OTP for Account Verification")
+    if (emailSent) {
+      console.log("Resend OTP:", otp);
+      res.status(HTTP_STATUS.OK).json({
+        success: true,
+        message: RESPONSE_MESSAGES.OTP_RESENT
+      });
+    } else {
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: RESPONSE_MESSAGES.EMAIL_SEND_FAILED
+      });
+    }
+  } catch (error) {
+    next(error);
+  }
 }
 
-const logout = async (req,res,next) =>{
+const logout = async (req, res, next) => {
   try {
     authLogger.info(`LOGOUT | UserId: ${req.session.user} | IP: ${req.ip}`);
     req.session.user = null;
@@ -404,19 +404,19 @@ const logout = async (req,res,next) =>{
   }
 }
 
-const loadContact = async (req,res,next)=>{
-    try{
-        res.render("contact")
-    }catch(error){
-        next(error)
-    }
+const loadContact = async (req, res, next) => {
+  try {
+    res.render("contact")
+  } catch (error) {
+    next(error)
+  }
 }
 
-const loadAbout = async (req,res,next)=>{
-  try{
-      res.render("about")
-  }catch(error){
-      next(error)
+const loadAbout = async (req, res, next) => {
+  try {
+    res.render("about")
+  } catch (error) {
+    next(error)
   }
 }
 

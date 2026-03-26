@@ -64,7 +64,7 @@ const loadOrderDetails = async (req, res, next) => {
     req.session.cancelCouponError = null;
 
     const user = await User.findById(userId).lean();
-    res.render("orderDetails", {user, order , cancelCouponError });
+    res.render("orderDetails", { user, order, cancelCouponError });
 
   } catch (error) {
     next(error);
@@ -97,7 +97,7 @@ const loadCancelPage = async (req, res, next) => {
     }
     // Pass itemId to EJS
     const user = await User.findById(userId).lean();
-    res.render("cancelOrder", {user, order, itemId });
+    res.render("cancelOrder", { user, order, itemId });
 
   } catch (error) {
     next(error);
@@ -133,15 +133,15 @@ const cancelOrder = async (req, res, next) => {
       // Compute current subtotal of non-cancelled items
       const currentSubtotal = order.items.reduce((sum, it) =>
         it.status !== "Cancelled" ? sum + it.price * it.quantity : sum
-      , 0);
+        , 0);
 
       const itemValue = item.price * item.quantity;
       const newSubtotal = currentSubtotal - itemValue;
 
       // If coupon applied & violation happens → block single cancel
       if (order.couponCode && newSubtotal < order.couponMinPurchase) {
-      // Redirect back with an error message
-        req.session.cancelCouponError = 
+        // Redirect back with an error message
+        req.session.cancelCouponError =
           `Cannot cancel this item because it will break the coupon minimum purchase condition (₹${order.couponMinPurchase}). Cancel entire order instead.`;
 
         return res.redirect(`/order/${orderId}`);
@@ -200,12 +200,12 @@ const cancelOrder = async (req, res, next) => {
 
       for (let it of order.items) {
 
-       // only refund for non-cancelled items
+        // only refund for non-cancelled items
         if (it.status !== "Cancelled") {
           const itemRefund = calculateRefundWithCoupon(order, it);
           refundAmount += itemRefund;
-          
-        // restore stock
+
+          // restore stock
           const product = await Product.findById(it.productId);
           const variant = product.variants.find(v => v.size === it.size);
           if (variant) {
@@ -217,7 +217,7 @@ const cancelOrder = async (req, res, next) => {
           it.refundStatus = "Processed";
         }
 
-    // mark status cancelled for all items
+        // mark status cancelled for all items
         it.status = "Cancelled";
         it.cancellationReason = reason || "No reason provided";
         it.cancelledAt = new Date();
@@ -275,7 +275,7 @@ const loadReturnPage = async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id);
     const user = await User.findById(order.userId).lean();
-    res.render("returnOrder", { user,order });
+    res.render("returnOrder", { user, order });
   } catch (error) {
     next(error);
   }
@@ -296,16 +296,16 @@ const submitReturnRequest = async (req, res, next) => {
     if (!order) return res.redirect("/order");
 
     //check return time limit(2hours)
-    if(!order.deliveryDate){
+    if (!order.deliveryDate) {
       return res.redirect(`/order/${orderId}`);
     }
     const now = new Date();
     const deliveryTime = new Date(order.deliveryDate);
 
     const diffInMs = now - deliveryTime;
-    const diffInHours = diffInMs / (1000*60*60);
+    const diffInHours = diffInMs / (1000 * 60 * 60);
 
-    if(diffInHours >2){
+    if (diffInHours > 2) {
       return res.status(HTTP_STATUS.BAD_REQUEST).send(
         RESPONSE_MESSAGES.RETURN_PERIOD_EXPIRED
       );
@@ -631,7 +631,7 @@ function recalculateOrderTotals(order) {
 
   if (order.originalCouponDiscount > 0 && originalSubTotal > 0) {
     newCouponDiscount = Math.round(
-      (newSubTotal / originalSubTotal) * order.originalCouponDiscount 
+      (newSubTotal / originalSubTotal) * order.originalCouponDiscount
     );
   }
 

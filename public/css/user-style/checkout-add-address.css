@@ -1,5 +1,11 @@
-.checkout-add-page { padding: 28px 24px 60px; }
-.page-title { font-size: 26px; margin-bottom: 18px; }
+.checkout-add-page {
+  padding: 28px 24px 60px;
+}
+
+.page-title {
+  font-size: 26px;
+  margin-bottom: 18px;
+}
 
 .checkout-grid {
   display: grid;
@@ -11,7 +17,7 @@
   background: #fff;
   padding: 24px;
   border-radius: 10px;
-  border: 1px solid rgba(233,219,226,0.9);
+  border: 1px solid rgba(233, 219, 226, 0.9);
 }
 
 .card-title {
@@ -21,10 +27,19 @@
 }
 
 /* LEFT FORM */
-.address-form-card { background: #fff5f8; }
+.address-form-card {
+  background: #fff5f8;
+}
 
-.form-group { margin-bottom: 18px; }
-.form-group label { font-size: 15px; display: block; margin-bottom: 5px; }
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  font-size: 15px;
+  display: block;
+  margin-bottom: 5px;
+}
 
 .form-group input,
 .form-group select {
@@ -73,29 +88,60 @@
 
 /* RIGHT SUMMARY */
 .summary-card {}
+
 .cart-row {
   display: flex;
   gap: 14px;
   padding: 10px;
-  border: 1px solid rgba(233,219,226,0.9);
+  border: 1px solid rgba(233, 219, 226, 0.9);
   border-radius: 8px;
   margin-bottom: 12px;
 }
+
 .cart-thumb {
   width: 64px;
   height: 64px;
   border-radius: 8px;
   object-fit: cover;
 }
-.cart-name { font-weight: 600; }
-.cart-qty { font-size: 14px; color: #666; margin-top: 6px; }
 
-.price-box { margin-top: 24px; padding: 16px; border-radius: 8px; border: 1px solid rgba(233,219,226,0.9); }
-.price-row { display: flex; justify-content: space-between; padding: 6px 0; }
-.total { font-weight: bold; font-size: 17px; }
-.price-divider { border: none; border-top: 1px solid #ccc; margin: 10px 0; }
+.cart-name {
+  font-weight: 600;
+}
+
+.cart-qty {
+  font-size: 14px;
+  color: #666;
+  margin-top: 6px;
+}
+
+.price-box {
+  margin-top: 24px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(233, 219, 226, 0.9);
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+}
+
+.total {
+  font-weight: bold;
+  font-size: 17px;
+}
+
+.price-divider {
+  border: none;
+  border-top: 1px solid #ccc;
+  margin: 10px 0;
+}
 
 /* Responsive */
 @media (max-width: 980px) {
-  .checkout-grid { grid-template-columns: 1fr; }
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
 }

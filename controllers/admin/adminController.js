@@ -6,38 +6,38 @@ import { authLogger } from "../../utils/logger.js";
 import HTTP_STATUS from "../../utils/httpStatus.js";
 import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
-const pageerror = async (req,res)=>{
+const pageerror = async (req, res) => {
     res.render("admin-error")
 }
 
-const loadLogin = (req,res)=>{
-    if(req.session.admin){
+const loadLogin = (req, res) => {
+    if (req.session.admin) {
         return res.redirect("/admin/dashboard");
     }
-    res.render("admin-login",{message:null})
+    res.render("admin-login", { message: null })
 }
 
-const login = async (req,res,next)=>{
+const login = async (req, res, next) => {
     try {
-        const {email,password} = req.body;
-        const admin = await User.findOne({email: email,isAdmin:true});
-        if(admin){
-            const passwordMatch = await bcrypt.compare(password,admin.password);
-            if(passwordMatch){
+        const { email, password } = req.body;
+        const admin = await User.findOne({ email: email, isAdmin: true });
+        if (admin) {
+            const passwordMatch = await bcrypt.compare(password, admin.password);
+            if (passwordMatch) {
                 req.session.admin = admin._id;
-                
+
                 authLogger.info(
                     `ADMIN LOGIN SUCCESS | AdminId: ${admin._id} | Email: ${admin.email} | IP: ${req.ip}`
                 );
-                
+
                 return res.redirect("/admin")
-            }else{
+            } else {
                 authLogger.warn(
                     `ADMIN LOGIN FAILED | Email: ${email} | Reason: Invalid Password | IP: ${req.ip}`
                 );
                 res.render("admin-login", { message: RESPONSE_MESSAGES.ADMIN_INVALID_CREDENTIALS });
             }
-        }else{
+        } else {
             authLogger.warn(
                 `ADMIN LOGIN FAILED | Email: ${email} | Reason: Admin Not Found | IP: ${req.ip}`
             );
@@ -49,20 +49,20 @@ const login = async (req,res,next)=>{
     }
 }
 
-const loadDashboard = async (req,res,next)=>{
-    if(!req.session.admin){
+const loadDashboard = async (req, res, next) => {
+    if (!req.session.admin) {
         return res.redirect("/admin/login")
     }
     try {
         authLogger.info(
-          `ADMIN DASHBOARD ACCESS | AdminId: ${req.session.admin} | IP: ${req.ip}`
+            `ADMIN DASHBOARD ACCESS | AdminId: ${req.session.admin} | IP: ${req.ip}`
         );
         //Dashboard statistics
-        const totalUsers = await User.countDocuments({isAdmin:false});
+        const totalUsers = await User.countDocuments({ isAdmin: false });
         const totalOrders = await Order.countDocuments();
         const revenueData = await Order.aggregate([
             {
-                $group:{_id:null,totalRevenue:{$sum:"$totalAmount"}}
+                $group: { _id: null, totalRevenue: { $sum: "$totalAmount" } }
             }
         ]);
 
@@ -70,62 +70,63 @@ const loadDashboard = async (req,res,next)=>{
 
         //Best selling product (top 10)
         const bestProducts = await Order.aggregate([
-            {$unwind :"$items"},
+            { $unwind: "$items" },
             {
-                $group:{_id:"$items.productId", totalSold:{$sum:"$items.quantity"}}
+                $group: { _id: "$items.productId", totalSold: { $sum: "$items.quantity" } }
             },
-            {$sort:{totalSold : -1}},
-            {$limit:10},
+            { $sort: { totalSold: -1 } },
+            { $limit: 10 },
             {
-                $lookup:{
-                    from:"products",
-                    localField:"_id",
-                    foreignField:"_id",
-                    as:"product"
+                $lookup: {
+                    from: "products",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "product"
                 }
             },
             //(Lookup always return an array)
-            {$unwind:"$product"}
+            { $unwind: "$product" }
         ])
 
         //Best selling category (top 10) 
         const bestCategories = await Order.aggregate([
-            {$unwind:"$items"},
+            { $unwind: "$items" },
             {
-                $lookup:{
-                    from:"products",
-                    localField:"items.productId",
-                    foreignField:"_id",
-                    as:"product"
+                $lookup: {
+                    from: "products",
+                    localField: "items.productId",
+                    foreignField: "_id",
+                    as: "product"
                 }
             },
-            {$unwind:"$product"},
-            {$group:{
-                _id:"$product.category",
-                totalSold:{$sum:"$items.quantity"}
-                }
-            },
-            {$sort:{totalSold:-1}},
-            {$limit:10},
+            { $unwind: "$product" },
             {
-                $lookup:{
-                    from:"categories",
-                    localField:"_id",
-                    foreignField:"_id",
-                    as:"category"
+                $group: {
+                    _id: "$product.category",
+                    totalSold: { $sum: "$items.quantity" }
                 }
             },
-            {$unwind:"$category"}
+            { $sort: { totalSold: -1 } },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: "categories",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "category"
+                }
+            },
+            { $unwind: "$category" }
         ])
 
         const recentOrders = await Order
             .find()
-            .sort({orderDate:-1})
+            .sort({ orderDate: -1 })
             .limit(5)
             .populate("userId");
 
 
-        res.render("dashboard",{
+        res.render("dashboard", {
             totalUsers,
             totalOrders,
             totalRevenue,
@@ -136,7 +137,7 @@ const loadDashboard = async (req,res,next)=>{
 
     } catch (error) {
         authLogger.error(
-          `ADMIN DASHBOARD ERROR | AdminId: ${req.session.admin} | Route: ${req.originalUrl} | Message: ${error.message} | IP: ${req.ip}`
+            `ADMIN DASHBOARD ERROR | AdminId: ${req.session.admin} | Route: ${req.originalUrl} | Message: ${error.message} | IP: ${req.ip}`
         );
         next(error)
     }
@@ -144,39 +145,39 @@ const loadDashboard = async (req,res,next)=>{
 
 //sales chart
 
-const getSalesChart = async (req,res,next)=>{
+const getSalesChart = async (req, res, next) => {
     try {
         const filter = req.query.filter;
         let groupStage;
-        if(filter === "daily"){
+        if (filter === "daily") {
             groupStage = {
-                year:{$year:"$orderDate"},
-                month:{$month:"$orderDate"},
-                day:{$dayOfMonth:"$orderDate"}
+                year: { $year: "$orderDate" },
+                month: { $month: "$orderDate" },
+                day: { $dayOfMonth: "$orderDate" }
             }
-        }else if(filter === "monthly"){
+        } else if (filter === "monthly") {
             groupStage = {
-                year:{$year:"$orderDate"},
-                month:{$month:"$orderDate"}
+                year: { $year: "$orderDate" },
+                month: { $month: "$orderDate" }
             }
-        }else{
+        } else {
             groupStage = {
-                year:{$year:"$orderDate"}
+                year: { $year: "$orderDate" }
             }
         }
 
         const sales = await Order.aggregate([
             {
-                $group:{
-                    _id:groupStage,
-                    revenue:{$sum:"$totalAmount"}
+                $group: {
+                    _id: groupStage,
+                    revenue: { $sum: "$totalAmount" }
                 }
             },
             {
-                $sort:{
-                    "_id.year":1,
-                    "_id.month":1,
-                    "_id.day":1
+                $sort: {
+                    "_id.year": 1,
+                    "_id.month": 1,
+                    "_id.day": 1
                 }
             }
         ])
@@ -191,14 +192,14 @@ const getSalesChart = async (req,res,next)=>{
     }
 }
 
-const logout = async (req,res,next)=>{
+const logout = async (req, res, next) => {
     try {
         const adminId = req.session.admin;
 
         authLogger.info(
             `ADMIN LOGOUT | AdminId: ${adminId} | IP: ${req.ip}`
         );
-        req.session.admin = null;   
+        req.session.admin = null;
         return res.redirect("/admin/login");
     } catch (error) {
         next(error);
@@ -207,10 +208,10 @@ const logout = async (req,res,next)=>{
 
 
 export default {
-  loadLogin,
-  login,
-  loadDashboard,
-  getSalesChart,
-  pageerror,
-  logout,
+    loadLogin,
+    login,
+    loadDashboard,
+    getSalesChart,
+    pageerror,
+    logout,
 };

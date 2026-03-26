@@ -1,35 +1,35 @@
 <%- include('../partials/user/header') %>
-<link rel="stylesheet" href="/css/user-style/payment-success.css">
+  <link rel="stylesheet" href="/css/user-style/payment-success.css">
 
-<div class="success-wrap">
-  <div class="success-card">
+  <div class="success-wrap">
+    <div class="success-card">
 
-    <!-- Success Icon -->
-    <div class="success-icon">
-      <img src="/images/payment-fail.png" alt="failed">
+      <!-- Success Icon -->
+      <div class="success-icon">
+        <img src="/images/payment-fail.png" alt="failed">
+      </div>
+
+      <!-- Heading -->
+      <h2 class="success-title">Payment Failed</h2>
+
+      <!-- Sub Text -->
+      <p class="success-msg">
+        Transaction has been declined by the bank.
+      </p>
+
+      <!-- Actions -->
+      <div class="success-buttons">
+        <a href="/order/<%= orderId %>" class="btn view-btn">View Order</a>
+
+        <form action="/payment/retry/<%= orderId %>" method="POST" style="display:inline;">
+          <button type="submit" class="btn shop-btn">
+            Retry Payment
+          </button>
+        </form>
+        <a href="/shop" class="btn shop-btn">Continue Shopping</a>
+      </div>
+
     </div>
-
-    <!-- Heading -->
-    <h2 class="success-title">Payment Failed</h2>
-
-    <!-- Sub Text -->
-    <p class="success-msg">
-      Transaction has been declined by the bank.
-    </p>
-
-    <!-- Actions --> 
-    <div class="success-buttons">
-      <a href="/order/<%= orderId %>" class="btn view-btn">View Order</a>
-      
-      <form action="/payment/retry/<%= orderId %>" method="POST" style="display:inline;">
-        <button type="submit" class="btn shop-btn">
-          Retry Payment
-        </button>
-      </form>
-      <a href="/shop" class="btn shop-btn">Continue Shopping</a> 
-    </div>
-
   </div>
-</div>
 
-<%- include('../partials/user/footer') %>
+  <%- include('../partials/user/footer') %>

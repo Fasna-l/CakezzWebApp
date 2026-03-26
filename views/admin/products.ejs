@@ -1,42 +1,44 @@
 <%- include('../partials/admin/header') %>
-<link rel="stylesheet" href="/css/admin-style/products.css">
-<link rel="stylesheet" href="/css/admin-style/category.css">
+  <link rel="stylesheet" href="/css/admin-style/products.css">
+  <link rel="stylesheet" href="/css/admin-style/category.css">
 
-<div class="dashboard-container">
-  <div class="dashboard-wrapper">
-    <%- include('../partials/admin/sidebar') %>
+  <div class="dashboard-container">
+    <div class="dashboard-wrapper">
+      <%- include('../partials/admin/sidebar') %>
 
-    <!-- ✅ Main Content -->
-    <div class="products-container">
-      <main class="main-content" id="mainContent">
+        <!-- ✅ Main Content -->
+        <div class="products-container">
+          <main class="main-content" id="mainContent">
 
-        <div class="page-title">
-            <h2>Products</h2>
+            <div class="page-title">
+              <h2>Products</h2>
 
-            <!-- Add Product Button -->
-            <a href="/admin/products/add" class="btn-add-product">Add Product</a>
+              <!-- Add Product Button -->
+              <a href="/admin/products/add" class="btn-add-product">Add Product</a>
 
-            <!-- Search Form -->
-            <form action="/admin/products" method="get" class="search-form">
+              <!-- Search Form -->
+              <form action="/admin/products" method="get" class="search-form">
                 <div class="search-box">
-                    <input type="text" class="search-input" placeholder="Search products..." name="search" value="<%= search || '' %>">
-                    <button class="search-button-text" type="submit">Search</button>
+                  <input type="text" class="search-input" placeholder="Search products..." name="search"
+                    value="<%= search || '' %>">
+                  <button class="search-button-text" type="submit">Search</button>
 
-                    <% if (search && search.trim() !== '') { %>
-                        <a href="/admin/products" class="search-button-text" style="background:#888;text-decoration:none;">Clear</a>
+                  <% if (search && search.trim() !=='' ) { %>
+                    <a href="/admin/products" class="search-button-text"
+                      style="background:#888;text-decoration:none;">Clear</a>
                     <% } %>
                 </div>
-            </form>
-        </div>
-
-        
+              </form>
+            </div>
 
 
-        <!-- ✅ Product Table -->
-        <div class="table-wrapper">
-          <table class="categories-table">
-            <thead>
-                <tr>
+
+
+            <!-- ✅ Product Table -->
+            <div class="table-wrapper">
+              <table class="categories-table">
+                <thead>
+                  <tr>
                     <th>Sl.No</th>
                     <th>Image</th>
                     <th>Product Name</th>
@@ -46,183 +48,194 @@
                     <th>Action</th>
                     <th>Offer</th>
                     <th>Edit</th>
-                </tr>
-            </thead>
+                  </tr>
+                </thead>
 
-            <tbody>
-                <% if (products && products.length > 0) { %>
-                    <% products.forEach((product, index) => { %>
-                        <tr>
-                            <td><%= (currentPage - 1) * 3 + index + 1 %></td>
+                <tbody>
+                  <% if (products && products.length> 0) { %>
+                    <% products.forEach((product, index)=> { %>
+                      <tr>
+                        <td>
+                          <%= (currentPage - 1) * 3 + index + 1 %>
+                        </td>
 
-                            <!-- Product Image -->
-                            <td>
-                                <% if (product.productImage && product.productImage.length > 0) { %>
-                                    <img src="/uploads/product/<%= product.productImage[0] %>" style="width:50px;height:50px;border-radius:5px;">
-                                <% } else { %>
-                                    <span>No Image</span>
-                                <% } %>
-                            </td>
-
-                            <td><%= product.productName %></td>
-                            <td><%= product.category ? product.category.categoryName  : "N/A" %></td>
-                            <td>
-                                1kg: ₹<%= product.variants[0] ? product.variants[0].price : '-' %> <br>
-                                2kg: ₹<%= product.variants[1] ? product.variants[1].price : '-' %> <br>
-                                3kg: ₹<%= product.variants[2] ? product.variants[2].price : '-' %>
-                            </td>
-                            <td>
-                                1kg: <%= product.variants[0] ? product.variants[0].stock : '-' %> <br>
-                                2kg: <%= product.variants[1] ? product.variants[1].stock : '-' %> <br>
-                                3kg: <%= product.variants[2] ? product.variants[2].stock : '-' %>
-                            </td>
-
-
-                            <!-- Action Buttons -->
-                            <td>
-                                <div class="action-group">
-                                    <!-- Block/UnBlock Button -->
-                                    <% if (product.isBlocked === false) { %>
-                                        <button class="btn btn-danger"
-                                            onclick="confirmProduct('<%= product._id %>', 'block')">
-                                            Block
-                                        </button>
-                                    <% } else { %>
-                                        <button class="btn btn-success"
-                                            onclick="confirmProduct('<%= product._id %>', 'unblock')">
-                                            Unblock
-                                        </button>
-                                    <% } %>
-                                </div>
-                            </td>
-
-                            <!-- Offer Button (disabled for now) -->
-                             <td>
-                              <% if (!product.productOffer) { %>
-                                <a 
-                                  href="/admin/offer/add?productId=<%= product._id %>" 
-                                  class="btn btn-primary btn-sm">
-                                  Add Offer
-                                </a>
-                              <% } else { %>
-                                <a 
-                                  href="/admin/offer/edit/<%= product.productOffer %>?productId=<%= product._id %>" 
-                                  class="btn btn-warning btn-sm">
-                                  Edit Offer
-                                </a>
+                        <!-- Product Image -->
+                        <td>
+                          <% if (product.productImage && product.productImage.length> 0) { %>
+                            <img src="/uploads/product/<%= product.productImage[0] %>"
+                              style="width:50px;height:50px;border-radius:5px;">
+                            <% } else { %>
+                              <span>No Image</span>
                               <% } %>
-                            </td>
-                            <td>
-                              <!-- Edit Icon -->
-                                    <a href="/admin/edit-product?id=<%= product._id %>&page=<%= currentPage %>" class="btn-edit">
-   
-                                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                        </svg>
-                                    </a>
-                            </td>
-                        </tr>
-                <% }) %>
+                        </td>
+
+                        <td>
+                          <%= product.productName %>
+                        </td>
+                        <td>
+                          <%= product.category ? product.category.categoryName : "N/A" %>
+                        </td>
+                        <td>
+                          1kg: ₹<%= product.variants[0] ? product.variants[0].price : '-' %> <br>
+                            2kg: ₹<%= product.variants[1] ? product.variants[1].price : '-' %> <br>
+                              3kg: ₹<%= product.variants[2] ? product.variants[2].price : '-' %>
+                        </td>
+                        <td>
+                          1kg: <%= product.variants[0] ? product.variants[0].stock : '-' %> <br>
+                            2kg: <%= product.variants[1] ? product.variants[1].stock : '-' %> <br>
+                              3kg: <%= product.variants[2] ? product.variants[2].stock : '-' %>
+                        </td>
+
+
+                        <!-- Action Buttons -->
+                        <td>
+                          <div class="action-group">
+                            <!-- Block/UnBlock Button -->
+                            <% if (product.isBlocked===false) { %>
+                              <button class="btn btn-danger" onclick="confirmProduct('<%= product._id %>', 'block')">
+                                Block
+                              </button>
+                              <% } else { %>
+                                <button class="btn btn-success"
+                                  onclick="confirmProduct('<%= product._id %>', 'unblock')">
+                                  Unblock
+                                </button>
+                                <% } %>
+                          </div>
+                        </td>
+
+                        <!-- Offer Button (disabled for now) -->
+                        <td>
+                          <% if (!product.productOffer) { %>
+                            <a href="/admin/offer/add?productId=<%= product._id %>" class="btn btn-primary btn-sm">
+                              Add Offer
+                            </a>
+                            <% } else { %>
+                              <a href="/admin/offer/edit/<%= product.productOffer %>?productId=<%= product._id %>"
+                                class="btn btn-warning btn-sm">
+                                Edit Offer
+                              </a>
+                              <% } %>
+                        </td>
+                        <td>
+                          <!-- Edit Icon -->
+                          <a href="/admin/edit-product?id=<%= product._id %>&page=<%= currentPage %>" class="btn-edit">
+
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                          </a>
+                        </td>
+                      </tr>
+                      <% }) %>
+                        <% } else { %>
+                          <tr>
+                            <td colspan="9" style="text-align:center;">No Products Available</td>
+                          </tr>
+                          <% } %>
+                </tbody>
+              </table>
+
+            </div>
+
+            <!--  Pagination -->
+            <div class="pagination-container">
+
+              <% if (currentPage> 1) { %>
+                <a href="/admin/products?page=<%= currentPage - 1 %>&search=<%= search || '' %>"
+                  class="pagination-link prev">« Prev</a>
                 <% } else { %>
-                    <tr>
-                        <td colspan="9" style="text-align:center;">No Products Available</td>
-                    </tr>
-                <% } %>
-            </tbody>
-        </table>
+                  <span class="pagination-link disabled">« Prev</span>
+                  <% } %>
 
+                    <% const startPage=Math.max(1, currentPage - 2); const endPage=Math.min(totalPages, currentPage +
+                      2); %>
+
+                      <% if (startPage> 1) { %>
+                        <a href="/admin/products?page=1&search=<%= search || '' %>" class="pagination-link">1</a>
+                        <% if (startPage> 2) { %>
+                          <span class="pagination-link disabled">...</span>
+                          <% } %>
+                            <% } %>
+
+                              <% for (let i=startPage; i <=endPage; i++) { %>
+                                <% if (i===currentPage) { %>
+                                  <span class="pagination-link current">
+                                    <%= i %>
+                                  </span>
+                                  <% } else { %>
+                                    <a href="/admin/products?page=<%= i %>&search=<%= search || '' %>"
+                                      class="pagination-link">
+                                      <%= i %>
+                                    </a>
+                                    <% } %>
+                                      <% } %>
+
+                                        <% if (endPage < totalPages) { %>
+                                          <% if (endPage < totalPages - 1) { %>
+                                            <span class="pagination-link disabled">...</span>
+                                            <% } %>
+                                              <a href="/admin/products?page=<%= totalPages %>&search=<%= search || '' %>"
+                                                class="pagination-link">
+                                                <%= totalPages %>
+                                              </a>
+                                              <% } %>
+
+                                                <% if (currentPage < totalPages) { %>
+                                                  <a href="/admin/products?page=<%= currentPage + 1 %>&search=<%= search || '' %>"
+                                                    class="pagination-link next">Next »</a>
+                                                  <% } else { %>
+                                                    <span class="pagination-link disabled">Next »</span>
+                                                    <% } %>
+
+            </div>
+
+            <!-- Optional: Page indicator -->
+            <p style="text-align: center; color: #aaa; font-size: 13px; margin-top: 8px;">
+              Page <%= currentPage %> of <%= totalPages %>
+            </p>
+
+          </main>
         </div>
 
-        <!--  Pagination -->
-         <div class="pagination-container">
-
-          <% if (currentPage > 1) { %>
-            <a href="/admin/products?page=<%= currentPage - 1 %>&search=<%= search || '' %>" class="pagination-link prev">« Prev</a>
-          <% } else { %>
-            <span class="pagination-link disabled">« Prev</span>
-          <% } %>
-
-          <% 
-            const startPage = Math.max(1, currentPage - 2);
-            const endPage = Math.min(totalPages, currentPage + 2);
-          %>
-
-          <% if (startPage > 1) { %>
-            <a href="/admin/products?page=1&search=<%= search || '' %>" class="pagination-link">1</a>
-            <% if (startPage > 2) { %>
-            <span class="pagination-link disabled">...</span>
-            <% } %>
-          <% } %>
-
-          <% for (let i = startPage; i <= endPage; i++) { %>
-            <% if (i === currentPage) { %>
-              <span class="pagination-link current"><%= i %></span>
-            <% } else { %>
-              <a href="/admin/products?page=<%= i %>&search=<%= search || '' %>" class="pagination-link"><%= i %></a>
-            <% } %>
-          <% } %>
-
-          <% if (endPage < totalPages) { %>
-            <% if (endPage < totalPages - 1) { %>
-              <span class="pagination-link disabled">...</span>
-            <% } %>
-            <a href="/admin/products?page=<%= totalPages %>&search=<%= search || '' %>" class="pagination-link"><%= totalPages %></a>
-          <% } %>
-
-          <% if (currentPage < totalPages) { %>
-            <a href="/admin/products?page=<%= currentPage + 1 %>&search=<%= search || '' %>" class="pagination-link next">Next »</a>
-          <% } else { %>
-            <span class="pagination-link disabled">Next »</span>
-          <% } %>
-
-        </div>
-
-         <!-- Optional: Page indicator -->
-        <p style="text-align: center; color: #aaa; font-size: 13px; margin-top: 8px;">
-            Page <%= currentPage %> of <%= totalPages %>
-        </p>
-
-      </main>
     </div>
-
   </div>
-</div>
 
-<%- include('../partials/admin/footer') %>
+  <%- include('../partials/admin/footer') %>
 
-<!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-async function confirmProduct(productId, action) {
-  const result = await Swal.fire({
-    title: action === "block" ? "Block this product?" : "Unblock this product?",
-    text: "Please confirm your action",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Yes, confirm it!",
-    background: "#2a2a2a",
-    color: "#fff"
-  });
+    <script>
+      async function confirmProduct(productId, action) {
+        const result = await Swal.fire({
+          title: action === "block" ? "Block this product?" : "Unblock this product?",
+          text: "Please confirm your action",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonText: "Yes, confirm it!",
+          background: "#2a2a2a",
+          color: "#fff"
+        });
 
-  if (!result.isConfirmed) return;
+        if (!result.isConfirmed) return;
 
-  try {
-    const response = await fetch(
-      `/admin/products/${productId}/${action}`,
-      { method: "PATCH" }
-    );
+        try {
+          const response = await fetch(
+            `/admin/products/${productId}/${action}`,
+            { method: "PATCH" }
+          );
 
-    const data = await response.json();
+          const data = await response.json();
 
-    if (data.success) {
-      location.reload();
-    } else {
-      throw new Error();
-    }
-  } catch (error) {
-    Swal.fire("Error", "Something went wrong", "error");
-  }
-}
-</script>
+          if (data.success) {
+            location.reload();
+          } else {
+            throw new Error();
+          }
+        } catch (error) {
+          Swal.fire("Error", "Something went wrong", "error");
+        }
+      }
+    </script>

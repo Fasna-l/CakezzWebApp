@@ -54,7 +54,7 @@
   margin-bottom: 25px;
   flex-wrap: wrap;
   gap: 20px;
-  margin-top:40px;
+  margin-top: 40px;
 }
 
 .shop-title {
@@ -449,7 +449,8 @@
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 items per row */
+  grid-template-columns: repeat(4, 1fr);
+  /* 4 items per row */
   gap: 25px;
   margin-top: 20px;
 }
@@ -457,7 +458,7 @@
 .product-card {
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 15px;
   text-align: center;
   position: relative;
@@ -515,7 +516,8 @@
 }
 
 .product-link:hover {
-  color: #d81b60; /* optional hover effect */
+  color: #d81b60;
+  /* optional hover effect */
 }
 
 /* Product Image styling (already correct but kept for clarity) */
@@ -537,7 +539,7 @@
   width: 100%;
   flex-wrap: wrap;
   margin-bottom: 20px;
-  margin-top:40px;
+  margin-top: 40px;
 }
 
 .shop-controls input[type="text"],
@@ -568,6 +570,7 @@
   cursor: pointer;
   transition: 0.3s;
 }
+
 .filter-apply-btn:hover {
   background-color: var(--primary-dark);
 }
@@ -580,6 +583,7 @@
   cursor: pointer;
   transition: 0.3s;
 }
+
 .filter-clear-btn:hover {
   color: var(--primary-pink);
 }
@@ -591,6 +595,7 @@
     align-items: flex-start;
     width: 100%;
   }
+
   .shop-controls input,
   .shop-controls select {
     width: 100%;
@@ -654,7 +659,7 @@
   padding: 8px 12px;
   border-radius: 6px;
   transition: 0.3s;
-  border:solid 1px;
+  border: solid 1px;
 }
 
 .filter-clear-btn:hover {
@@ -669,6 +674,7 @@
     align-items: flex-start;
     gap: 10px;
   }
+
   .filter-form {
     flex-wrap: wrap;
     gap: 10px;
@@ -690,10 +696,12 @@
   cursor: pointer;
   z-index: 2;
 }
+
 .wishlist-icon i {
   color: #666;
   font-size: 16px;
 }
+
 .wishlist-icon:hover i {
   color: #e91e63;
 }
@@ -713,7 +721,8 @@
 
 .rating-badge {
   position: absolute;
-  bottom: 75px;     /* Move above Add to Cart button */
+  bottom: 75px;
+  /* Move above Add to Cart button */
   right: 15px;
   background-color: var(--badge-green);
   color: white;
@@ -730,27 +739,28 @@
 ================================ */
 
 .wishlist-icon i {
-  color: #999;          
+  color: #999;
   transition: 0.2s;
 }
 
 .wishlist-icon.active i {
-  color: #e91e63;       
+  color: #e91e63;
 }
 
 /* DEFAULT HEART (NOT WISHLISTED) */
 .wishlist-icon i {
   font-family: "Font Awesome 5 Free";
-  font-weight: 400; 
+  font-weight: 400;
   color: #ccc;
   transition: all 0.3s ease;
 }
 
 /* ACTIVE HEART (WISHLISTED) */
 .wishlist-icon.active i {
-  font-weight: 900; 
-  color: #e91e63;   
+  font-weight: 900;
+  color: #e91e63;
 }
+
 /* FIX FONT AWESOME HEART TILT (NO ROTATION) */
 .wishlist-icon {
   display: flex;
@@ -855,7 +865,7 @@
   background: #fff;
   padding: 10px;
   border-radius: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
   display: none;
   z-index: 999;
 }
@@ -873,8 +883,10 @@
   background: #f16ead;
   color: white;
 }
+
 .empty-wishlist {
-  grid-column: 1 / -1;   /* take full width of grid */
+  grid-column: 1 / -1;
+  /* take full width of grid */
   text-align: center;
   font-size: 18px;
   color: #888;

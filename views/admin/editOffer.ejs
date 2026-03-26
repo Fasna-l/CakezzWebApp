@@ -1,196 +1,165 @@
 <%- include('../partials/admin/header') %>
-<link rel="stylesheet" href="/css/admin-style/addCategory.css">
-<link rel="stylesheet" href="/css/admin-style/couponbutton.css">
+    <link rel="stylesheet" href="/css/admin-style/addCategory.css">
+    <link rel="stylesheet" href="/css/admin-style/couponbutton.css">
 
-<div class="dashboard-container">
-    <div class="dashboard-wrapper">
-        <%- include('../partials/admin/sidebar') %>
+    <div class="dashboard-container">
+        <div class="dashboard-wrapper">
+            <%- include('../partials/admin/sidebar') %>
 
-        <!-- Main Content -->
-        <div class="add-category-container">
-            <h1 class="page-title">Edit Offer</h1>
+                <!-- Main Content -->
+                <div class="add-category-container">
+                    <h1 class="page-title">Edit Offer</h1>
 
-            <!-- Edit Offer Card -->
-            <div class="form-card">
-                <form
-                    class="add-category-form"
-                    action="/admin/offer/update"
-                    method="post"
-                    onsubmit="return handleFormSubmit(event)"
-                    novalidate
-                >
-                    <input type="hidden" id="productId" value="<%= productId %>">
+                    <!-- Edit Offer Card -->
+                    <div class="form-card">
+                        <form class="add-category-form" action="/admin/offer/update" method="post"
+                            onsubmit="return handleFormSubmit(event)" novalidate>
+                            <input type="hidden" id="productId" value="<%= productId %>">
 
-                    <!-- Hidden Offer ID -->
-                    <input type="hidden" id="offerId" value="<%= offer._id %>">
+                            <!-- Hidden Offer ID -->
+                            <input type="hidden" id="offerId" value="<%= offer._id %>">
 
-                    <!-- Offer Name -->
-                    <div class="form-group">
-                        <label for="offerName">Offer Name :</label>
-                        <input
-                            type="text"
-                            id="offerName"
-                            name="offerName"
-                            value="<%= offer.offerName %>"
-                            required
-                        >
-                        <div id="offerName-error" class="error-message"></div>
+                            <!-- Offer Name -->
+                            <div class="form-group">
+                                <label for="offerName">Offer Name :</label>
+                                <input type="text" id="offerName" name="offerName" value="<%= offer.offerName %>"
+                                    required>
+                                <div id="offerName-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Expiry Date -->
+                            <div class="form-group">
+                                <label for="expiryDate">Expiry Date :</label>
+                                <input type="date" id="expiryDate" name="expiryDate"
+                                    value="<%= offer.expiryDate.toISOString().split('T')[0] %>" required>
+                                <div id="expiryDate-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Discount -->
+                            <div class="form-group">
+                                <label for="discount">Discount :</label>
+                                <input type="number" id="discount" name="discount" value="<%= offer.discount %>" min="1"
+                                    max="90" required>
+                                <div id="discount-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="form-group">
+                                <label for="description">Description :</label>
+                                <input type="text" id="description" name="description" value="<%= offer.description %>">
+                                <div id="description-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div style="display:flex; gap:20px; justify-content:center; margin-top:20px;">
+                                <button type="button" class="btn-delete" onclick="deleteOffer()">
+                                    Delete
+                                </button>
+
+                                <button type="submit" class="btn-add">
+                                    Update
+                                </button>
+                            </div>
+
+                        </form>
                     </div>
-
-                    <!-- Expiry Date -->
-                    <div class="form-group">
-                        <label for="expiryDate">Expiry Date :</label>
-                        <input
-                            type="date"
-                            id="expiryDate"
-                            name="expiryDate"
-                            value="<%= offer.expiryDate.toISOString().split('T')[0] %>"
-                            required
-                        >
-                        <div id="expiryDate-error" class="error-message"></div>
-                    </div>
-
-                    <!-- Discount -->
-                    <div class="form-group">
-                        <label for="discount">Discount :</label>
-                        <input
-                            type="number"
-                            id="discount"
-                            name="discount"
-                            value="<%= offer.discount %>"
-                            min="1"
-                            max="90"
-                            required
-                        >
-                        <div id="discount-error" class="error-message"></div>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="form-group">
-                        <label for="description">Description :</label>
-                        <input
-                            type="text"
-                            id="description"
-                            name="description"
-                            value="<%= offer.description %>"
-                        >
-                        <div id="description-error" class="error-message"></div>
-                    </div>
-
-                    <!-- Buttons -->
-                    <div style="display:flex; gap:20px; justify-content:center; margin-top:20px;">
-                        <button
-                            type="button"
-                            class="btn-delete"
-                            onclick="deleteOffer()"
-                        >
-                            Delete
-                        </button>
-
-                        <button type="submit" class="btn-add">
-                            Update
-                        </button>
-                    </div>
-
-                </form>
-            </div>
+                </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-    const offerId = document.getElementById("offerId");
-    const offerName = document.getElementById("offerName");
-    const expiryDate = document.getElementById("expiryDate");
-    const discount = document.getElementById("discount");
-    const description = document.getElementById("description");
-    const productId = document.getElementById("productId")
+    <script>
+        const offerId = document.getElementById("offerId");
+        const offerName = document.getElementById("offerName");
+        const expiryDate = document.getElementById("expiryDate");
+        const discount = document.getElementById("discount");
+        const description = document.getElementById("description");
+        const productId = document.getElementById("productId")
 
-    function handleFormSubmit(event) {
-        event.preventDefault();
-        if (!validateForm()) return;
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            if (!validateForm()) return;
 
-        const data = {
-            offerName: offerName.value,
-            expiryDate: expiryDate.value,
-            discount: discount.value,
-            description: description.value,
-            productId: productId.value
-        };
+            const data = {
+                offerName: offerName.value,
+                expiryDate: expiryDate.value,
+                discount: discount.value,
+                description: description.value,
+                productId: productId.value
+            };
 
-        fetch(`/admin/offers/${offerId.value}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        })
-        .then(res => res.json())
-        .then(() => {
-            Swal.fire({
-                icon: "success",
-                title: "Offer Updated!",
-                timer: 1500,
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = "/admin/products";
-            });
-        })
-        .catch(() => {
-            Swal.fire("Error", "Failed to update offer", "error");
-        });
-    }
-
-    function deleteOffer() {
-        Swal.fire({
-            title: "Are you sure?",
-            text: "This offer will be deleted",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            confirmButtonText: "Yes, delete it!"
-        }).then(result => {
-            if (result.isConfirmed) {
-                fetch(`/admin/offer/delete/${offerId.value}`, {
-                    method: "DELETE"
-                }).then(() => {
-                    window.location.href = "/admin/products";
+            fetch(`/admin/offers/${offerId.value}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            })
+                .then(res => res.json())
+                .then(() => {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Offer Updated!",
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = "/admin/products";
+                    });
+                })
+                .catch(() => {
+                    Swal.fire("Error", "Failed to update offer", "error");
                 });
+        }
+
+        function deleteOffer() {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "This offer will be deleted",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    fetch(`/admin/offer/delete/${offerId.value}`, {
+                        method: "DELETE"
+                    }).then(() => {
+                        window.location.href = "/admin/products";
+                    });
+                }
+            });
+        }
+
+        function validateForm() {
+            clearErrors();
+            let valid = true;
+
+            if (!offerName.value.trim()) {
+                showError("offerName-error", "Offer name required");
+                valid = false;
             }
-        });
-    }
-
-    function validateForm() {
-        clearErrors();
-        let valid = true;
-
-        if (!offerName.value.trim()) {
-            showError("offerName-error", "Offer name required");
-            valid = false;
+            if (!expiryDate.value) {
+                showError("expiryDate-error", "Expiry date required");
+                valid = false;
+            }
+            if (discount.value < 1 || discount.value > 90) {
+                showError("discount-error", "Discount must be 1–90%");
+                valid = false;
+            }
+            return valid;
         }
-        if (!expiryDate.value) {
-            showError("expiryDate-error", "Expiry date required");
-            valid = false;
+
+        function showError(id, msg) {
+            const el = document.getElementById(id);
+            el.innerText = msg;
+            el.style.display = "block";
         }
-        if (discount.value < 1 || discount.value > 90) {
-            showError("discount-error", "Discount must be 1–90%");
-            valid = false;
+
+        function clearErrors() {
+            document.querySelectorAll(".error-message").forEach(e => {
+                e.innerText = "";
+                e.style.display = "none";
+            });
         }
-        return valid;
-    }
+    </script>
 
-    function showError(id, msg) {
-        const el = document.getElementById(id);
-        el.innerText = msg;
-        el.style.display = "block";
-    }
-
-    function clearErrors() {
-        document.querySelectorAll(".error-message").forEach(e => {
-            e.innerText = "";
-            e.style.display = "none";
-        });
-    }
-</script>
-
-<%- include('../partials/admin/footer') %>
+    <%- include('../partials/admin/footer') %>

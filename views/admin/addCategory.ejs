@@ -1,145 +1,142 @@
 <%- include('../partials/admin/header') %>
-<link rel="stylesheet" href="/css/admin-style/addCategory.css">
+    <link rel="stylesheet" href="/css/admin-style/addCategory.css">
 
-<div class="dashboard-container">
-    <div class="dashboard-wrapper">
-        <%- include('../partials/admin/sidebar') %>
-        
-        <!-- Main Content -->
-        <div class="add-category-container">
-            <h1 class="page-title">Add Category</h1>
-            
-            <!-- Add Category Form Card -->
-            <div class="form-card">
-                <form class="add-category-form" action="/admin/category/add" method="post" onsubmit="return handleFormSubmit(event)" novalidate >
-                    <!-- Name Field -->
-                    <div class="form-group">
-                        <label for="category-name">Name :</label>
-                        <input 
-                            type="text" 
-                            id="categoryName" 
-                            name="categoryName"
-                            placeholder="Enter category name"
-                            required
-                        >
-                        <div id="name-error" class="error-message"></div>
+    <div class="dashboard-container">
+        <div class="dashboard-wrapper">
+            <%- include('../partials/admin/sidebar') %>
+
+                <!-- Main Content -->
+                <div class="add-category-container">
+                    <h1 class="page-title">Add Category</h1>
+
+                    <!-- Add Category Form Card -->
+                    <div class="form-card">
+                        <form class="add-category-form" action="/admin/category/add" method="post"
+                            onsubmit="return handleFormSubmit(event)" novalidate>
+                            <!-- Name Field -->
+                            <div class="form-group">
+                                <label for="category-name">Name :</label>
+                                <input type="text" id="categoryName" name="categoryName"
+                                    placeholder="Enter category name" required>
+                                <div id="name-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Description Field -->
+                            <div class="form-group">
+                                <label for="category-description">Description:</label>
+                                <textarea placeholder="Enter category description" name="description"
+                                    class="form-control" id="description"></textarea>
+                                <div id="description-error" class="error-message"></div>
+                            </div>
+
+                            <!-- Add Button -->
+                            <button type="submit" class="btn-add">Add</button>
+                        </form>
                     </div>
-
-                    <!-- Description Field -->
-                    <div class="form-group">
-                        <label for="category-description">Description:</label>
-                        <textarea placeholder="Enter category description" name="description" class="form-control" id="description"></textarea>
-                        <div id="description-error" class="error-message"></div>
-                    </div>
-
-                    <!-- Add Button -->
-                    <button type="submit" class="btn-add">Add</button>
-                </form>
-            </div>
+                </div>
         </div>
     </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
-<script>
-    function handleFormSubmit(event) {
-        event.preventDefault();
-        if (!validateForm()) {
-            return;
+    <script>
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            if (!validateForm()) {
+                return;
+            }
+
+            const categoryName = document.getElementsByName("categoryName")[0].value;
+            const description = document.getElementById("description").value;
+
+            fetch("/admin/category/add", {
+                method: "POST",
+                headers: {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify({ categoryName, description })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => {
+                            throw new Error(err.error);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Category Added!",
+                        text: "Your category was added successfully.",
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = "/admin/category";
+                    });
+                })
+                .catch(error => {
+                    if (error.message === "Category already exists") {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "Category already exists!"
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: "An error occurred while adding the category."
+                        });
+                    }
+                });
         }
 
-        const categoryName = document.getElementsByName("categoryName")[0].value;
-        const description = document.getElementById("description").value;
+        function validateForm() {
+            clearErrorMessages();
+            const categoryName = document.getElementsByName("categoryName")[0].value.trim();
+            const description = document.getElementById("description").value.trim();
+            let isValid = true; // ✅ Fix here
 
-        fetch("/admin/category/add", {
-            method: "POST",
-            headers: {
-                "content-type": "application/json"
-            },
-            body: JSON.stringify({ categoryName, description })
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(err => {
-                    throw new Error(err.error);
-                });
+            if (categoryName === "") {
+                displayErrorMessage("name-error", "Please enter a name.");
+                isValid = false;
+            } else if (categoryName.length < 3 || categoryName.length > 30) {
+                displayErrorMessage("name-error", "Category name must be between 3 and 30 characters.");
+                isValid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(categoryName)) {
+                displayErrorMessage("name-error", "Category name should contain only alphabetic characters.");
+                isValid = false;
+            } else if (/^(.)\1+$/.test(categoryName)) {
+                displayErrorMessage("name-error", "Category name cannot be all repeated characters.");
+                isValid = false;
             }
-            return response.json();
-        })
-        .then(data => {
-            Swal.fire({
-                icon: "success",
-                title: "Category Added!",
-                text: "Your category was added successfully.",
-                timer: 1500,
-                showConfirmButton: false
-            }).then(() => {
-                window.location.href = "/admin/category";
+
+            if (description === "") {
+                displayErrorMessage("description-error", "Please enter a description.");
+                isValid = false;
+            } else if (description.length < 10 || description.length > 500) {
+                displayErrorMessage("description-error", "Description must be between 10 and 500 characters.");
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function displayErrorMessage(elementId, message) {
+            var errorElement = document.getElementById(elementId);
+            errorElement.innerText = message;
+            errorElement.style.display = "block";
+        }
+
+        function clearErrorMessages() {
+            const errorElements = document.getElementsByClassName("error-message");
+            Array.from(errorElements).forEach(element => {
+                element.innerText = "";
+                element.style.display = "none";
             });
-        })
-        .catch(error => {
-            if (error.message === "Category already exists") {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Category already exists!"
-                });
-            } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "An error occurred while adding the category."
-                });
-            }
-        });
-    }
-
-    function validateForm() {
-        clearErrorMessages();
-        const categoryName = document.getElementsByName("categoryName")[0].value.trim();
-        const description = document.getElementById("description").value.trim();
-        let isValid = true; // ✅ Fix here
-
-        if (categoryName === "") {
-            displayErrorMessage("name-error", "Please enter a name.");
-            isValid = false;
-        } else if (categoryName.length < 3 || categoryName.length > 30) {
-            displayErrorMessage("name-error", "Category name must be between 3 and 30 characters.");
-            isValid = false;
-        } else if (!/^[a-zA-Z\s]+$/.test(categoryName)) {
-            displayErrorMessage("name-error", "Category name should contain only alphabetic characters.");
-            isValid = false;
-        } else if (/^(.)\1+$/.test(categoryName)) {
-            displayErrorMessage("name-error", "Category name cannot be all repeated characters.");
-            isValid = false;
         }
-
-        if (description === "") {
-            displayErrorMessage("description-error", "Please enter a description.");
-            isValid = false;
-        } else if (description.length < 10 || description.length > 500) {
-            displayErrorMessage("description-error", "Description must be between 10 and 500 characters.");
-            isValid = false;
-        }
-
-        return isValid;
-    }
-
-    function displayErrorMessage(elementId, message) {
-        var errorElement = document.getElementById(elementId);
-        errorElement.innerText = message;
-        errorElement.style.display = "block";
-    }
-
-    function clearErrorMessages() {
-        const errorElements = document.getElementsByClassName("error-message");
-        Array.from(errorElements).forEach(element => {
-            element.innerText = "";
-            element.style.display = "none";
-        });
-    }
-</script>
+    </script>
 
 
-<%- include('../partials/admin/footer') %>
+    <%- include('../partials/admin/footer') %>

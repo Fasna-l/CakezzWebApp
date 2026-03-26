@@ -12,9 +12,9 @@ import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 function findVariant(product, size) {
   return product.variants.find(v => v.size === size);
 }
- 
+
 const addToCart = async (req, res, next) => {
-  try {   
+  try {
 
     if (!req.session.user) {
       return res.status(HTTP_STATUS.UNAUTHORIZED).json({
@@ -71,7 +71,7 @@ const addToCart = async (req, res, next) => {
       (i) => i.product.toString() === productId && i.size === size
     );
 
-    if (existing) { 
+    if (existing) {
       // MAX 5 LIMIT
       if (existing.quantity + qty > 5) {
         return res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -89,7 +89,7 @@ const addToCart = async (req, res, next) => {
       }
 
       existing.quantity += qty;
-    }else {
+    } else {
       cart.items.push({
         product: productId,
         size,
@@ -146,14 +146,14 @@ const updateQuantity = async (req, res, next) => {
       message: RESPONSE_MESSAGES.INVALID_SIZE
     });
 
-    if(item.product.isBlocked || item.product.category?.isListed === false){
+    if (item.product.isBlocked || item.product.category?.isListed === false) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: RESPONSE_MESSAGES.PRODUCT_UNAVAILABLE
       });
     }
 
-    if(variant.stock <= 0){
+    if (variant.stock <= 0) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
         success: false,
         message: RESPONSE_MESSAGES.OUT_OF_STOCK
@@ -249,38 +249,38 @@ const removeCartItem = async (req, res, next) => {
       }
     }
 
-const cart = await Cart.findOne({ user: userId })
-  .populate({
-    path: "items.product",
-    populate: { path: "category" }
-  });
+    const cart = await Cart.findOne({ user: userId })
+      .populate({
+        path: "items.product",
+        populate: { path: "category" }
+      });
 
 
-const cartItems = await Promise.all(
-  cart.items.map(async (item) => {
-    const variant = item.product.variants.find(v => v.size === item.size);
-    const offer = await calculateBestOffer(item.product, variant.price);
+    const cartItems = await Promise.all(
+      cart.items.map(async (item) => {
+        const variant = item.product.variants.find(v => v.size === item.size);
+        const offer = await calculateBestOffer(item.product, variant.price);
 
-    return {
-      productId: item.product._id.toString(),
-      size: item.size,
-      price: offer.finalPrice,
-      quantity: item.quantity,
-      subtotal: offer.finalPrice * item.quantity
-    };
-  })
-);
+        return {
+          productId: item.product._id.toString(),
+          size: item.size,
+          price: offer.finalPrice,
+          quantity: item.quantity,
+          subtotal: offer.finalPrice * item.quantity
+        };
+      })
+    );
 
-const subtotal = cartItems.reduce((a, b) => a + b.subtotal, 0);
-const tax = Math.round(subtotal * 0.05);
-const shipping = 50;
-const total = subtotal + tax + shipping;
+    const subtotal = cartItems.reduce((a, b) => a + b.subtotal, 0);
+    const tax = Math.round(subtotal * 0.05);
+    const shipping = 50;
+    const total = subtotal + tax + shipping;
 
-return res.json({
-  success: true,
-  cartItems,
-  summary: { subtotal, tax, shipping, total }
-});
+    return res.json({
+      success: true,
+      cartItems,
+      summary: { subtotal, tax, shipping, total }
+    });
 
   } catch (error) {
     logger.error(error);
@@ -302,7 +302,7 @@ const proceedToCheckout = async (req, res, next) => {
       return res.redirect("/cart");
     }
 
-     // VALIDATION LOOP
+    // VALIDATION LOOP
     for (let item of cart.items) {
       const product = item.product;
       const variant = product.variants.find(v => v.size === item.size);
@@ -400,7 +400,7 @@ const getCartPage = async (req, res, next) => {
 
         const variant = item.product.variants.find(v => v.size === item.size);
         const stockAvailable = variant?.stock ?? 0;
-        const isOutOfStock =stockAvailable <= 0;
+        const isOutOfStock = stockAvailable <= 0;
         const isInsufficientStock = stockAvailable > 0 && stockAvailable < item.quantity;
 
         const offer = await calculateBestOffer(item.product, variant.price);

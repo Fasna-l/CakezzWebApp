@@ -18,7 +18,7 @@
   background: #fff;
   padding: 22px;
   border-radius: 10px;
-  border: 1px solid rgba(233,219,226,0.9);
+  border: 1px solid rgba(233, 219, 226, 0.9);
 }
 
 /* Left side */
@@ -88,7 +88,7 @@
   display: flex;
   justify-content: space-between;
   padding: 12px;
-  border: 1px solid rgba(233,219,226,0.9);
+  border: 1px solid rgba(233, 219, 226, 0.9);
   border-radius: 8px;
   margin-bottom: 12px;
 }
@@ -135,7 +135,7 @@
 /* Price box */
 .price-box {
   margin-top: 20px;
-  border: 1px solid rgba(233,219,226,0.9);
+  border: 1px solid rgba(233, 219, 226, 0.9);
   padding: 16px;
   border-radius: 8px;
 }
@@ -179,4 +179,3 @@
     grid-template-columns: 1fr;
   }
 }
-

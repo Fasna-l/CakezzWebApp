@@ -392,139 +392,143 @@ body {
   background: #666;
 }
 
-.btn-edit{
-    text-decoration: none;
-    color: white;
+.btn-edit {
+  text-decoration: none;
+  color: white;
 }
 
 .page-title {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    margin-top:10px
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  margin-top: 10px
 }
+
 .search-form {
-    display: flex;
-    justify-content: flex-end;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .search-box {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .search-input {
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
 .search-button-text {
-    padding: 8px 12px;
-    background: #007bff;
-    color: #fff;
-    border-radius: 6px;
-    cursor: pointer;
-    border: none;
+  padding: 8px 12px;
+  background: #007bff;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
 }
 
 /* Search box container */
 .search-box {
-    display: flex;
-    align-items: center;
-    background: #1e1e1e;        /* Same dark rounded box */
-    padding: 6px 12px;
-    border-radius: 30px;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  background: #1e1e1e;
+  /* Same dark rounded box */
+  padding: 6px 12px;
+  border-radius: 30px;
+  gap: 10px;
 }
 
 /* Search input */
 .search-input {
-    background: transparent;
-    border: none;
-    outline: none;
-    color: white;
-    font-size: 15px;
-    width: 180px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 15px;
+  width: 180px;
 }
 
 /* Placeholder color */
 .search-input::placeholder {
-    color: #bbb;
+  color: #bbb;
 }
 
 /* Search button (blue) */
 .search-button-text {
-    padding: 8px 18px;
-    background: #2d8bff;
-    color: white;
-    border-radius: 20px;
-    cursor: pointer;
-    border: none;
-    font-size: 14px;
-    font-weight: 500;
+  padding: 8px 18px;
+  background: #2d8bff;
+  color: white;
+  border-radius: 20px;
+  cursor: pointer;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* Clear button (gray) */
 .clear-btn {
-    padding: 8px 18px;
-    background: #666;
-    color: white;
-    border-radius: 20px;
-    text-decoration: none;
-    cursor: pointer;
-    font-size: 14px;
+  padding: 8px 18px;
+  background: #666;
+  color: white;
+  border-radius: 20px;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 /* Add left spacing just like Users page */
 .categories-container {
-    margin-left: 35px;     /* space between sidebar & content */
-    padding-right: 0;      /* no extra right spacing */
+  margin-left: 35px;
+  /* space between sidebar & content */
+  padding-right: 0;
+  /* no extra right spacing */
 }
 
 /* Add small top gap under title area */
 .page-title {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 /* Table wrapper spacing */
 .table-wrapper {
-    margin-top: 15px;
+  margin-top: 15px;
 }
 
 .return-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+  display: flex;
+  gap: 10px;
+  align-items: center;
 }
 
 .return-action-btn {
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-weight: 600;
-    text-decoration: none;
-    color: #fff;
-    display: inline-block;
-    white-space: nowrap;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #fff;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .btn-approve {
-    background: #007bff;
+  background: #007bff;
 }
 
 .btn-reject {
-    background: #d32f2f;
+  background: #d32f2f;
 }
 
 .btn-view {
-    background: #666;
-    padding: 8px 14px;
-    border-radius: 6px;
-    color: #fff;
-    text-decoration: none;
-    white-space: nowrap;
+  background: #666;
+  padding: 8px 14px;
+  border-radius: 6px;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 /* Common action button style */
@@ -620,4 +624,3 @@ body {
     font-size: 10px;
   }
 }
-

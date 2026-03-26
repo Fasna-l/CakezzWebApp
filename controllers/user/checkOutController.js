@@ -11,37 +11,37 @@ import logger from "../../utils/logger.js";
 import HTTP_STATUS from "../../utils/httpStatus.js";
 import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
-const validateCheckoutItems = async (req)=>{
-  if(!req.session.checkoutItems || req.session.checkoutItems.length === 0) {
-    return {error:"Your cart is empty."}
+const validateCheckoutItems = async (req) => {
+  if (!req.session.checkoutItems || req.session.checkoutItems.length === 0) {
+    return { error: "Your cart is empty." }
   }
 
-  for(let item of req.session.checkoutItems){
+  for (let item of req.session.checkoutItems) {
     const product = await Product.findById(item.productId).populate("category");
 
-    if(!product){
-      return {error:"A product in your cart no longer exists"};
+    if (!product) {
+      return { error: "A product in your cart no longer exists" };
     }
 
     //if Product Blocked or category is disabled
-    if(product.isBlocked || product.category?.isListed === false){
-      return {error: `${product.productName} is no longer available. Please remove it from cart.`};
+    if (product.isBlocked || product.category?.isListed === false) {
+      return { error: `${product.productName} is no longer available. Please remove it from cart.` };
     }
 
     //varient check(size,stock)
-    const variant = product.variants.find(v=>v.size === item.size);
-    if(!variant || variant.stock < item.quantity){
-      return {error:`${product.productName} is out of stock, please update your cart.`};
+    const variant = product.variants.find(v => v.size === item.size);
+    if (!variant || variant.stock < item.quantity) {
+      return { error: `${product.productName} is out of stock, please update your cart.` };
     }
   }
-  return {success:true}
+  return { success: true }
 };
 
 const getCheckout = async (req, res, next) => {
   try {
     //validation check(like cart page)
     const validation = await validateCheckoutItems(req);
-    if(validation.error){
+    if (validation.error) {
       req.session.checkoutError = validation.error;
       return res.redirect("/cart")
     }
@@ -145,10 +145,10 @@ const saveDeliveryDate = async (req, res, next) => {
     const selected = new Date(selectedDate);
     const now = new Date();
     //MIN = now + 1 hour
-    const minAllowed = new Date(now.getTime() + 60 * 60* 1000);
+    const minAllowed = new Date(now.getTime() + 60 * 60 * 1000);
     //MAX = today + 3 days
     const maxAllowed = new Date();
-    maxAllowed.setDate(maxAllowed.getDate()+3);
+    maxAllowed.setDate(maxAllowed.getDate() + 3);
     maxAllowed.setHours(23, 59, 0, 0);
     // If earlier than 1 hour from now
     if (selected < minAllowed) {
@@ -156,14 +156,14 @@ const saveDeliveryDate = async (req, res, next) => {
       return res.redirect("/personalize?from=save");
     }
 
-    if(selected >maxAllowed){
+    if (selected > maxAllowed) {
       req.session.deliveryError = "Delivery date cannot be more than 3 days from today.";
       return res.redirect("/personalize?from=save");
     }
     // VALID → Save in session and clear any previous error
     req.session.deliveryDate = selectedDate;
     delete req.session.deliveryError;
-    
+
     return res.redirect("/checkout/payment");
 
   } catch (error) {
@@ -174,7 +174,7 @@ const saveDeliveryDate = async (req, res, next) => {
 const getPaymentPage = async (req, res, next) => {
   try {
     const validation = await validateCheckoutItems(req);
-    if(validation.error){
+    if (validation.error) {
       req.session.checkoutError = validation.error;
       return res.redirect("/cart")
     }
@@ -197,7 +197,7 @@ const getPaymentPage = async (req, res, next) => {
     logger.info(
       `User ${userId} proceeded to checkout. Grand Total: ${totals.grandTotal || 0}`
     );
-    
+
     res.render("payment", {
       user,
       checkoutItems: req.session.checkoutItems || [],
@@ -228,7 +228,7 @@ const placeOrder = async (req, res, next) => {
 
     let walletUsed = 0;
     let remainingAmount = req.session.checkoutTotals.grandTotal;
-    
+
     //COD limit (1000) 
     if (paymentMethod === "COD" && remainingAmount > 1000) {
       return res.status(HTTP_STATUS.BAD_REQUEST).json({
@@ -236,18 +236,18 @@ const placeOrder = async (req, res, next) => {
         message: RESPONSE_MESSAGES.COD_LIMIT_EXCEEDED
       });
     }
-    
+
     let wallet = null;
 
     if (paymentMethod === "WALLET") {
       wallet = await Wallet.findOne({ userId });
 
-    if (!wallet || wallet.balance <= 0) {
-      return res.status(HTTP_STATUS.BAD_REQUEST).json({
-        success: false,
-        message: RESPONSE_MESSAGES.WALLET_EMPTY
-      });
-    }  
+      if (!wallet || wallet.balance <= 0) {
+        return res.status(HTTP_STATUS.BAD_REQUEST).json({
+          success: false,
+          message: RESPONSE_MESSAGES.WALLET_EMPTY
+        });
+      }
 
       walletUsed = Math.min(wallet.balance, remainingAmount);
       remainingAmount = remainingAmount - walletUsed;
@@ -317,7 +317,7 @@ const placeOrder = async (req, res, next) => {
     const couponDiscount = couponSession ? couponSession.discount : 0;
     const couponCode = couponSession ? couponSession.code : null;
     const couponMinPurchase = couponSession ? couponSession.minPurchaseAmount : 0;
-    
+
     const order = new Order({
       userId,
       items,
@@ -424,15 +424,15 @@ const placeOrder = async (req, res, next) => {
 
     // CLEAR SESSION ONLY FOR COD or WALLET FULL
     if (paymentMethod === "COD" || (paymentMethod === "WALLET" && remainingAmount === 0)) {
-    logger.info(
-      `PAYMENT SUCCESS | UserId: ${userId} | OrderId: ${order._id} | Method: ${paymentMethod} | Amount: ${order.totalAmount}`
-    );
+      logger.info(
+        `PAYMENT SUCCESS | UserId: ${userId} | OrderId: ${order._id} | Method: ${paymentMethod} | Amount: ${order.totalAmount}`
+      );
 
-  // CLEAR CART FROM DATABASE
-    await Cart.updateOne(
-      { user: userId },
-      { $set: { items: [] } }
-    );
+      // CLEAR CART FROM DATABASE
+      await Cart.updateOne(
+        { user: userId },
+        { $set: { items: [] } }
+      );
 
       req.session.checkoutItems = [];
       req.session.checkoutTotals = null;
@@ -456,7 +456,7 @@ const getSuccessPage = async (req, res, next) => {
     const user = userId ? await User.findById(userId).lean() : null;
 
     const order = await Order.findById(req.params.orderId);
-    
+
     if (!order) {
       return res.redirect("/order");
     }
@@ -468,7 +468,7 @@ const getSuccessPage = async (req, res, next) => {
     res.render("payment-success", {
       user,
       order,                     // send full order
-      deliveryDateFormatted      
+      deliveryDateFormatted
     });
 
   } catch (error) {
@@ -479,7 +479,7 @@ const getSuccessPage = async (req, res, next) => {
 const getPersonalizePage = async (req, res, next) => {
   try {
     const validation = await validateCheckoutItems(req);
-    if(validation.error){
+    if (validation.error) {
       req.session.checkoutError = validation.error;
       return res.redirect("/cart")
     }
@@ -524,7 +524,7 @@ const loadPaymentFailurePage = async (req, res, next) => {
       return res.redirect("/order");
     }
 
-    res.render("payment-failure", { user , orderId });
+    res.render("payment-failure", { user, orderId });
 
   } catch (error) {
     next(error);

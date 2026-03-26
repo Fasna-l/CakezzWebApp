@@ -5,7 +5,8 @@
   --neutral-900: #333;
   --neutral-600: #666;
   --neutral-50: #ffffff;
-  --panel-pink: #fde7ef; /* light panel bg */
+  --panel-pink: #fde7ef;
+  /* light panel bg */
   --panel-border: #f5c9d6;
 }
 
@@ -15,7 +16,8 @@
   display: flex;
   align-items: center;
   padding: 5rem 0 1rem 0;
-  background-color: #fdf2f8; /* light pink */
+  background-color: #fdf2f8;
+  /* light pink */
 }
 
 /* Card wrapper */
@@ -37,31 +39,37 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 440px; /* helps the image feel substantial on larger screens */
+  height: 440px;
+  /* helps the image feel substantial on larger screens */
 }
 
 /* make image fill the left area nicely like the reference */
 .illustration-image {
   width: 100%;
   height: 100%;
-  max-width: 420px; /* prevents overspill on very wide screens */
-  object-fit: contain; /* keep full artwork visible */
-  border-radius: 12px; /* soft edges like the reference card */
+  max-width: 420px;
+  /* prevents overspill on very wide screens */
+  object-fit: contain;
+  /* keep full artwork visible */
+  border-radius: 12px;
+  /* soft edges like the reference card */
 }
 
 /* Right panel */
 .form-section {
-    padding: 1rem;
-    margin-top: 50px;
+  padding: 1rem;
+  margin-top: 50px;
 }
 
 .otp-right {
   background: var(--neutral-50);
 }
+
 .otp-title {
   color: var(--neutral-900);
   font-weight: 700;
 }
+
 .otp-subtitle {
   color: var(--neutral-600);
   font-size: 0.9rem;
@@ -80,6 +88,7 @@
   padding: 10px 16px;
   font-weight: 600;
 }
+
 .btn-pink:hover {
   background-color: var(--brand-pink-dark);
   border-color: var(--brand-pink-dark);
@@ -122,7 +131,8 @@
 .otp-card .cakezz-primary-btn:hover {
   background: #c2185b;
 }
-.error-message{
+
+.error-message {
   color: #ff4d4d;
   font-size: 0.75rem;
   display: none;
@@ -131,7 +141,8 @@
 
 /* Timer box styling */
 .timer-box {
-  background-color: #fff4f8;         /* soft pink background */
+  background-color: #fff4f8;
+  /* soft pink background */
   border: 1px solid #f5c9d6;
   border-radius: 12px;
   padding: 10px;
@@ -154,6 +165,7 @@
     opacity: 1;
     transform: scale(1);
   }
+
   to {
     opacity: 0;
     transform: scale(0.95);
@@ -164,10 +176,13 @@
 /* Timer Expires colour change to red */
 #timerValue.expired {
   display: inline-block;
-  background-color: #ffe5eb;        /* soft pink background */
-  color: var(--brand-pink-dark);    /* your darker pink */
+  background-color: #ffe5eb;
+  /* soft pink background */
+  color: var(--brand-pink-dark);
+  /* your darker pink */
   font-weight: 600;
-  border-radius: 10px;              /* pill shape */
+  border-radius: 10px;
+  /* pill shape */
   font-size: 0.95rem;
   animation: fadeIn 0.6s ease-in;
 }
@@ -178,6 +193,7 @@
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -186,16 +202,20 @@
 
 /*Resend Button */
 #resendBtn {
-  background-color: #f5f5f5;   /* light gray background */
-  border: 1px solid #dee2e6;   /* subtle gray border */
-  color: #555;                 /* medium gray text */
+  background-color: #f5f5f5;
+  /* light gray background */
+  border: 1px solid #dee2e6;
+  /* subtle gray border */
+  color: #555;
+  /* medium gray text */
   border-radius: 10px;
   transition: all 0.3s ease;
 }
 
 /* Hover effect */
 #resendBtn:hover:enabled {
-  background-color: #e0e0e0;   /* slightly darker on hover */
+  background-color: #e0e0e0;
+  /* slightly darker on hover */
   color: #333;
 }
 
@@ -231,10 +251,12 @@
   .signup-card {
     margin: 1rem;
   }
+
   .promo-section,
   .form-section {
     padding: 1.5rem;
   }
+
   .promo-section {
     min-height: 320px;
   }

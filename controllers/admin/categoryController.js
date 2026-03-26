@@ -3,33 +3,33 @@ import logger from "../../utils/logger.js";
 import HTTP_STATUS from "../../utils/httpStatus.js";
 import RESPONSE_MESSAGES from "../../utils/responseMessages.js";
 
-const categoryInfo = async (req,res,next)=>{
+const categoryInfo = async (req, res, next) => {
     try {
-        let search="";
-        if(req.query.search){
-            search=req.query.search;
+        let search = "";
+        if (req.query.search) {
+            search = req.query.search;
         }
 
         const page = parseInt(req.query.page) || 1;
         const limit = 3;
-        const skip = (page-1)*limit;
+        const skip = (page - 1) * limit;
 
         const categoryData = await Category.find({
             categoryName: { $regex: search, $options: "i" }
         })
-        .sort({createdAt:-1})
-        .skip(skip)
-        .limit(limit);
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
 
         const totalCategories = await Category.countDocuments({
             categoryName: { $regex: search, $options: "i" }
         });
         const totalPages = Math.ceil(totalCategories / limit);
-        res.render("category",{
-            cat:categoryData,
-            currentPage:page,
-            totalPages:totalPages,
-            totalCategories:totalCategories,
+        res.render("category", {
+            cat: categoryData,
+            currentPage: page,
+            totalPages: totalPages,
+            totalCategories: totalCategories,
             search
         });
     } catch (error) {
@@ -39,18 +39,18 @@ const categoryInfo = async (req,res,next)=>{
 
 const loadAddCategoryPage = async (req, res, next) => {
     try {
-        res.render("addCategory"); 
+        res.render("addCategory");
     } catch (error) {
         next(error);
     }
 };
 
 
-const addCategory = async (req,res,next)=>{
-    const {categoryName,description} = req.body
+const addCategory = async (req, res, next) => {
+    const { categoryName, description } = req.body
     try {
-        const existingCategory = await Category.findOne({categoryName});
-        if(existingCategory){
+        const existingCategory = await Category.findOne({ categoryName });
+        if (existingCategory) {
             return res.status(HTTP_STATUS.BAD_REQUEST).json({
                 message: RESPONSE_MESSAGES.CATEGORY_ALREADY_EXISTS
             });
@@ -72,7 +72,7 @@ const addCategory = async (req,res,next)=>{
     }
 }
 
-const listCategory = async (req, res,next) => {
+const listCategory = async (req, res, next) => {
     try {
         const { id } = req.params;
 
@@ -114,24 +114,24 @@ const unlistCategory = async (req, res, next) => {
     }
 };
 
-const getEditCategory = async (req,res,next)=>{
+const getEditCategory = async (req, res, next) => {
     try {
         const id = req.query.id;
-        const category = await Category.findOne({_id:id});
-        res.render("editCategory",{category:category});
+        const category = await Category.findOne({ _id: id });
+        res.render("editCategory", { category: category });
     } catch (error) {
         next(error);
     }
 }
 
-const editCategory = async (req,res,next)=>{
+const editCategory = async (req, res, next) => {
     try {
         const id = req.params.id;
-        const {categoryName,description} =req.body;
-        
+        const { categoryName, description } = req.body;
+
         //Check if another category with same name exists
-        const existingCategory = await Category.findOne({categoryName:categoryName,_id:{$ne:id}});   //// Exclude current category
-        if(existingCategory){
+        const existingCategory = await Category.findOne({ categoryName: categoryName, _id: { $ne: id } });   //// Exclude current category
+        if (existingCategory) {
             return res.status(HTTP_STATUS.BAD_REQUEST).json({
                 success: false,
                 message: RESPONSE_MESSAGES.CATEGORY_ALREADY_EXISTS
@@ -139,12 +139,12 @@ const editCategory = async (req,res,next)=>{
         }
 
         //Update the category
-        const updateCategory = await Category.findByIdAndUpdate(id,{
-            categoryName:categoryName,
-            description:description,
-        },{ new: true })
+        const updateCategory = await Category.findByIdAndUpdate(id, {
+            categoryName: categoryName,
+            description: description,
+        }, { new: true })
 
-        if(updateCategory){
+        if (updateCategory) {
             logger.info(
                 `ADMIN CATEGORY UPDATED | CategoryId: ${id} | Name: ${updateCategory.categoryName}`
             );
@@ -152,7 +152,7 @@ const editCategory = async (req,res,next)=>{
                 success: true,
                 message: RESPONSE_MESSAGES.CATEGORY_UPDATED
             });
-        }else {
+        } else {
             return res.status(HTTP_STATUS.NOT_FOUND).json({
                 success: false,
                 message: RESPONSE_MESSAGES.CATEGORY_NOT_FOUND
@@ -165,11 +165,11 @@ const editCategory = async (req,res,next)=>{
 }
 
 export default {
-  categoryInfo,
-  loadAddCategoryPage,
-  addCategory,
-  listCategory,
-  unlistCategory,
-  getEditCategory,
-  editCategory,
+    categoryInfo,
+    loadAddCategoryPage,
+    addCategory,
+    listCategory,
+    unlistCategory,
+    getEditCategory,
+    editCategory,
 };

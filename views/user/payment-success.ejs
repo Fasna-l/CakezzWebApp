@@ -1,35 +1,37 @@
 <%- include('../partials/user/header') %>
-<link rel="stylesheet" href="/css/user-style/payment-success.css">
+  <link rel="stylesheet" href="/css/user-style/payment-success.css">
 
-<div class="success-wrap">
-  <div class="success-card">
+  <div class="success-wrap">
+    <div class="success-card">
 
-    <!-- Success Icon -->
-    <div class="success-icon">
-      <img src="/images/success-tick.png" alt="Success">
+      <!-- Success Icon -->
+      <div class="success-icon">
+        <img src="/images/success-tick.png" alt="Success">
+      </div>
+
+      <!-- Heading -->
+      <h2 class="success-title">Your order is Completed</h2>
+
+      <!-- Sub Text -->
+      <p class="success-msg">
+        Thank you for your order! Your delicious cake will be delivered soon.
+      </p>
+
+      <!-- Delivery Date -->
+      <div class="delivery-box">
+        <p class="delivery-label">Estimated Delivery Date</p>
+        <p class="delivery-date">
+          <%= deliveryDateFormatted %>
+        </p>
+      </div>
+
+      <!-- Actions -->
+      <div class="success-buttons">
+        <a href="/order/<%= order._id %>" class="btn view-btn">View Order</a>
+        <a href="/shop" class="btn shop-btn">Continue Shopping</a>
+      </div>
+
     </div>
-
-    <!-- Heading -->
-    <h2 class="success-title">Your order is Completed</h2>
-
-    <!-- Sub Text -->
-    <p class="success-msg">
-      Thank you for your order! Your delicious cake will be delivered soon.
-    </p>
-
-    <!-- Delivery Date -->
-    <div class="delivery-box">
-      <p class="delivery-label">Estimated Delivery Date</p>
-      <p class="delivery-date"><%= deliveryDateFormatted %></p>
-    </div>
-
-    <!-- Actions -->
-    <div class="success-buttons">
-      <a href="/order/<%= order._id %>" class="btn view-btn">View Order</a>
-      <a href="/shop" class="btn shop-btn">Continue Shopping</a>
-    </div>
-
   </div>
-</div>
 
-<%- include('../partials/user/footer') %>
+  <%- include('../partials/user/footer') %>
