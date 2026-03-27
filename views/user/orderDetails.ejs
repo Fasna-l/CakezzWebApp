@@ -29,16 +29,20 @@
     <!-- Main Content -->
     <div class="orders-main-content">
       <div class="order-details-card">
-        <% const isCancelledFlow=order.orderStatus==="Cancelled" ; const
-          isReturnFlow=order.orderStatus==="Return Requested" || order.orderStatus==="Returned" ||
-          order.orderStatus==="Rejected" || order.orderStatus==="Return Rejected" ; // Helper: what stages should be
-          active const stage1=['Pending','Processing','Packed','Shipped','Out for
-          Delivery','Delivered'].includes(order.orderStatus); const stage2=['Packed','Shipped','Out for
-          Delivery','Delivered'].includes(order.orderStatus); const stage3=['Shipped','Out for
-          Delivery','Delivered'].includes(order.orderStatus); const stage4=['Delivered'].includes(order.orderStatus); %>
-          <% const now=new Date(); const deliveryTime=order.deliveryDate ? new Date(order.deliveryDate) : null; const
-            diffInHours=deliveryTime ? (now - deliveryTime) / (1000 * 60 * 60) : 999; const
-            isReturnWindowOpen=diffInHours <=2; %>
+        <% 
+          const isCancelledFlow=order.orderStatus==="Cancelled" ; 
+          const isReturnFlow=order.orderStatus==="Return Requested" || order.orderStatus==="Returned" || order.orderStatus==="Rejected" || order.orderStatus==="Return Rejected" ; 
+
+          const stage1=['Pending','Processing','Packed','Shipped','Out for Delivery','Delivered'].includes(order.orderStatus); 
+          const stage2=['Packed','Shipped','Out for Delivery','Delivered'].includes(order.orderStatus); 
+          const stage3=['Shipped','Out for Delivery','Delivered'].includes(order.orderStatus); 
+          const stage4=['Delivered'].includes(order.orderStatus); %>
+          <% git add .
+            const now=new Date(); 
+            const deliveryTime=order.deliveryDate ? new Date(order.deliveryDate) : null; 
+            const diffInHours=deliveryTime ? (now - deliveryTime) / (1000 * 60 * 60) : 999; 
+            const isReturnWindowOpen=diffInHours <=2; 
+          %>
 
             <% const isPaymentFailed=order.paymentStatus==="Failed" ; %>
 
