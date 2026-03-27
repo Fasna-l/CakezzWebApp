@@ -37,7 +37,7 @@
           const stage2=['Packed','Shipped','Out for Delivery','Delivered'].includes(order.orderStatus); 
           const stage3=['Shipped','Out for Delivery','Delivered'].includes(order.orderStatus); 
           const stage4=['Delivered'].includes(order.orderStatus); %>
-          <% git add .
+          <%
             const now=new Date(); 
             const deliveryTime=order.deliveryDate ? new Date(order.deliveryDate) : null; 
             const diffInHours=deliveryTime ? (now - deliveryTime) / (1000 * 60 * 60) : 999; 
